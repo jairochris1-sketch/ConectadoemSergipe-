@@ -264,10 +264,20 @@
                 </a>
             </div>
 
-            <div class="position-relative">
-                <div class="swiper swiper-featured-ads rounded-3 p-1">
+            <style>
+                .swiper-marquee-esteira .swiper-wrapper {
+                    -webkit-transition-timing-function: linear !important;
+                    -o-transition-timing-function: linear !important;
+                    transition-timing-function: linear !important;
+                }
+            </style>
+            <div class="position-relative overflow-hidden">
+                <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
                     <div class="swiper-wrapper">
-                        @foreach($recentAds as $ad)
+                        @php
+                            $loopAds = count($recentAds) < 8 ? $recentAds->concat($recentAds) : $recentAds;
+                        @endphp
+                        @foreach($loopAds as $ad)
                         <div class="swiper-slide">
                             <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                                 <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
@@ -298,17 +308,6 @@
                         @endforeach
                     </div>
                 </div>
-
-                <!-- Setas de Navegação -->
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-2 swiper-featured-prev d-none d-md-flex align-items-center justify-content-center" style="width: 34px; height: 34px; left: -15px; background: #fff;">
-                    <i class="fa-solid fa-chevron-left text-dark fs-6"></i>
-                </button>
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-2 swiper-featured-next d-none d-md-flex align-items-center justify-content-center" style="width: 34px; height: 34px; right: -15px; background: #fff;">
-                    <i class="fa-solid fa-chevron-right text-dark fs-6"></i>
-                </button>
-
-                <!-- Paginação por Pontos -->
-                <div class="swiper-pagination swiper-featured-pagination mt-2 position-relative"></div>
             </div>
         </div>
 
@@ -749,17 +748,11 @@
         slidesPerView: 2,
         spaceBetween: 10,
         loop: true,
+        speed: 6000,
         autoplay: {
-            delay: 3500,
+            delay: 0,
             disableOnInteraction: false,
-        },
-        pagination: {
-            el: '.swiper-featured-pagination',
-            clickable: true,
-        },
-        navigation: {
-            nextEl: '.swiper-featured-next',
-            prevEl: '.swiper-featured-prev',
+            pauseOnMouseEnter: false,
         },
         breakpoints: {
             576: { slidesPerView: 2, spaceBetween: 12 },
