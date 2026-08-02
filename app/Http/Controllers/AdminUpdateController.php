@@ -39,23 +39,25 @@ class AdminUpdateController extends Controller
         if ($pullGit) {
             $logBuffer[] = "\n[ETAPA 1/3] Atualizando arquivos do repositório (Git Pull)...";
             try {
-                $basePath = base_path();
+                $repoPath = $this->getGitRepositoryPath();
                 $gitBin = $this->getGitBinary();
                 
+                $logBuffer[] = "Diretório do Repositório: {$repoPath}";
+                $logBuffer[] = "Executável Git utilizado: {$gitBin}";
+
                 // Detectar branch atual ou usar main
-                $branchResult = Process::path($basePath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
+                $branchResult = Process::path($repoPath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
                 $branch = $branchResult->successful() ? trim($branchResult->output()) : 'main';
 
                 $logBuffer[] = "Branch detectada: {$branch}";
-                $logBuffer[] = "Executável Git utilizado: {$gitBin}";
 
                 // Git fetch & pull
-                $fetchResult = Process::path($basePath)->run("{$gitBin} fetch origin");
+                $fetchResult = Process::path($repoPath)->run("{$gitBin} fetch origin");
                 if ($fetchResult->successful() && !empty(trim($fetchResult->output()))) {
                     $logBuffer[] = "Git Fetch: " . trim($fetchResult->output());
                 }
 
-                $pullResult = Process::path($basePath)->run("{$gitBin} pull origin {$branch}");
+                $pullResult = Process::path($repoPath)->run("{$gitBin} pull origin {$branch}");
                 $pullOutput = trim($pullResult->output() . "\n" . $pullResult->errorOutput());
                 $logBuffer[] = "Saída do Git Pull:\n" . ($pullOutput ?: 'Comando executado com sucesso.');
 
@@ -141,17 +143,17 @@ class AdminUpdateController extends Controller
 
     private function getGitInformation(): array
     {
-        $basePath = base_path();
+        $repoPath = $this->getGitRepositoryPath();
         $gitBin = $this->getGitBinary();
         
         try {
-            $branchResult = Process::path($basePath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
+            $branchResult = Process::path($repoPath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
             $branch = $branchResult->successful() ? trim($branchResult->output()) : 'N/D';
 
-            $commitResult = Process::path($basePath)->run("{$gitBin} log -1 --pretty=format:\"%h - %s (%cr) <%an>\"");
+            $commitResult = Process::path($repoPath)->run("{$gitBin} log -1 --pretty=format:\"%h - %s (%cr) <%an>\"");
             $commit = $commitResult->successful() ? trim($commitResult->output()) : 'Informação do git não disponível';
 
-            $statusResult = Process::path($basePath)->run("{$gitBin} status --short");
+            $statusResult = Process::path($repoPath)->run("{$gitBin} status --short");
             $hasLocalChanges = $statusResult->successful() && !empty(trim($statusResult->output()));
 
             return [
@@ -168,6 +170,30 @@ class AdminUpdateController extends Controller
                 'has_local_changes' => false,
             ];
         }
+    }
+
+    private function getGitRepositoryPath(): string
+    {
+        $customRepoPath = env('GIT_REPO_PATH') ?: Setting::get('system_git_repo_path');
+        if ($customRepoPath && is_dir($customRepoPath) && file_exists($customRepoPath . '/.git')) {
+            return $customRepoPath;
+        }
+
+        $candidates = [
+            base_path(),
+            base_path('../'),
+            base_path('../ConectadoemSergipe-'),
+            dirname(base_path()) . '/ConectadoemSergipe-',
+        ];
+
+        foreach ($candidates as $candidate) {
+            $realPath = realpath($candidate);
+            if ($realPath && file_exists($realPath . '/.git')) {
+                return $realPath;
+            }
+        }
+
+        return base_path();
     }
 
     private function getGitBinary(): string
