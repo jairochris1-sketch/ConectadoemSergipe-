@@ -229,12 +229,21 @@
 .marketplace-account-button {
     min-height: 34px;
     max-width: 158px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 4px 11px 4px 6px;
     gap: 7px;
     overflow: hidden;
     color: var(--marketplace-header-text);
     background: var(--marketplace-header-bg);
     border: 1px solid var(--marketplace-header-border);
+    border-radius: 999px;
+    text-decoration: none;
+}
+
+.marketplace-account-button.dropdown-toggle::after {
+    display: none !important;
 }
 
 .marketplace-account-avatar,
@@ -243,6 +252,7 @@
     height: 24px;
     flex: 0 0 24px;
     border-radius: 50%;
+    margin: 0;
 }
 
 .marketplace-account-avatar {
@@ -681,14 +691,20 @@
         height: 38px;
     }
 
-    .marketplace-account-button,
-    .marketplace-announce-button {
-        min-height: 40px;
+    .marketplace-account-button {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        flex: 0 0 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        border-radius: 50% !important;
     }
 
-    .marketplace-account-button {
-        min-height: 34px;
-        padding: 4px 10px 4px 5px;
+    .marketplace-account-button span {
+        display: none !important;
     }
 
     .marketplace-mobile-menu {
