@@ -32,28 +32,36 @@
                 @foreach($heroBanners as $index => $banner)
                 @php
                     $bannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
-                    $isFirstBanner = $index === 0;
                 @endphp
-                <div class="swiper-slide d-flex flex-column justify-content-center align-items-center text-center px-4 hero-slide-padding" 
-                     style="background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('{{ $bannerUrl }}') center/cover no-repeat;">
-                    <h1 class="text-white fw-bold display-5 mb-3" style="max-width: 900px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2.2rem;">
-                        {{ $isFirstBanner ? 'Conectado em Sergipe é a plataforma ideal para encontrar serviços locais.' : 'Os melhores imóveis, veículos e oportunidades em um só lugar.' }}
-                    </h1>
-                    <p class="text-light fs-5 mb-4" style="max-width: 700px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                        {{ $isFirstBanner ? 'Encontre prestadores de serviços, lojas e comércio local na sua cidade.' : 'Compre, venda, alugue ou anuncie com rapidez em Sergipe.' }}
-                    </p>
-                    <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-                        <a href="{{ $isFirstBanner ? route('module.services') : route('module.real_estate') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold border-0" style="background-color: #3b82f6;">
-                            {{ $isFirstBanner ? 'Explorar categorias' : 'Explorar anúncios' }}
-                        </a>
-                        <a href="/anunciar" class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold text-white border-white" style="background-color: rgba(0,0,0,0.4);">Quero anunciar</a>
+                <div class="swiper-slide d-flex flex-column justify-content-center align-items-center px-4" 
+                     style="height: 520px; background: linear-gradient(rgba(10, 15, 30, 0.7), rgba(10, 15, 30, 0.7)), url('{{ $bannerUrl }}') center/cover no-repeat;">
+                    
+                    <div class="container position-relative h-100 d-flex flex-column justify-content-center text-start" style="margin-top: -60px;">
+                        <div class="d-flex justify-content-between align-items-start w-100">
+                            <div>
+                                <h1 class="text-white fw-bold display-5 mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                                    Encontre tudo em Sergipe.
+                                </h1>
+                                <p class="text-light fs-5 mb-4 opacity-75" style="max-width: 600px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                                    Produtos, serviços, imóveis, veículos, empregos e muito mais perto de você.
+                                </p>
+                            </div>
+                            <!-- Badge Desktop -->
+                            <div class="d-none d-lg-flex align-items-center rounded-4 px-3 py-2 border border-secondary border-opacity-50" style="background: rgba(20, 25, 45, 0.6); backdrop-filter: blur(8px);">
+                                <div class="bg-primary bg-opacity-25 rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                                    <i class="fa-solid fa-users text-primary fs-5"></i>
+                                </div>
+                                <div class="text-start">
+                                    <strong class="text-white d-block lh-1">+ 50 mil usuários</strong>
+                                    <small class="text-light opacity-75" style="font-size: 0.75rem;">conectados em todo o estado</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
                 @endforeach
             </div>
-            <!-- Navigation -->
-            <div class="swiper-button-next text-white opacity-75 d-none d-md-flex" style="width: 40px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); right: 24px;"></div>
-            <div class="swiper-button-prev text-white opacity-75 d-none d-md-flex" style="width: 40px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); left: 24px;"></div>
         </div>
     </div>
 </div>
@@ -68,148 +76,127 @@
 @endif
 
 <!-- Container com Busca Rápida -->
-<div class="container position-relative {{ empty($module) ? 'hero-container-overlap' : 'pt-4' }}" style="z-index: 10;">
+<div class="container position-relative {{ empty($module) ? 'pt-0' : 'pt-4' }}" style="z-index: 10; {{ empty($module) ? 'margin-top: -240px;' : '' }}">
     @if($module !== 'real_estate' && $module !== 'vehicles')
     <!-- Card Busca Rápida -->
     <div class="row justify-content-center mb-4">
-        <div class="col-12 col-xl-10 px-2 px-md-3">
-            <div id="busca-rapida" class="quick-search-card quick-search-model-one rounded-4 shadow-lg mx-auto" style="max-width: 1040px; scroll-margin-top: 24px;">
+        <div class="col-12 col-xl-11 px-2 px-md-3">
+            <div id="busca-rapida" class="rounded-4 shadow-lg mx-auto p-3 p-lg-4" style="max-width: 1140px; scroll-margin-top: 24px; background: var(--card); border: 1px solid var(--border);">
+                
                 <form
                     id="home-search-form"
                     action="{{ route('home') }}"
                     method="GET"
-                    class="quick-search-model-one-form"
+                    class="d-flex flex-column flex-lg-row align-items-center gap-3 w-100 mb-3"
                     data-suggestions-url="{{ route('search.suggestions') }}"
                     data-smart-search="{{ auth()->check() ? (auth()->user()->smart_search_enabled ? '1' : '0') : 'guest' }}"
                 >
-                    <div class="quick-search-model-one-field quick-search-model-one-query">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <label for="home-search-query" class="visually-hidden">O que você procura em Sergipe?</label>
+                    <!-- Campo O que procura -->
+                    <div class="position-relative d-flex align-items-center bg-body rounded-3 border px-3 py-2 w-100" style="min-height: 54px; flex: 2.5;">
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        <label for="home-search-query" class="visually-hidden">O que você procura?</label>
                         <input
                             id="home-search-query"
+                            class="form-control bg-transparent border-0 ms-2 shadow-none p-0 text-body"
                             type="search"
                             name="q"
                             value="{{ $q }}"
-                            placeholder="O que você procura em Sergipe?"
+                            placeholder="O que você procura?"
                             autocomplete="off"
                             aria-autocomplete="list"
                             aria-controls="home-search-suggestions"
                             aria-expanded="false"
                         >
-                        <button id="home-search-microphone" type="button" class="quick-search-microphone" aria-label="Buscar usando a voz" title="Buscar usando a voz">
+                        <button id="home-search-microphone" type="button" class="btn btn-link text-muted p-0 ms-2 text-decoration-none" aria-label="Buscar usando a voz" title="Buscar usando a voz">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
                         <div id="home-search-suggestions" class="quick-search-suggestions" role="listbox" hidden></div>
                     </div>
 
-                    <label class="quick-search-model-one-field">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <span class="visually-hidden">Cidade</span>
-                        <select id="home-search-city" name="city" aria-label="Cidade">
-                            <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
-                            @foreach(\App\Core\SergipeCities::getAll() as $cityName)
-                                <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-
-                    <label class="quick-search-model-one-field">
-                        <i class="fa-solid fa-table-cells-large"></i>
-                        <span class="visually-hidden">Categoria</span>
-                        <select id="home-search-category-filter" aria-label="Categoria">
-                            <option value="">Todas as categorias</option>
-                            <optgroup label="Anúncios">
-                                <option value="module:real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
-                                <option value="module:products" {{ $module === 'products' ? 'selected' : '' }}>Produtos</option>
-                                <option value="module:vehicles" {{ $module === 'vehicles' ? 'selected' : '' }}>Veículos</option>
-                                <option value="module:jobs" {{ $module === 'jobs' ? 'selected' : '' }}>Empregos</option>
-                                <option value="module:agro" {{ $module === 'agro' ? 'selected' : '' }}>Agro</option>
-                            </optgroup>
-                            <optgroup label="Serviços">
-                                @foreach($serviceSearchCategories as $serviceCategory)
-                                    <option value="service:{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
+                    <!-- Row Mobile para Cidade e Categoria -->
+                    <div class="d-flex flex-column flex-md-row gap-3 w-100" style="flex: 2;">
+                        <div class="position-relative d-flex align-items-center bg-body rounded-3 border px-3 py-2 w-100" style="min-height: 54px;">
+                            <i class="fa-solid fa-location-dot text-muted"></i>
+                            <span class="visually-hidden">Cidade</span>
+                            <select id="home-search-city" name="city" aria-label="Cidade" class="form-select bg-transparent border-0 shadow-none w-100 ps-2 pe-4 p-0 text-body">
+                                <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
+                                @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+                                    <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
                                 @endforeach
-                            </optgroup>
-                        </select>
-                        <input id="home-search-module-value" type="hidden" name="module" value="{{ $module }}">
-                        <input id="home-search-service-category-value" type="hidden" name="category">
-                    </label>
+                            </select>
+                        </div>
 
-                    <button type="submit" class="quick-search-model-one-submit">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Buscar
+                        <div class="position-relative d-flex align-items-center bg-body rounded-3 border px-3 py-2 w-100" style="min-height: 54px;">
+                            <i class="fa-solid fa-table-cells-large text-muted"></i>
+                            <span class="visually-hidden">Categoria</span>
+                            <select id="home-search-category-filter" aria-label="Categoria" class="form-select bg-transparent border-0 shadow-none w-100 ps-2 pe-4 p-0 text-body">
+                                <option value="">Todas as categorias</option>
+                                <optgroup label="Anúncios">
+                                    <option value="module:real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
+                                    <option value="module:products" {{ $module === 'products' ? 'selected' : '' }}>Produtos</option>
+                                    <option value="module:vehicles" {{ $module === 'vehicles' ? 'selected' : '' }}>Veículos</option>
+                                    <option value="module:jobs" {{ $module === 'jobs' ? 'selected' : '' }}>Empregos</option>
+                                    <option value="module:agro" {{ $module === 'agro' ? 'selected' : '' }}>Agro</option>
+                                </optgroup>
+                                <optgroup label="Serviços">
+                                    @foreach($serviceSearchCategories as $serviceCategory)
+                                        <option value="service:{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+                            <input id="home-search-module-value" type="hidden" name="module" value="{{ $module }}">
+                            <input id="home-search-service-category-value" type="hidden" name="category">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary fw-bold rounded-3 w-100" style="min-height: 54px; flex: 1;">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
                     </button>
                 </form>
 
                 <p id="home-voice-status" class="quick-search-voice-status" role="status" aria-live="polite" hidden></p>
 
-                <div class="quick-search-location-row">
-                    <button
-                        id="home-use-location"
-                        type="button"
-                        @class([
-                            'quick-search-location-button',
-                            'is-active' => session('location_filter.enabled', false),
-                        ])
-                        aria-describedby="home-location-status"
-                        aria-pressed="{{ session('location_filter.enabled', false) ? 'true' : 'false' }}"
-                    >
-                        <span class="quick-search-location-icon" aria-hidden="true">
-                            <i class="fa-solid {{ session('location_filter.enabled', false) ? 'fa-location-dot' : 'fa-location-crosshairs' }}"></i>
-                        </span>
-                        <span>
-                            <strong data-location-button-label>{{ session('location_filter.enabled', false) ? 'Desativar localização' : 'Usar localização atual' }}</strong>
-                            <small data-location-button-detail>
-                                {{ session('location_filter.enabled', false)
-                                    ? 'Resultados filtrados para '.session('location_filter.city').'.'
-                                    : 'Ative para ver ofertas e anúncios mais relevantes perto de você.' }}
-                            </small>
-                        </span>
-                    </button>
-                    <p id="home-location-status" class="quick-search-location-status {{ session('location_filter.enabled', false) ? 'is-success' : '' }}" role="status" aria-live="polite">
-                        @if(session('location_filter.enabled', false))
-                            Localização ativa: {{ session('location_filter.city') }}.
-                        @endif
-                    </p>
+                <!-- Footer do card: Location Link (mobile) & Categorias Rápidas (desktop) -->
+                <div class="d-flex flex-column flex-lg-row justify-content-lg-center align-items-center pt-2">
+                    <div class="d-lg-none w-100 mb-3 pb-3 border-bottom text-center">
+                        <button
+                            id="home-use-location"
+                            type="button"
+                            class="btn btn-link text-decoration-none p-0 m-0 d-inline-flex align-items-center gap-2 fw-semibold"
+                            aria-describedby="home-location-status"
+                            aria-pressed="{{ session('location_filter.enabled', false) ? 'true' : 'false' }}"
+                            style="font-size: 0.85rem;"
+                        >
+                            <i class="fa-solid {{ session('location_filter.enabled', false) ? 'fa-location-dot text-primary' : 'fa-location-crosshairs text-muted' }}"></i>
+                            <span data-location-button-label class="text-body">{{ session('location_filter.enabled', false) ? 'Desativar localização' : 'Usar localização atual' }}</span>
+                        </button>
+                        <p id="home-location-status" class="d-none" role="status" aria-live="polite"></p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-4 gap-lg-5 align-items-center justify-content-center w-100">
+                        <a href="{{ route('module.products') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-tag text-primary"></i> Produtos
+                        </a>
+                        <a href="{{ route('module.real_estate') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-building text-primary"></i> Imóveis
+                        </a>
+                        <a href="{{ route('module.vehicles') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-car text-primary"></i> Veículos
+                        </a>
+                        <a href="{{ route('module.services') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-wrench text-primary"></i> Serviços
+                        </a>
+                        <a href="{{ route('module.jobs') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-briefcase text-primary"></i> Empregos
+                        </a>
+                        <a href="{{ route('module.agro') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-leaf text-primary"></i> Agro
+                        </a>
+                        <a href="{{ route('stores.index') }}" class="text-decoration-none text-body fw-semibold d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                            <i class="fa-solid fa-ellipsis text-primary"></i> Ver todas
+                        </a>
+                    </div>
                 </div>
-
-                <nav class="quick-search-model-one-nav" aria-label="Acesso rápido às categorias">
-                    <div class="quick-search-nav-page" data-quick-nav-page data-page-label="Categorias de serviços">
-                        @foreach(array_slice($serviceSearchCategories, 0, 10) as $serviceCategory)
-                            <a
-                                href="{{ route('module.services', ['category' => $serviceCategory['name']]) }}"
-                                data-quick-nav
-                            >
-                                <i class="fa-solid {{ $serviceCategory['icon'] }}"></i>
-                                <span>{{ $serviceCategory['name'] }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-
-                    <div class="quick-search-nav-page" data-quick-nav-page data-page-label="Categorias de anúncios" hidden>
-                        <a href="{{ route('module.products') }}" data-quick-nav>
-                            <i class="fa-solid fa-tag"></i><span>Produtos</span>
-                        </a>
-                        <a href="{{ route('module.vehicles') }}" data-quick-nav>
-                            <i class="fa-solid fa-car"></i><span>Veículos</span>
-                        </a>
-                        <a href="{{ route('module.real_estate') }}" data-quick-nav>
-                            <i class="fa-solid fa-building"></i><span>Imóveis</span>
-                        </a>
-                        <a href="{{ route('module.jobs') }}" data-quick-nav>
-                            <i class="fa-solid fa-briefcase"></i><span>Empregos</span>
-                        </a>
-                        <a href="{{ route('module.agro') }}" data-quick-nav>
-                            <i class="fa-solid fa-leaf"></i><span>Agro</span>
-                        </a>
-                        <a href="{{ route('stores.index') }}" data-quick-nav>
-                            <i class="fa-solid fa-store"></i><span>Lojas</span>
-                        </a>
-                        <a href="#recentes-anuncios" data-quick-nav>
-                            <i class="fa-solid fa-ellipsis"></i><span>Mais anúncios</span>
-                        </a>
-                    </div>
-                </nav>
             </div>
         </div>
     </div>
