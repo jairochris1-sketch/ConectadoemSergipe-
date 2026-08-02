@@ -205,6 +205,38 @@ class HomeController extends Controller
             || ! empty($year)
             || (! empty($city) && ! $locationPreferenceActive);
 
+        $realEstateAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'real_estate')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $vehicleAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'vehicles')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $productAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'products')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $jobAgroAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->whereIn('module', ['jobs', 'agro'])
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->latest()
+            ->take(4)
+            ->get();
+
         return view('home', compact(
             'q',
             'city',
@@ -221,7 +253,11 @@ class HomeController extends Controller
             'adSearchCategories',
             'heroBanners',
             'realEstateBanners',
-            'vehiclesBanners'
+            'vehiclesBanners',
+            'realEstateAds',
+            'vehicleAds',
+            'productAds',
+            'jobAgroAds'
         ));
     }
 
