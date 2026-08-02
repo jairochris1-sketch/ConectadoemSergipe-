@@ -251,11 +251,11 @@
 
 <!-- Section Destaques para você (Carrossel em movimento) + Profissionais em destaque -->
 @if(!$isSearch && empty($module))
-<div class="container mb-5">
-    <div class="row g-4">
+<div class="container mb-3 mb-md-4">
+    <div class="row g-3 g-md-4">
         <!-- Coluna Esquerda: Destaques para você (Swiper Slider em Movimento) -->
         <div class="col-12 col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
                     <i class="fa-solid fa-fire text-danger"></i> Destaques para você
                 </h4>
@@ -271,7 +271,7 @@
                     transition-timing-function: linear !important;
                 }
             </style>
-            <div class="position-relative overflow-hidden">
+            <div class="position-relative overflow-hidden px-md-3">
                 <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
                     <div class="swiper-wrapper">
                         @php
@@ -308,12 +308,18 @@
                         @endforeach
                     </div>
                 </div>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-3 swiper-featured-prev d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Anterior">
+                    <i class="fa-solid fa-chevron-left text-dark small"></i>
+                </button>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-3 swiper-featured-next d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Próximo">
+                    <i class="fa-solid fa-chevron-right text-dark small"></i>
+                </button>
             </div>
         </div>
 
         <!-- Coluna Direita: Profissionais em destaque -->
         <div class="col-12 col-lg-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
                     <i class="fa-solid fa-users-gear text-primary"></i> Profissionais em destaque
                 </h4>
@@ -351,8 +357,8 @@
 </div>
 
 <!-- Section 2: 🏠 Imóveis em Sergipe -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container mb-3 mb-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-2.5">
         <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
             <i class="fa-solid fa-house text-primary"></i> Imóveis em Sergipe
         </h4>
@@ -361,7 +367,7 @@
         </a>
     </div>
 
-    <div class="position-relative">
+    <div class="position-relative overflow-hidden px-md-3">
         <div class="swiper swiper-category-ads rounded-3 p-1">
             <div class="swiper-wrapper">
                 @php
@@ -398,13 +404,18 @@
                 @endforeach
             </div>
         </div>
-        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-3 swiper-cat-prev d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left text-dark small"></i>
+        </button>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-3 swiper-cat-next d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Próximo">
+            <i class="fa-solid fa-chevron-right text-dark small"></i>
+        </button>
     </div>
 </div>
 
 <!-- Section 3: 🚗 Veículos em Destaque -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container mb-3 mb-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-2.5">
         <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
             <i class="fa-solid fa-car text-primary"></i> Veículos em Destaque
         </h4>
@@ -413,7 +424,7 @@
         </a>
     </div>
 
-    <div class="position-relative">
+    <div class="position-relative overflow-hidden px-md-3">
         <div class="swiper swiper-category-ads rounded-3 p-1">
             <div class="swiper-wrapper">
                 @php
@@ -450,13 +461,18 @@
                 @endforeach
             </div>
         </div>
-        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-3 swiper-cat-prev d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left text-dark small"></i>
+        </button>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-3 swiper-cat-next d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Próximo">
+            <i class="fa-solid fa-chevron-right text-dark small"></i>
+        </button>
     </div>
 </div>
 
 <!-- Section 4: 🏷️ Produtos & Eletrônicos -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container mb-3 mb-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-2.5">
         <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
             <i class="fa-solid fa-tag text-primary"></i> Produtos & Eletrônicos
         </h4>
@@ -465,7 +481,7 @@
         </a>
     </div>
 
-    <div class="position-relative">
+    <div class="position-relative overflow-hidden px-md-3">
         <div class="swiper swiper-category-ads rounded-3 p-1">
             <div class="swiper-wrapper">
                 @php
@@ -502,16 +518,21 @@
                 @endforeach
             </div>
         </div>
-        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-3 swiper-cat-prev d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left text-dark small"></i>
+        </button>
+        <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-3 swiper-cat-next d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Próximo">
+            <i class="fa-solid fa-chevron-right text-dark small"></i>
+        </button>
     </div>
 </div>
 
 <!-- Section 5: 💼 Empregos & Agronegócio + Bloco de Planos -->
-<div class="container mb-5">
-    <div class="row g-4">
+<div class="container mb-3 mb-md-4">
+    <div class="row g-3 g-md-4">
         <!-- Esquerda: Empregos e Agro em Swiper -->
         <div class="col-12 col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
                     <i class="fa-solid fa-briefcase text-primary"></i> Empregos & Agro
                 </h4>
@@ -520,7 +541,7 @@
                 </a>
             </div>
 
-            <div class="position-relative">
+            <div class="position-relative overflow-hidden px-md-3">
                 <div class="swiper swiper-category-ads rounded-3 p-1">
                     <div class="swiper-wrapper">
                         @php
@@ -557,7 +578,12 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-3 swiper-cat-prev d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Anterior">
+                    <i class="fa-solid fa-chevron-left text-dark small"></i>
+                </button>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-3 swiper-cat-next d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #fff; border: 1px solid rgba(0,0,0,0.12);" aria-label="Próximo">
+                    <i class="fa-solid fa-chevron-right text-dark small"></i>
+                </button>
             </div>
         </div>
 
@@ -584,8 +610,8 @@
 </div>
 
 <!-- Section Explore anúncios por cidade -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container mb-3 mb-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-2.5">
         <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Explore anúncios por cidade</h4>
         <a href="{{ route('home') }}" class="text-primary text-decoration-none small fw-bold">
             Ver todas as cidades <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -607,7 +633,7 @@
 </div>
 
 <!-- Section Banner do Aplicativo -->
-<div class="container mb-5">
+<div class="container mb-3 mb-md-4">
     <div class="rounded-4 p-4 p-md-5 text-white position-relative overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255, 255, 255, 0.15);">
         <div class="row align-items-center">
             <div class="col-12 col-md-7 mb-4 mb-md-0 z-1">
@@ -754,6 +780,10 @@
             disableOnInteraction: false,
             pauseOnMouseEnter: false,
         },
+        navigation: {
+            prevEl: '.swiper-featured-prev',
+            nextEl: '.swiper-featured-next',
+        },
         breakpoints: {
             576: { slidesPerView: 2, spaceBetween: 12 },
             768: { slidesPerView: 3, spaceBetween: 14 },
@@ -762,7 +792,10 @@
     });
 
     document.querySelectorAll('.swiper-category-ads').forEach((el) => {
-        const pagEl = el.parentElement.querySelector('.swiper-cat-pagination');
+        const parent = el.parentElement;
+        const prevBtn = parent ? parent.querySelector('.swiper-cat-prev') : null;
+        const nextBtn = parent ? parent.querySelector('.swiper-cat-next') : null;
+
         new Swiper(el, {
             slidesPerView: 2,
             spaceBetween: 10,
@@ -771,7 +804,7 @@
                 delay: 4000,
                 disableOnInteraction: false,
             },
-            pagination: pagEl ? { el: pagEl, clickable: true } : false,
+            navigation: (prevBtn && nextBtn) ? { prevEl: prevBtn, nextEl: nextBtn } : false,
             breakpoints: {
                 576: { slidesPerView: 2, spaceBetween: 12 },
                 768: { slidesPerView: 3, spaceBetween: 14 },
