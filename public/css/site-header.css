@@ -718,18 +718,18 @@
     .marketplace-guest-login {
         width: auto !important;
         max-width: none !important;
-        height: 34px !important;
-        min-height: 34px !important;
+        height: 30px !important;
+        min-height: 30px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 5px !important;
-        padding: 4px 12px !important;
+        gap: 4px !important;
+        padding: 3px 9px !important;
         border-radius: 999px !important;
         color: #fff !important;
         background: var(--marketplace-blue) !important;
         border: 1px solid var(--marketplace-blue) !important;
-        font-size: .8rem !important;
+        font-size: .74rem !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
         text-decoration: none !important;
@@ -737,11 +737,11 @@
 
     .marketplace-guest-login span {
         display: inline !important;
-        font-size: .8rem !important;
+        font-size: .74rem !important;
     }
 
     .marketplace-guest-login i {
-        font-size: .85rem !important;
+        font-size: .75rem !important;
     }
 
     .marketplace-mobile-menu {
@@ -907,6 +907,17 @@
 
     .marketplace-header-actions {
         gap: 4px;
+    }
+
+    .marketplace-guest-login {
+        height: 28px !important;
+        min-height: 28px !important;
+        padding: 2px 7px !important;
+        font-size: .7rem !important;
+    }
+
+    .marketplace-guest-login span {
+        font-size: .7rem !important;
     }
 
     .marketplace-announce-button {
