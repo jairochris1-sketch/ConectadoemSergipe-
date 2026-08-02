@@ -405,21 +405,22 @@
             </div>
         </div>
 
-        <!-- Card Quer Anunciar CTA Box -->
+        <!-- Card Quer Anunciar CTA Box (Planos de Anúncio) -->
         <div class="col-12 col-lg-4">
-            <div class="p-4 rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);">
+            <div class="p-4 rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%); border: 1px solid rgba(13, 110, 253, 0.2) !important;">
                 <div>
-                    <h5 class="fw-bold text-dark mb-2">Quer anunciar?</h5>
-                    <p class="text-muted small mb-4">Publique seus anúncios e encontre milhares de pessoas todos os dias.</p>
-                    <a href="{{ route('ad.create') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm">
-                        <i class="fa-solid fa-plus me-2"></i> Publicar anúncio
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1 rounded-pill small fw-bold">Planos de Anúncio</span>
+                    <h5 class="fw-bold text-dark mb-2">Quer anunciar sua empresa ou produto?</h5>
+                    <p class="text-muted small mb-4">Escolha o plano ideal para você e alcance milhares de clientes em todo o estado de Sergipe.</p>
+                    <a href="{{ route('page.plans') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                        <i class="fa-solid fa-gem"></i> Conheça nossos Planos
                     </a>
                 </div>
-                <div class="d-flex flex-column gap-2 small text-secondary">
-                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Mais visibilidade</div>
-                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Contato rápido</div>
-                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Ambiente seguro</div>
-                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> É fácil e rápido!</div>
+                <div class="d-flex flex-column gap-2 small text-secondary border-top pt-3 border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success fs-6"></i> <strong>Planos Prata, Ouro e Diamante</strong></div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success fs-6"></i> Destaque no topo das buscas</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success fs-6"></i> Botão direto de WhatsApp e Ligação</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success fs-6"></i> Suporte prioritário dedicado</div>
                 </div>
             </div>
         </div>
