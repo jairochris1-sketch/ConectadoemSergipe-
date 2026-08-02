@@ -186,81 +186,33 @@
             </div>
 
             <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
-                <!-- Fake Ad 1 -->
+                @foreach($recentAds->take(4) as $ad)
                 <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
-                        <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
-                        <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Apartamento" style="height: 130px; object-fit: cover;">
-                        <div class="card-body p-2 d-flex flex-column justify-content-between">
-                            <div>
-                                <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">Apartamento Jardins</h6>
-                                <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">3 quartos • 1 suíte</small>
-                            </div>
-                            <div>
-                                <strong class="text-primary d-block" style="font-size: 0.9rem;">R$ 320.000</strong>
-                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
+                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
+                            <span class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></span>
+                            @if($ad->card_image)
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 130px; object-fit: cover;">
+                            @else
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 130px;">
+                                    <i class="fa-solid fa-tag fs-2"></i>
+                                </div>
+                            @endif
+                            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 35) }}</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary d-block" style="font-size: 0.9rem;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Sergipe' }}</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
-
-                <!-- Fake Ad 2 -->
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
-                        <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
-                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Carro" style="height: 130px; object-fit: cover;">
-                        <div class="card-body p-2 d-flex flex-column justify-content-between">
-                            <div>
-                                <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">Chevrolet Onix 2020</h6>
-                                <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">1.0 Flex • Completo</small>
-                            </div>
-                            <div>
-                                <strong class="text-primary d-block" style="font-size: 0.9rem;">R$ 58.900</strong>
-                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fake Ad 3 -->
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
-                        <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
-                        <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="iPhone" style="height: 130px; object-fit: cover;">
-                        <div class="card-body p-2 d-flex flex-column justify-content-between">
-                            <div>
-                                <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">iPhone 13 128GB</h6>
-                                <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">Excelente estado</small>
-                            </div>
-                            <div>
-                                <strong class="text-primary d-block" style="font-size: 0.9rem;">R$ 2.199</strong>
-                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fake Ad 4 -->
-                <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
-                        <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
-                        <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Moto" style="height: 130px; object-fit: cover;">
-                        <div class="card-body p-2 d-flex flex-column justify-content-between">
-                            <div>
-                                <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">Honda CG 160 Start</h6>
-                                <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">2022 • Único dono</small>
-                            </div>
-                            <div>
-                                <strong class="text-primary d-block" style="font-size: 0.9rem;">R$ 13.500</strong>
-                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
@@ -274,53 +226,28 @@
             </div>
 
             <div class="d-flex flex-column gap-2 gap-md-3">
-                <!-- Professional 1 -->
+                @foreach($serviceProviders->take(3) as $provider)
                 <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="46" height="46" style="object-fit: cover;" alt="João">
-                        <div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.88rem;">João Eletricista</h6>
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Instalações elétricas</small>
-                            <small class="text-warning fw-bold" style="font-size: 0.72rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Aracaju</span></small>
+                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2">
+                        @if($provider->card_image)
+                            <img src="{{ asset($provider->card_image) }}" class="rounded-circle flex-shrink-0" width="46" height="46" style="object-fit: cover;" alt="{{ $provider->title }}">
+                        @else
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0" style="width: 46px; height: 46px;">
+                                {{ strtoupper(substr($provider->title, 0, 1)) }}
+                            </div>
+                        @endif
+                        <div class="overflow-hidden">
+                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.88rem;">{{ $provider->title }}</h6>
+                            <small class="text-muted d-block text-truncate" style="font-size: 0.75rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
+                            <small class="text-warning fw-bold" style="font-size: 0.72rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Sergipe' }}</span></small>
                         </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
+                    </a>
+                    <div class="d-flex gap-2 flex-shrink-0">
+                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
                     </div>
                 </div>
-
-                <!-- Professional 2 -->
-                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="46" height="46" style="object-fit: cover;" alt="Pintor">
-                        <div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.88rem;">Pintor Profissional</h6>
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Pinturas e acabamentos</small>
-                            <small class="text-warning fw-bold" style="font-size: 0.72rem;">⭐ 4,8 (96) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Socorro</span></small>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
-                    </div>
-                </div>
-
-                <!-- Professional 3 -->
-                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="46" height="46" style="object-fit: cover;" alt="Faxina">
-                        <div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.88rem;">Faxina & Cia</h6>
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Limpeza residencial</small>
-                            <small class="text-warning fw-bold" style="font-size: 0.72rem;">⭐ 4,9 (112) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Aracaju</span></small>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -431,9 +358,10 @@
 </div>
 @endif
 
-    <!-- Resultados da Busca -->
-    @if($isSearch)
-    <div class="row mb-5" id="resultados-busca">
+<!-- Resultados da Busca / Categoria -->
+@if($isSearch)
+<div class="container mb-5" id="resultados-busca">
+    <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -466,16 +394,16 @@
                     <p class="text-muted small">Tente buscar por outras palavras-chave ou alterar a cidade selecionada.</p>
                 </div>
             @else
-                <div class="row g-4">
+                <div class="row g-3 g-md-4">
                     @foreach($searchResults as $item)
-                    <div class="col-12 col-md-6 col-lg-3">
+                    <div class="col-6 col-md-6 col-lg-3">
                         <a href="{{ $item->module === 'services' ? route('provider.show', $item->slug) : route('ad.show', $item->slug) }}" class="text-decoration-none text-dark">
                             <div class="card card-premium h-100 border-0 rounded-4 shadow-sm overflow-hidden">
                                 <div class="card-img-wrapper position-relative">
                                     @if($item->card_image)
-                                        <img src="{{ asset($item->card_image) }}" class="card-img-top" alt="{{ $item->title }}">
+                                        <img src="{{ asset($item->card_image) }}" class="card-img-top" alt="{{ $item->title }}" style="height: 160px; object-fit: cover;">
                                     @else
-                                        <img src="{{ asset('images/logo.png') }}" class="card-img-top p-4 object-fit-contain" alt="{{ $item->title }}">
+                                        <img src="{{ asset('images/logo.png') }}" class="card-img-top p-4 object-fit-contain" alt="{{ $item->title }}" style="height: 160px;">
                                     @endif
                                 </div>
                                 <div class="card-body p-3 d-flex flex-column justify-content-between">
@@ -498,7 +426,7 @@
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         @if($item->module === 'services')
-                                            <span class="fw-bold text-primary">Ver perfil profissional</span>
+                                            <span class="fw-bold text-primary small">Ver perfil profissional</span>
                                         @else
                                             <span class="fw-bold text-primary fs-5">R$ {{ number_format($item->price, 2, ',', '.') }}</span>
                                         @endif
@@ -512,124 +440,9 @@
             @endif
         </div>
     </div>
-    @endif
+</div>
+@endif
 
-    @if(empty($module) && $serviceProviders->isNotEmpty())
-    <section class="row mb-5 mt-2">
-        <div class="col-12 px-3 px-md-4">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 provider-section-heading">
-                <div>
-                    <span class="text-primary small fw-bold text-uppercase">Profissionais {{ $city ? 'de '.$city : 'de Sergipe' }}</span>
-                    <h3 class="section-title fw-bold mb-1">Prestadores de Serviços</h3>
-                    <p class="text-muted mb-0">Conheça os profissionais e fale diretamente com eles.</p>
-                </div>
-                <a href="{{ route('module.services') }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                    Ver todos os prestadores
-                </a>
-            </div>
-            <div class="row g-3 g-md-4 provider-card-grid">
-                @foreach($serviceProviders as $provider)
-                    <div class="col-6 col-md-6 col-xl-3">
-                        @include('services._card', [
-                            'provider' => $provider,
-                            'hideDesktopWhatsapp' => true,
-                            'hideDescription' => true,
-                        ])
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    @if($recentAds->isNotEmpty())
-    <!-- Seção Acabaram de Anunciar -->
-    <div id="recentes-anuncios" class="row mb-4 mt-2">
-        <div class="col-12 px-3 px-md-4">
-            <h3 class="section-title fw-bold mb-3" style="font-size: 1.25rem;"><i class="fa-solid fa-sparkles text-warning me-1"></i> 🆕 Acabaram de anunciar{{ $city ? ' em '.$city : '' }}</h3>
-            <div class="row g-3">
-                @foreach($recentAds as $ad)
-                <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
-                        <div class="card card-premium h-100 border-0 rounded-4 shadow-sm overflow-hidden">
-                            <div class="card-img-wrapper position-relative">
-                                @if($ad->card_image)
-                                    <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}">
-                                @else
-                                    <img src="{{ asset('images/logo.png') }}" class="card-img-top p-3 object-fit-contain" alt="{{ $ad->title }}">
-                                @endif
-                            </div>
-                            <div class="card-body p-2 d-flex flex-column justify-content-between">
-                                <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.84rem;">{{ $ad->title }}</h6>
-                                    <p class="card-text text-muted mb-1" style="font-size: 0.75rem;">{{ $ad->city }}</p>
-                                </div>
-                                <span class="fw-bold text-primary" style="font-size: 0.95rem;">R$ {{ number_format($ad->price, 2, ',', '.') }}</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endif
-
-    @if(empty($module) && $recentStores->isNotEmpty())
-    <section class="row mb-5 mt-2">
-        <div class="col-12 px-3 px-md-4">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 provider-section-heading">
-                <div>
-                    <span class="text-success small fw-bold text-uppercase">Comércio local</span>
-                    <h3 class="section-title fw-bold mb-1">Lojas {{ $city ? 'de '.$city : 'criadas recentemente' }}</h3>
-                    <p class="text-muted mb-0">Conheça vitrines e produtos disponíveis na sua região.</p>
-                </div>
-                <a href="{{ route('stores.index') }}" class="btn btn-outline-success rounded-pill px-4 fw-bold">
-                    Ver todas as lojas
-                </a>
-            </div>
-
-            <div class="row g-3 g-md-4">
-                @foreach($recentStores as $store)
-                    @php
-                        $storeCity = $store->city ?: $store->user?->city ?: 'Sergipe';
-                        $storeLogo = $store->logo ?: 'images/logo.png';
-                        $storeCover = $store->banner;
-                    @endphp
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <article class="store-directory-card h-100">
-                            <a href="{{ route('store.show', $store->slug) }}" class="store-card-cover" aria-label="Abrir {{ $store->name }}">
-                                @if($storeCover)
-                                    <img src="{{ asset($storeCover) }}" alt="" loading="lazy">
-                                @else
-                                    <div class="store-card-cover-fallback">
-                                        <i class="fa-solid fa-store"></i>
-                                    </div>
-                                @endif
-                                <span class="store-card-category">{{ $store->category ?: 'Comércio local' }}</span>
-                            </a>
-                            <div class="store-card-body">
-                                <img src="{{ asset($storeLogo) }}" class="store-card-logo" alt="Logo da {{ $store->name }}" loading="lazy">
-                                <div class="store-card-title-row">
-                                    <h3>
-                                        <a href="{{ route('store.show', $store->slug) }}">{{ $store->name }}</a>
-                                        <i class="fa-solid fa-circle-check" title="Loja ativa"></i>
-                                    </h3>
-                                </div>
-                                <p class="store-card-city"><i class="fa-solid fa-location-dot"></i> {{ $storeCity }}/SE</p>
-                                <p class="store-card-description">{{ \Illuminate\Support\Str::limit($store->description ?: 'Conheça os produtos e novidades desta loja.', 92) }}</p>
-                                <div class="store-card-actions">
-                                    <a href="{{ route('store.show', $store->slug) }}" class="store-card-open">Ver loja</a>
-                                    <span><i class="fa-solid fa-cube"></i> {{ $store->active_ads_count }} {{ $store->active_ads_count === 1 ? 'produto' : 'produtos' }}</span>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
 </div>
 @endsection
 
