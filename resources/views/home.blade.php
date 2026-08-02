@@ -76,8 +76,8 @@
 @endif
 
 <!-- Container Busca Rápida Responsiva -->
+@if($module !== 'real_estate' && $module !== 'vehicles')
 <div class="container position-relative" style="z-index: 10; margin-top: -120px; margin-bottom: 30px;">
-    @if($module !== 'real_estate' && $module !== 'vehicles')
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="rounded-4 shadow-lg p-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
@@ -169,8 +169,8 @@
             </div>
         </div>
     </div>
-    @endif
 </div>
+@endif
 
 <!-- Section Destaques para você + Profissionais em destaque -->
 @if(!$isSearch && empty($module))
@@ -360,7 +360,7 @@
 
 <!-- Resultados da Busca / Categoria -->
 @if($isSearch)
-<div class="container mb-5" id="resultados-busca">
+<div class="container mt-4 mb-5" id="resultados-busca">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -403,7 +403,9 @@
                                     @if($item->card_image)
                                         <img src="{{ asset($item->card_image) }}" class="card-img-top" alt="{{ $item->title }}" style="height: 160px; object-fit: cover;">
                                     @else
-                                        <img src="{{ asset('images/logo.png') }}" class="card-img-top p-4 object-fit-contain" alt="{{ $item->title }}" style="height: 160px;">
+                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-dark bg-opacity-25 text-muted" style="height: 160px;">
+                                            <i class="fa-solid {{ $item->module === 'real_estate' ? 'fa-house' : ($item->module === 'vehicles' ? 'fa-car' : 'fa-tag') }} fs-1 text-primary"></i>
+                                        </div>
                                     @endif
                                 </div>
                                 <div class="card-body p-3 d-flex flex-column justify-content-between">
