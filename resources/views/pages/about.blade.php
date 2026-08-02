@@ -305,31 +305,46 @@
 .about-features-bar {
     background: #ffffff;
     border-top: 1px solid #f1f5f9;
-    padding: 32px 0;
+    padding: 36px 0;
     margin-top: 60px;
 }
 .feature-box {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    height: 100%;
+    transition: all 0.25s ease;
 }
-.feature-icon {
-    font-size: 1.5rem;
+.feature-box:hover {
+    background: #ffffff;
+    border-color: #93c5fd;
+    box-shadow: 0 8px 24px rgba(29, 78, 216, 0.08);
+    transform: translateY(-2px);
+}
+.feature-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #eff6ff;
     color: #1d4ed8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
     flex-shrink: 0;
-    margin-top: 4px;
 }
 .feature-text {
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     color: #475569;
-    line-height: 1.5;
+    line-height: 1.4;
     margin: 0;
 }
 .feature-text strong {
     color: #0f172a;
-}
-.feature-text .text-primary {
-    font-weight: 700;
 }
 
 @media (max-width: 991.98px) {
@@ -527,34 +542,34 @@ body.about-page-no-header .site-header {
     <!-- Barra de Features Inferior -->
     <div class="about-features-bar">
         <div class="container">
-            <div class="row g-4 justify-content-center">
-                <div class="col-12 col-sm-6 col-lg-auto">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3">
+                <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon"><i class="fa-solid fa-heart-circle-check"></i></div>
-                        <p class="feature-text">Somos mais que uma plataforma.<br><span class="text-primary">Somos um movimento por um Sergipe mais conectado.</span></p>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-heart-circle-check"></i></div>
+                        <p class="feature-text">Somos mais que uma plataforma.<br><span class="text-primary fw-bold">Movimento por Sergipe</span></p>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-lg-auto">
+                <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-chart-line"></i></div>
                         <p class="feature-text"><strong>Desenvolvimento</strong><br>da economia local</p>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-lg-auto">
+                <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-seedling"></i></div>
                         <p class="feature-text"><strong>Oportunidades</strong><br>para todos</p>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-lg-auto">
+                <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-microchip"></i></div>
                         <p class="feature-text"><strong>Tecnologia</strong><br>a serviço das pessoas</p>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-lg-auto">
+                <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon"><i class="fa-solid fa-handshake-angle"></i></div>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-handshake-angle"></i></div>
                         <p class="feature-text">Conexão que gera<br><strong>Confiança e resultados</strong></p>
                     </div>
                 </div>
