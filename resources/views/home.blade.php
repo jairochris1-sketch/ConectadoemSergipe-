@@ -249,79 +249,100 @@
 </div>
 @endif
 
-<!-- Section Destaques para você + Profissionais em destaque -->
+<!-- Section Destaques para você (Carrossel em movimento) + Profissionais em destaque -->
 @if(!$isSearch && empty($module))
 <div class="container mb-5">
     <div class="row g-4">
-        <!-- Coluna Esquerda: Destaques para você -->
+        <!-- Coluna Esquerda: Destaques para você (Swiper Slider em Movimento) -->
         <div class="col-12 col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;"><i class="fa-solid fa-fire text-danger me-2"></i>Destaques para você</h4>
-                    <small class="text-muted">Anúncios selecionados perto de você</small>
-                </div>
+                <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
+                    <i class="fa-solid fa-fire text-danger"></i> Destaques para você
+                </h4>
+                <a href="{{ route('home') }}" class="text-primary text-decoration-none small fw-bold">
+                    Ver todos os destaques <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
             </div>
 
-            <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
-                @foreach($recentAds->take(4) as $ad)
-                <div class="col">
-                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
-                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
-                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1" style="font-size: 0.7rem;">Destaque</span>
-                            <span class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></span>
-                            @if($ad->card_image)
-                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 130px; object-fit: cover;">
-                            @else
-                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 130px;">
-                                    <i class="fa-solid fa-tag fs-2"></i>
+            <div class="position-relative">
+                <div class="swiper swiper-featured-ads rounded-3 p-1">
+                    <div class="swiper-wrapper">
+                        @foreach($recentAds as $ad)
+                        <div class="swiper-slide">
+                            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                                <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Destaque</span>
+                                    <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
+                                    @if($ad->card_image)
+                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 140px; object-fit: cover;">
+                                    @else
+                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 140px;">
+                                            <i class="fa-solid fa-tag fs-2"></i>
+                                        </div>
+                                    @endif
+                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                        </div>
+                                        <div>
+                                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                        </div>
+                                    </div>
                                 </div>
-                            @endif
-                            <div class="card-body p-2 d-flex flex-column justify-content-between">
-                                <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 35) }}</small>
-                                </div>
-                                <div>
-                                    <strong class="text-primary d-block" style="font-size: 0.9rem;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Sergipe' }}</small>
-                                </div>
-                            </div>
+                            </a>
                         </div>
-                    </a>
+                        @endforeach
+                    </div>
                 </div>
-                @endforeach
+
+                <!-- Setas de Navegação -->
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-2 swiper-featured-prev d-none d-md-flex align-items-center justify-content-center" style="width: 34px; height: 34px; left: -15px; background: #fff;">
+                    <i class="fa-solid fa-chevron-left text-dark fs-6"></i>
+                </button>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-2 swiper-featured-next d-none d-md-flex align-items-center justify-content-center" style="width: 34px; height: 34px; right: -15px; background: #fff;">
+                    <i class="fa-solid fa-chevron-right text-dark fs-6"></i>
+                </button>
+
+                <!-- Paginação por Pontos -->
+                <div class="swiper-pagination swiper-featured-pagination mt-2 position-relative"></div>
             </div>
         </div>
 
         <!-- Coluna Direita: Profissionais em destaque -->
         <div class="col-12 col-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;"><i class="fa-solid fa-user-gear text-primary me-2"></i>Profissionais em destaque</h4>
-                </div>
-                <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">Ver todos <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
+                    <i class="fa-solid fa-users-gear text-primary"></i> Profissionais em destaque
+                </h4>
+                <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">
+                    Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
             </div>
 
-            <div class="d-flex flex-column gap-2 gap-md-3">
-                @foreach($serviceProviders->take(3) as $provider)
-                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
+            <div class="d-flex flex-column gap-2">
+                @foreach($serviceProviders->take(4) as $provider)
+                <div class="p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
                     <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2">
                         @if($provider->card_image)
-                            <img src="{{ asset($provider->card_image) }}" class="rounded-circle flex-shrink-0" width="46" height="46" style="object-fit: cover;" alt="{{ $provider->title }}">
+                            <img src="{{ asset($provider->card_image) }}" class="rounded-circle flex-shrink-0" width="44" height="44" style="object-fit: cover;" alt="{{ $provider->title }}">
                         @else
-                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0" style="width: 46px; height: 46px;">
-                                {{ strtoupper(substr($provider->title, 0, 1)) }}
+                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0" style="width: 44px; height: 44px;">
+                                <i class="fa-solid fa-user"></i>
                             </div>
                         @endif
                         <div class="overflow-hidden">
-                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.88rem;">{{ $provider->title }}</h6>
-                            <small class="text-muted d-block text-truncate" style="font-size: 0.75rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
-                            <small class="text-warning fw-bold" style="font-size: 0.72rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Sergipe' }}</span></small>
+                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem;">{{ $provider->title }}</h6>
+                            <small class="text-muted d-block text-truncate" style="font-size: 0.73rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
+                            <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
                         </div>
                     </a>
                     <div class="d-flex gap-2 flex-shrink-0">
-                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
+                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
                     </div>
                 </div>
                 @endforeach
@@ -330,104 +351,136 @@
     </div>
 </div>
 
-<!-- Section Explore por Categoria -->
+<!-- Section Mais oportunidades para você -->
 <div class="container mb-5">
-    <div class="mb-3">
-        <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;"><i class="fa-solid fa-compass text-primary me-2"></i>Explore por categoria</h4>
-        <small class="text-muted">Encontre exatamente o que precisa</small>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Mais oportunidades para você</h4>
+        <a href="{{ route('module.real_estate') }}" class="text-primary text-decoration-none small fw-bold">
+            Ver todos os imóveis <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
     </div>
 
-    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-7 g-2 g-md-3">
-        <div class="col">
-            <a href="{{ route('module.products') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-tag text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Produtos</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">2.480 anúncios</small>
-            </a>
+    <!-- Abas / Tabs Horizontais -->
+    <div class="d-flex align-items-center gap-2 mb-4 overflow-x-auto text-nowrap pb-2 scrollbar-none">
+        <a href="{{ route('module.real_estate') }}" class="btn btn-primary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-house me-1"></i> Imóveis</a>
+        <a href="{{ route('module.vehicles') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-car me-1"></i> Veículos</a>
+        <a href="{{ route('module.products') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-tag me-1"></i> Produtos</a>
+        <a href="{{ route('module.services') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-wrench me-1"></i> Serviços</a>
+        <a href="{{ route('module.jobs') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-briefcase me-1"></i> Empregos</a>
+        <a href="{{ route('module.agro') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1 fw-semibold small"><i class="fa-solid fa-leaf me-1"></i> Agro</a>
+    </div>
+
+    <div class="row g-4">
+        <!-- 4 Cards de Oportunidades -->
+        <div class="col-12 col-lg-8">
+            <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
+                @foreach($recentAds->skip(4)->take(4) as $ad)
+                <div class="col">
+                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                        <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
+                            <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            @if($ad->card_image)
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 135px; object-fit: cover;">
+                            @else
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 135px;">
+                                    <i class="fa-solid fa-building fs-2"></i>
+                                </div>
+                            @endif
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
         </div>
-        <div class="col">
-            <a href="{{ route('module.real_estate') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-building text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Imóveis</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">1.270 anúncios</small>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ route('module.vehicles') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-car text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Veículos</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">980 anúncios</small>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ route('module.services') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-wrench text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Serviços</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">1.560 anúncios</small>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ route('module.jobs') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-briefcase text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Empregos</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">620 anúncios</small>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ route('module.agro') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-leaf text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Agro</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">410 anúncios</small>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ route('stores.index') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
-                <i class="fa-solid fa-store text-primary fs-3 mb-2"></i>
-                <strong class="text-dark d-block" style="font-size: 0.85rem;">Lojas</strong>
-                <small class="text-muted" style="font-size: 0.7rem;">320 anúncios</small>
-            </a>
+
+        <!-- Card Quer Anunciar CTA Box -->
+        <div class="col-12 col-lg-4">
+            <div class="p-4 rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);">
+                <div>
+                    <h5 class="fw-bold text-dark mb-2">Quer anunciar?</h5>
+                    <p class="text-muted small mb-4">Publique seus anúncios e encontre milhares de pessoas todos os dias.</p>
+                    <a href="{{ route('ad.create') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm">
+                        <i class="fa-solid fa-plus me-2"></i> Publicar anúncio
+                    </a>
+                </div>
+                <div class="d-flex flex-column gap-2 small text-secondary">
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Mais visibilidade</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Contato rápido</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> Ambiente seguro</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fa-solid fa-circle-check text-success"></i> É fácil e rápido!</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Section Features Footer Bar -->
+<!-- Section Explore anúncios por cidade -->
 <div class="container mb-5">
-    <div class="p-3 p-md-4 rounded-4 shadow-sm border" style="background: var(--card);">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-md-4 text-start">
-            <div class="col d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary flex-shrink-0">
-                    <i class="fa-solid fa-shield-halved fs-3"></i>
-                </div>
-                <div>
-                    <strong class="d-block text-dark mb-0" style="font-size: 0.9rem;">Ambiente seguro</strong>
-                    <small class="text-muted" style="font-size: 0.75rem;">Anúncios verificados para mais segurança.</small>
-                </div>
-            </div>
-            <div class="col d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary flex-shrink-0">
-                    <i class="fa-solid fa-headset fs-3"></i>
-                </div>
-                <div>
-                    <strong class="d-block text-dark mb-0" style="font-size: 0.9rem;">Suporte dedicado</strong>
-                    <small class="text-muted" style="font-size: 0.75rem;">Nossa equipe está pronta para ajudar você.</small>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Explore anúncios por cidade</h4>
+        <a href="{{ route('home') }}" class="text-primary text-decoration-none small fw-bold">
+            Ver todas as cidades <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="d-flex align-items-center gap-3 overflow-x-auto text-nowrap pb-2 scrollbar-none">
+        @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+        <a href="{{ route('home', ['city' => $cityName]) }}" class="text-decoration-none text-dark text-center d-flex flex-column align-items-center" style="width: 80px;">
+            <div class="rounded-circle shadow-sm mb-2 overflow-hidden border border-2 border-white" style="width: 64px; height: 64px; background: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);">
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white fw-bold fs-5">
+                    {{ strtoupper(substr($cityName, 0, 1)) }}
                 </div>
             </div>
-            <div class="col d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary flex-shrink-0">
-                    <i class="fa-solid fa-clock-rotate-left fs-3"></i>
+            <small class="fw-semibold text-truncate w-100" style="font-size: 0.75rem;">{{ $cityName }}</small>
+        </a>
+        @endforeach
+    </div>
+</div>
+
+<!-- Section Banner do Aplicativo -->
+<div class="container mb-5">
+    <div class="rounded-4 p-4 p-md-5 text-white position-relative overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255, 255, 255, 0.15);">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-7 mb-4 mb-md-0 z-1">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-primary bg-opacity-25 p-2 rounded-3 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-mobile-screen-button fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-white" style="font-size: clamp(1.2rem, 3vw, 1.8rem);">Leve o Conectado em Sergipe com você.</h3>
                 </div>
-                <div>
-                    <strong class="d-block text-dark mb-0" style="font-size: 0.9rem;">Anúncios atualizados</strong>
-                    <small class="text-muted" style="font-size: 0.75rem;">Novos anúncios todos os dias para melhores oportunidades.</small>
+                <p class="text-light opacity-75 mb-4" style="max-width: 500px;">Baixe nosso app e encontre oportunidades onde estiver.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#" class="btn btn-dark btn-lg border border-secondary border-opacity-50 rounded-3 px-3 py-2 d-flex align-items-center gap-2">
+                        <i class="fa-brands fa-google-play fs-3 text-success"></i>
+                        <div class="text-start lh-1">
+                            <small class="d-block text-muted" style="font-size: 0.65rem;">DISPONÍVEL NO</small>
+                            <strong class="text-white small">Google Play</strong>
+                        </div>
+                    </a>
+                    <a href="#" class="btn btn-dark btn-lg border border-secondary border-opacity-50 rounded-3 px-3 py-2 d-flex align-items-center gap-2">
+                        <i class="fa-brands fa-apple fs-3 text-white"></i>
+                        <div class="text-start lh-1">
+                            <small class="d-block text-muted" style="font-size: 0.65rem;">BAIXAR NA</small>
+                            <strong class="text-white small">App Store</strong>
+                        </div>
+                    </a>
                 </div>
             </div>
-            <div class="col d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary flex-shrink-0">
-                    <i class="fa-solid fa-location-dot fs-3"></i>
-                </div>
-                <div>
-                    <strong class="d-block text-dark mb-0" style="font-size: 0.9rem;">Conexão local</strong>
-                    <small class="text-muted" style="font-size: 0.75rem;">Apoiamos o comércio e os profissionais de Sergipe.</small>
+            <div class="col-12 col-md-5 text-center d-none d-md-block z-1">
+                <div class="position-relative d-inline-block">
+                    <i class="fa-solid fa-mobile-retro text-primary opacity-50" style="font-size: 10rem;"></i>
                 </div>
             </div>
         </div>
@@ -532,6 +585,29 @@
         loop: true,
         autoplay: { delay: 5000 },
         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+    });
+
+    const swiperFeatured = new Swiper('.swiper-featured-ads', {
+        slidesPerView: 1,
+        spaceBetween: 12,
+        loop: true,
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-featured-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-featured-next',
+            prevEl: '.swiper-featured-prev',
+        },
+        breakpoints: {
+            576: { slidesPerView: 2, spaceBetween: 12 },
+            768: { slidesPerView: 3, spaceBetween: 14 },
+            992: { slidesPerView: 4, spaceBetween: 14 },
+        },
     });
     @endif
 
