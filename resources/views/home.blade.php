@@ -152,15 +152,15 @@
                     <div class="d-flex gap-2 w-100" style="flex: 3;">
                         <!-- Cidade com botão GPS -->
                         <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
-                            <i class="fa-solid fa-location-dot text-muted me-1"></i>
-                            <select id="home-search-city" name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
+                            <i class="fa-solid fa-location-dot text-primary me-1 flex-shrink-0"></i>
+                            <select id="home-search-city" name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold text-truncate me-1" style="font-size: 0.84rem; max-width: calc(100% - 36px);">
                                 <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
                                 @foreach(\App\Core\SergipeCities::getAll() as $cityName)
                                     <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
                                 @endforeach
                             </select>
-                            <button type="button" id="home-use-location" class="btn btn-link text-primary p-0 ms-1 text-decoration-none flex-shrink-0" title="Detectar minha localização GPS" aria-label="Usar minha localização">
-                                <i class="fa-solid fa-crosshairs fs-6"></i>
+                            <button type="button" id="home-use-location" class="btn btn-primary btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 28px; height: 28px;" title="Detectar minha localização GPS atual" aria-label="Usar minha localização">
+                                <i class="fa-solid fa-location-crosshairs" style="font-size: 0.8rem;"></i>
                                 <span data-location-button-label class="visually-hidden">Usar minha localização</span>
                             </button>
                         </div>
@@ -1132,8 +1132,12 @@
                         setLocationStatus(`Localização ativa: ${nearestMunicipality.name}.`, 'success');
                         locationButton.classList.add('is-active');
                         locationButton.setAttribute('aria-pressed', 'true');
-                        locationButtonLabel.textContent = 'Desativar localização';
-                        locationButtonDetail.textContent = `Resultados filtrados para ${nearestMunicipality.name}.`;
+                        if (locationButtonLabel) {
+                            locationButtonLabel.textContent = 'Desativar localização';
+                        }
+                        if (locationButtonDetail) {
+                            locationButtonDetail.textContent = `Resultados filtrados para ${nearestMunicipality.name}.`;
+                        }
                         window.setTimeout(openLocationSearch, 450);
                     } catch (error) {
                         setLocationStatus(error.message, 'error');
