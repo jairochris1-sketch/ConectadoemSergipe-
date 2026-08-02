@@ -516,7 +516,7 @@
 @media (min-width: 992px) {
     .site-header-layout-vertical > main,
     .site-header-layout-vertical > footer {
-        margin-left: 220px;
+        transition: margin-left 0.25s ease;
     }
 
     .marketplace-header-layout-vertical {
@@ -528,6 +528,80 @@
         padding: 0;
         border-right: 1px solid var(--marketplace-header-border);
         border-bottom: 0;
+        transition: width 0.25s ease;
+    }
+
+    /* Botão Flutuante de Encolher/Abrir no Cabeçalho Vertical */
+    .marketplace-vertical-toggle {
+        display: none;
+        position: absolute;
+        top: 24px;
+        right: -13px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.7rem;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .marketplace-vertical-toggle:hover {
+        background-color: #0b5ed7;
+        transform: scale(1.1);
+    }
+
+    .marketplace-header-layout-vertical .marketplace-vertical-toggle {
+        display: flex;
+    }
+
+    /* Estado Recolhido / Collapsed do Cabeçalho Vertical */
+    body.header-vertical-collapsed .site-header-layout-vertical > main,
+    body.header-vertical-collapsed .site-header-layout-vertical > footer {
+        margin-left: 70px !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical {
+        width: 70px !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-brand-name,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-nav-label,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button span,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-announce-button span {
+        display: none !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-nav-item {
+        justify-content: center !important;
+        padding: 10px 0 !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-nav-icon {
+        margin: 0 !important;
+        font-size: 1.1rem !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-brand {
+        justify-content: center !important;
+        padding: 0 0 8px !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-brand-logo {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-announce-button,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button {
+        justify-content: center !important;
+        padding: 8px !important;
     }
 
     .marketplace-header-layout-vertical .marketplace-header-shell,

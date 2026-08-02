@@ -17,6 +17,16 @@
 @endphp
 
 <header class="marketplace-header marketplace-header-layout-{{ $headerLayout ?? 'horizontal' }} {{ auth()->guest() ? 'marketplace-header-guest' : '' }}" id="marketplaceHeader">
+    <!-- Botão Flutuante de Encolher/Abrir Cabeçalho Vertical -->
+    <button
+        class="marketplace-vertical-toggle"
+        id="marketplaceVerticalToggle"
+        type="button"
+        aria-label="Encolher ou Expandir Menu"
+        title="Encolher / Expandir Menu"
+    >
+        <i class="fa-solid fa-chevron-left" id="marketplaceVerticalToggleIcon"></i>
+    </button>
     <div class="marketplace-header-shell">
         <div class="marketplace-header-row">
             <button
@@ -183,3 +193,33 @@
         </div>
     </div>
 </header>
+<script>
+    (() => {
+        const toggleBtn = document.getElementById('marketplaceVerticalToggle');
+        const icon = document.getElementById('marketplaceVerticalToggleIcon');
+        if (!toggleBtn) return;
+
+        const isCollapsed = localStorage.getItem('header_vertical_collapsed') === 'true';
+        if (isCollapsed) {
+            document.body.classList.add('header-vertical-collapsed');
+            if (icon) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const collapsedNow = document.body.classList.toggle('header-vertical-collapsed');
+            localStorage.setItem('header_vertical_collapsed', collapsedNow ? 'true' : 'false');
+            if (icon) {
+                if (collapsedNow) {
+                    icon.classList.remove('fa-chevron-left');
+                    icon.classList.add('fa-chevron-right');
+                } else {
+                    icon.classList.remove('fa-chevron-right');
+                    icon.classList.add('fa-chevron-left');
+                }
+            }
+        });
+    })();
+</script>
