@@ -30,6 +30,9 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/busca/sugestoes', [HomeController::class, 'suggestions'])
     ->middleware('throttle:60,1')
     ->name('search.suggestions');
+Route::get('/home/sugestoes', [HomeController::class, 'suggestions'])
+    ->middleware('throttle:60,1')
+    ->name('home.suggestions');
 Route::get('/anuncio/{slug}', [AdController::class, 'show'])->name('ad.show');
 Route::get('/anuncio/{slug}/publicado', [AdController::class, 'published'])->name('ad.published');
 Route::get('/prestador/{slug}', [AdController::class, 'provider'])->name('provider.show');

@@ -124,7 +124,7 @@
                     id="home-search-form"
                     action="{{ route('home') }}"
                     method="GET"
-                    data-suggestions-url="{{ route('home.suggestions') }}"
+                    data-suggestions-url="{{ route('search.suggestions') }}"
                     class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3 w-100 mb-2 mb-md-3"
                 >
                     <input type="hidden" id="home-search-module-value" name="module" value="{{ $module }}">
