@@ -23,6 +23,408 @@
 @endpush
 
 @section('content')
+<!-- DESKTOP VERSION (Only for Desktop screens) -->
+<div class="d-none d-lg-block">
+    <!-- Hero Carousel Desktop -->
+    @if(empty($module))
+    <div class="row mx-0 mb-3">
+        <div class="col-12 px-0">
+            <div class="swiper swiper-hero overflow-hidden position-relative">
+                <div class="swiper-wrapper">
+                    @foreach($heroBanners as $index => $banner)
+                    @php
+                        $bannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
+                    @endphp
+                    <div class="swiper-slide d-flex flex-column justify-content-center align-items-center px-5" 
+                         style="height: 480px; background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.65) 100%), url('{{ $bannerUrl }}') center/cover no-repeat;">
+                        
+                        <div class="container position-relative h-100 d-flex flex-column justify-content-center text-start" style="padding-bottom: 90px;">
+                            <div class="d-flex justify-content-between align-items-start w-100">
+                                <div>
+                                    <h1 class="text-white fw-bold display-4 mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2.8rem;">
+                                        Encontre tudo em Sergipe.
+                                    </h1>
+                                    <p class="text-light fs-5 mb-0 opacity-75" style="max-width: 650px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                                        Produtos, serviços, imóveis, veículos, empregos e muito mais perto de você.
+                                    </p>
+                                </div>
+                                <!-- Badge Desktop -->
+                                <div class="d-flex align-items-center rounded-4 px-3 py-2 border border-secondary border-opacity-50" style="background: rgba(20, 25, 45, 0.65); backdrop-filter: blur(8px);">
+                                    <div class="bg-primary bg-opacity-25 rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-users text-primary fs-4"></i>
+                                    </div>
+                                    <div class="text-start">
+                                        <strong class="text-white d-block lh-1">+ 50 mil usuários</strong>
+                                        <small class="text-light opacity-75" style="font-size: 0.75rem;">conectados em todo o estado</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Container Busca Rápida Desktop -->
+    <div class="container position-relative" style="z-index: 10; margin-top: -140px; margin-bottom: 40px;">
+        @if($module !== 'real_estate' && $module !== 'vehicles')
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="rounded-4 shadow-lg p-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.12);">
+                    <form
+                        action="{{ route('home') }}"
+                        method="GET"
+                        class="d-flex align-items-center gap-3 w-100 mb-3"
+                    >
+                        <!-- Campo Pesquisa -->
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-2" style="min-height: 52px; flex: 2.5;">
+                            <i class="fa-solid fa-magnifying-glass text-muted me-2"></i>
+                            <input
+                                class="form-control bg-transparent border-0 shadow-none p-0 text-dark"
+                                type="search"
+                                name="q"
+                                value="{{ $q }}"
+                                placeholder="O que você procura?"
+                                autocomplete="off"
+                            >
+                            <button type="button" class="btn btn-link text-muted p-0 ms-2 text-decoration-none">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                        </div>
+
+                        <!-- Cidade -->
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-2" style="min-height: 52px; flex: 1.5;">
+                            <i class="fa-solid fa-location-dot text-muted me-2"></i>
+                            <select name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold">
+                                <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
+                                @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+                                    <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Categoria -->
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-2" style="min-height: 52px; flex: 1.5;">
+                            <i class="fa-solid fa-table-cells-large text-muted me-2"></i>
+                            <select name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold">
+                                <option value="">Todas as categorias</option>
+                                <optgroup label="Anúncios">
+                                    <option value="real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
+                                    <option value="products" {{ $module === 'products' ? 'selected' : '' }}>Produtos</option>
+                                    <option value="vehicles" {{ $module === 'vehicles' ? 'selected' : '' }}>Veículos</option>
+                                    <option value="jobs" {{ $module === 'jobs' ? 'selected' : '' }}>Empregos</option>
+                                    <option value="agro" {{ $module === 'agro' ? 'selected' : '' }}>Agro</option>
+                                </optgroup>
+                                <optgroup label="Serviços">
+                                    @foreach($serviceSearchCategories as $serviceCategory)
+                                        <option value="{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Botão Buscar -->
+                        <button type="submit" class="btn btn-primary fw-bold rounded-3 px-4" style="min-height: 52px; flex: 1; background-color: #0d6efd; border: none;">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
+                        </button>
+                    </form>
+
+                    <!-- Chips de Categoria Horizontal -->
+                    <div class="d-flex align-items-center justify-content-start gap-4 pt-2 px-2 border-top border-secondary border-opacity-25">
+                        <a href="{{ route('module.products') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-tag text-primary"></i> Produtos
+                        </a>
+                        <a href="{{ route('module.real_estate') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-building text-primary"></i> Imóveis
+                        </a>
+                        <a href="{{ route('module.vehicles') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-car text-primary"></i> Veículos
+                        </a>
+                        <a href="{{ route('module.services') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-wrench text-primary"></i> Serviços
+                        </a>
+                        <a href="{{ route('module.jobs') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-briefcase text-primary"></i> Empregos
+                        </a>
+                        <a href="{{ route('module.agro') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-leaf text-primary"></i> Agro
+                        </a>
+                        <a href="{{ route('stores.index') }}" class="text-decoration-none text-light opacity-90 fw-medium d-flex align-items-center gap-2 ms-auto">
+                            <i class="fa-solid fa-ellipsis text-primary"></i> Ver todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    <!-- Section Destaques para você + Profissionais em destaque Desktop -->
+    @if(!$isSearch && empty($module))
+    <div class="container mb-5">
+        <div class="row g-4">
+            <!-- Coluna Esquerda: Destaques para você -->
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-fire text-danger me-2"></i>Destaques para você</h4>
+                        <small class="text-muted">Anúncios selecionados perto de você</small>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+                    <!-- Fake Ad 1 -->
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1">Em destaque</span>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
+                            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Apartamento" style="height: 140px; object-fit: cover;">
+                            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.9rem;">Apartamento no Jardins</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.75rem;">3 quartos • 1 suíte • 2 vagas</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary d-block" style="font-size: 0.95rem;">R$ 320.000</strong>
+                                    <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fake Ad 2 -->
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1">Em destaque</span>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Carro" style="height: 140px; object-fit: cover;">
+                            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.9rem;">Chevrolet Onix 2020</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.75rem;">1.0 Flex • Completo • 45 mil km</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary d-block" style="font-size: 0.95rem;">R$ 58.900</strong>
+                                    <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fake Ad 3 -->
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1">Em destaque</span>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
+                            <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="iPhone" style="height: 140px; object-fit: cover;">
+                            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.9rem;">iPhone 13 128GB</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.75rem;">Excelente estado</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary d-block" style="font-size: 0.95rem;">R$ 2.199</strong>
+                                    <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fake Ad 4 -->
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1">Em destaque</span>
+                            <button class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted"><i class="fa-regular fa-heart"></i></button>
+                            <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80" class="card-img-top" alt="Moto" style="height: 140px; object-fit: cover;">
+                            <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.9rem;">Honda CG 160 Start</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" style="font-size: 0.75rem;">2022 • Único dono</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary d-block" style="font-size: 0.95rem;">R$ 13.500</strong>
+                                    <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-location-dot me-1"></i>Aracaju, SE</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Profissionais em destaque -->
+            <div class="col-lg-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-gear text-primary me-2"></i>Profissionais em destaque</h4>
+                    </div>
+                    <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">Ver todos <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    <!-- Professional 1 -->
+                    <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="48" height="48" style="object-fit: cover;" alt="João">
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">João Eletricista</h6>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">Instalações elétricas</small>
+                                <small class="text-warning fw-bold" style="font-size: 0.75rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Aracaju, SE</span></small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Professional 2 -->
+                    <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="48" height="48" style="object-fit: cover;" alt="Pintor">
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">Pintor Profissional</h6>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">Pinturas e acabamentos</small>
+                                <small class="text-warning fw-bold" style="font-size: 0.75rem;">⭐ 4,8 (96) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Nossa Sra. do Socorro</span></small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Professional 3 -->
+                    <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" class="rounded-circle" width="48" height="48" style="object-fit: cover;" alt="Faxina">
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">Faxina & Cia</h6>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">Limpeza residencial</small>
+                                <small class="text-warning fw-bold" style="font-size: 0.75rem;">⭐ 4,9 (112) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> Aracaju, SE</span></small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="#" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;"><i class="fa-solid fa-phone"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Explore por Categoria Desktop -->
+    <div class="container mb-5">
+        <div class="mb-3">
+            <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-compass text-primary me-2"></i>Explore por categoria</h4>
+            <small class="text-muted">Encontre exatamente o que precisa</small>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-7 g-3">
+            <div class="col">
+                <a href="{{ route('module.products') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-tag text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Produtos</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">2.480 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('module.real_estate') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-building text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Imóveis</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">1.270 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('module.vehicles') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-car text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Veículos</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">980 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('module.services') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-wrench text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Serviços</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">1.560 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('module.jobs') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-briefcase text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Empregos</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">620 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('module.agro') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-leaf text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Agro</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">410 anúncios</small>
+                </a>
+            </div>
+            <div class="col">
+                <a href="{{ route('stores.index') }}" class="card text-center p-3 border-0 shadow-sm rounded-3 text-decoration-none h-100" style="background: var(--card);">
+                    <i class="fa-solid fa-store text-primary fs-2 mb-2"></i>
+                    <strong class="text-dark d-block" style="font-size: 0.85rem;">Lojas</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">320 anúncios</small>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Features Footer Bar Desktop -->
+    <div class="container mb-5">
+        <div class="p-4 rounded-4 shadow-sm border" style="background: var(--card);">
+            <div class="row row-cols-1 row-cols-md-4 g-4 text-start">
+                <div class="col d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                        <i class="fa-solid fa-shield-halved fs-3"></i>
+                    </div>
+                    <div>
+                        <strong class="d-block text-dark mb-0" style="font-size: 0.95rem;">Ambiente seguro</strong>
+                        <small class="text-muted" style="font-size: 0.75rem;">Anúncios verificados para mais segurança.</small>
+                    </div>
+                </div>
+                <div class="col d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                        <i class="fa-solid fa-headset fs-3"></i>
+                    </div>
+                    <div>
+                        <strong class="d-block text-dark mb-0" style="font-size: 0.95rem;">Suporte dedicado</strong>
+                        <small class="text-muted" style="font-size: 0.75rem;">Nossa equipe está pronta para ajudar você.</small>
+                    </div>
+                </div>
+                <div class="col d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                        <i class="fa-solid fa-clock-rotate-left fs-3"></i>
+                    </div>
+                    <div>
+                        <strong class="d-block text-dark mb-0" style="font-size: 0.95rem;">Anúncios atualizados</strong>
+                        <small class="text-muted" style="font-size: 0.75rem;">Novos anúncios todos os dias para melhores oportunidades.</small>
+                    </div>
+                </div>
+                <div class="col d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                        <i class="fa-solid fa-location-dot fs-3"></i>
+                    </div>
+                    <div>
+                        <strong class="d-block text-dark mb-0" style="font-size: 0.95rem;">Conexão local</strong>
+                        <small class="text-muted" style="font-size: 0.75rem;">Apoiamos o comércio e os profissionais de Sergipe.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+
+<!-- MOBILE VERSION -->
+<div class="d-lg-none">
 <!-- Hero Carousel -->
 @if(empty($module))
 <div class="row mx-0 mb-3">
