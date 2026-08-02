@@ -69,16 +69,8 @@
                         <i class="fa-solid fa-xmark marketplace-location-close" aria-hidden="true"></i>
                     </button>
                 @endif
-                <a class="marketplace-search-button marketplace-top-search" href="{{ route('home') }}#busca-rapida" aria-label="Buscar anúncios e serviços" title="Buscar">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </a>
-                <a class="marketplace-search-button position-relative" href="{{ route('cart.index') }}" aria-label="Carrinho com {{ $headerCartCount }} itens" title="Carrinho">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    @if($headerCartCount > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {{ $headerCartCount > 99 ? '99+' : $headerCartCount }}
-                        </span>
-                    @endif
+                <a class="marketplace-search-button marketplace-store-header-btn" href="{{ route('stores.index') }}" aria-label="Ver Lojas" title="Lojas">
+                    <i class="fa-solid fa-store"></i>
                 </a>
 
                 @auth
@@ -127,7 +119,7 @@
                         </ul>
                     </div>
                 @else
-                    <a class="marketplace-account-button marketplace-guest-login" href="{{ route('login') }}">
+                    <a class="marketplace-account-button marketplace-guest-login" href="{{ route('login') }}" title="Entrar na sua conta">
                         <i class="fa-regular fa-user"></i>
                         <span>Entrar</span>
                     </a>
