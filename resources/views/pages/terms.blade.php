@@ -105,6 +105,39 @@
                     <div class="mb-4 pb-3 border-bottom">
                         <h4 class="fw-bold text-dark d-flex align-items-center gap-2 mb-3" style="font-size: 1.2rem;">
                             <span class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center small" style="width: 28px; height: 28px; font-size: 0.85rem;">6</span>
+                            Suspensão e Bloqueio da Conta
+                        </h4>
+                        <p class="text-secondary mb-3">
+                            O <strong>Conectado em Sergipe</strong> poderá suspender temporariamente ou bloquear definitivamente uma conta sempre que identificar indícios de irregularidades, violações destes Termos de Uso ou situações que possam comprometer a segurança da plataforma, de seus usuários ou de terceiros.
+                        </p>
+                        <p class="text-secondary mb-3">
+                            A conta poderá ser <strong>suspensa para verificação de informações cadastrais</strong>. Nesses casos, o usuário poderá entrar em contato com o suporte para regularizar a situação e solicitar a reativação do acesso, quando cabível.
+                        </p>
+                        <p class="text-secondary fw-semibold mb-2">
+                            O bloqueio definitivo poderá ocorrer, entre outras hipóteses, quando o usuário:
+                        </p>
+                        <ul class="text-secondary ps-3 mb-3">
+                            <li class="mb-1">Anunciar ou comercializar produtos, serviços ou conteúdos proibidos por lei;</li>
+                            <li class="mb-1">Publicar anúncios enganosos, fraudulentos ou com informações falsas;</li>
+                            <li class="mb-1">Utilizar dados falsos ou inconsistentes no cadastro;</li>
+                            <li class="mb-1">Anunciar mais de um produto ou serviço em um único anúncio, quando isso contrariar as regras da plataforma;</li>
+                            <li class="mb-1">Utilizar mecanismos para burlar limitações, sistemas de segurança ou qualquer funcionalidade do site;</li>
+                            <li class="mb-1">Praticar fraudes, golpes ou qualquer atividade ilícita;</li>
+                            <li class="mb-1">Cometer violações reiteradas destes Termos de Uso;</li>
+                            <li class="mb-1">Utilizar a plataforma de forma abusiva, prejudicando outros usuários ou o funcionamento do serviço.</li>
+                        </ul>
+                        <p class="text-secondary mb-2">
+                            O Conectado em Sergipe poderá adotar as medidas cabíveis de acordo com a gravidade da infração, incluindo advertência, suspensão temporária, remoção de anúncios ou bloqueio definitivo da conta.
+                        </p>
+                        <p class="text-secondary mb-0">
+                            Nos casos de bloqueio definitivo motivados por infrações graves ou reincidência, a decisão poderá ser irreversível, sem prejuízo das medidas legais cabíveis.
+                        </p>
+                    </div>
+
+                    <!-- Seção 7 -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h4 class="fw-bold text-dark d-flex align-items-center gap-2 mb-3" style="font-size: 1.2rem;">
+                            <span class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center small" style="width: 28px; height: 28px; font-size: 0.85rem;">7</span>
                             Propriedade Intelectual e Direitos Autorais
                         </h4>
                         <p class="text-secondary mb-0">
@@ -112,10 +145,10 @@
                         </p>
                     </div>
 
-                    <!-- Seção 7 -->
+                    <!-- Seção 8 -->
                     <div class="mb-4">
                         <h4 class="fw-bold text-dark d-flex align-items-center gap-2 mb-3" style="font-size: 1.2rem;">
-                            <span class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center small" style="width: 28px; height: 28px; font-size: 0.85rem;">7</span>
+                            <span class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center small" style="width: 28px; height: 28px; font-size: 0.85rem;">8</span>
                             Fale Conosco e Encarregado de Dados (DPO)
                         </h4>
                         <p class="text-secondary mb-3">
