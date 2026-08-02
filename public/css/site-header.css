@@ -586,12 +586,15 @@
 
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-brand-name,
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-nav-label,
-    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button span,
-    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-announce-button span,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button > span,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-announce-button > span,
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-search-button span,
-    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-location-active span,
-    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-header-actions span {
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-location-active span {
         display: none !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-menu span {
+        display: inline-block !important;
     }
 
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-search-button::after {
