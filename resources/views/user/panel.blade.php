@@ -115,9 +115,14 @@
                 <div class="alert alert-success rounded-4">{{ session('store_success') }}</div>
             @endif
             @if(session('store_limit'))
-                <div class="alert alert-warning rounded-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <span>{{ session('store_limit') }}</span>
-                    <a href="{{ route('page.plans') }}" class="btn btn-sm btn-primary rounded-pill px-3">Ver planos</a>
+                <div class="alert alert-warning rounded-4 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-sm border-0 p-3 mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-crown text-warning fs-4"></i>
+                        <span class="fw-semibold">{{ session('store_limit') }}</span>
+                    </div>
+                    <a href="{{ route('page.plans') }}" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Fazer Upgrade
+                    </a>
                 </div>
             @endif
 
@@ -130,7 +135,7 @@
                         </span>
                         <h4>{{ $stores->isNotEmpty() ? 'Gerencie suas vitrines comerciais' : 'Crie sua vitrine comercial' }}</h4>
                         <p>
-                            Uso: {{ $stores->count() }} de {{ $storeLimit === null ? 'ilimitadas' : $storeLimit }}
+                            Uso: {{ $stores->count() }} de {{ $storeLimit === null ? 'ilimitadas' : ($storeLimit === 0 ? '0 (Necessário Plano Start ou superior)' : $storeLimit) }}
                             {{ $storeLimit === 1 ? 'loja' : 'lojas' }}
                         </p>
                     </div>
@@ -142,7 +147,7 @@
                     @else
                         <a href="{{ route('page.plans') }}" class="user-store-create-button">
                             <i class="fa-solid fa-crown"></i>
-                            Ver planos
+                            Fazer Upgrade
                         </a>
                     @endif
                 </div>

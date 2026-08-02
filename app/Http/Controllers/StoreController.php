@@ -462,11 +462,19 @@ class StoreController extends Controller
 
     private function storeLimitMessage(Request $request): string
     {
-        $limit = $request->user()->storeLimit();
+        $user = $request->user();
+        $limit = $user->storeLimit();
+        $planLabel = $user->subscriptionPlanLabel();
 
-        return $limit === 1
-            ? 'Você já possui 1 loja, que é o limite do seu plano. Escolha outro plano para cadastrar mais lojas.'
-            : "Você atingiu o limite de {$limit} lojas do seu plano. Aumente o limite para cadastrar outra loja.";
+        if ($limit === 0) {
+            return 'A criação de Loja Online é uma funcionalidade disponível a partir do Plano Start. Faça o upgrade do seu plano para ativar sua loja e vender online!';
+        }
+
+        if ($limit === 1) {
+            return "Você já possui 1 loja cadastrada, que é o limite do seu plano atual ({$planLabel}). Faça um upgrade para o Plano Premium para cadastrar mais lojas!";
+        }
+
+        return "Você já atingiu o limite de {$limit} lojas do seu plano ({$planLabel}). Faça um upgrade de plano para cadastrar novas lojas!";
     }
 
     public function show(Request $request, $slug)
