@@ -27,23 +27,33 @@
 @if(empty($module))
 <div class="row mx-0 mb-3">
     <div class="col-12 px-0">
-        <div class="swiper swiper-hero overflow-hidden position-relative" style="max-height: 220px;">
+        <div class="swiper swiper-hero overflow-hidden position-relative">
             <div class="swiper-wrapper">
                 @foreach($heroBanners as $index => $banner)
                 @php
                     $bannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
+                    $isFirstBanner = $index === 0;
                 @endphp
-                <div class="swiper-slide d-flex flex-column justify-content-center align-items-center text-center px-4" 
-                     style="height: 220px; background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ $bannerUrl }}') center/cover no-repeat;">
-                    <h1 class="text-white fw-bold m-0" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2rem;">
-                        Conectado em Sergipe
+                <div class="swiper-slide d-flex flex-column justify-content-center align-items-center text-center px-4 hero-slide-padding" 
+                     style="background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('{{ $bannerUrl }}') center/cover no-repeat;">
+                    <h1 class="text-white fw-bold display-5 mb-3" style="max-width: 900px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2.2rem;">
+                        {{ $isFirstBanner ? 'Conectado em Sergipe é a plataforma ideal para encontrar serviços locais.' : 'Os melhores imóveis, veículos e oportunidades em um só lugar.' }}
                     </h1>
+                    <p class="text-light fs-5 mb-4" style="max-width: 700px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                        {{ $isFirstBanner ? 'Encontre prestadores de serviços, lojas e comércio local na sua cidade.' : 'Compre, venda, alugue ou anuncie com rapidez em Sergipe.' }}
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
+                        <a href="{{ $isFirstBanner ? route('module.services') : route('module.real_estate') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold border-0" style="background-color: #3b82f6;">
+                            {{ $isFirstBanner ? 'Explorar categorias' : 'Explorar anúncios' }}
+                        </a>
+                        <a href="/anunciar" class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold text-white border-white" style="background-color: rgba(0,0,0,0.4);">Quero anunciar</a>
+                    </div>
                 </div>
                 @endforeach
             </div>
             <!-- Navigation -->
-            <div class="swiper-button-next text-white opacity-75 d-none d-md-flex" style="width: 32px; height: 32px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); right: 16px;"></div>
-            <div class="swiper-button-prev text-white opacity-75 d-none d-md-flex" style="width: 32px; height: 32px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); left: 16px;"></div>
+            <div class="swiper-button-next text-white opacity-75 d-none d-md-flex" style="width: 40px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); right: 24px;"></div>
+            <div class="swiper-button-prev text-white opacity-75 d-none d-md-flex" style="width: 40px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(5px); left: 24px;"></div>
         </div>
     </div>
 </div>
@@ -68,21 +78,19 @@
                     id="home-search-form"
                     action="{{ route('home') }}"
                     method="GET"
-                    class="quick-search-model-one-form p-2 p-md-3"
+                    class="quick-search-model-one-form"
                     data-suggestions-url="{{ route('search.suggestions') }}"
                     data-smart-search="{{ auth()->check() ? (auth()->user()->smart_search_enabled ? '1' : '0') : 'guest' }}"
-                    style="display: flex; flex-direction: column; gap: 10px;"
                 >
-                    <!-- Row 1: Search Query -->
-                    <div class="quick-search-model-one-field quick-search-model-one-query" style="width: 100%; border-radius: 12px; min-height: 54px;">
-                        <i class="fa-solid fa-magnifying-glass ms-2"></i>
-                        <label for="home-search-query" class="visually-hidden">O que procura?</label>
+                    <div class="quick-search-model-one-field quick-search-model-one-query">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <label for="home-search-query" class="visually-hidden">O que você procura em Sergipe?</label>
                         <input
                             id="home-search-query"
                             type="search"
                             name="q"
                             value="{{ $q }}"
-                            placeholder="O que procura?"
+                            placeholder="O que você procura em Sergipe?"
                             autocomplete="off"
                             aria-autocomplete="list"
                             aria-controls="home-search-suggestions"
@@ -94,62 +102,71 @@
                         <div id="home-search-suggestions" class="quick-search-suggestions" role="listbox" hidden></div>
                     </div>
 
-                    <!-- Row 2: City | Category | Submit -->
-                    <div class="d-flex flex-column flex-md-row gap-2">
-                        <label class="quick-search-model-one-field w-100" style="border-radius: 12px; min-height: 54px;">
-                            <i class="fa-solid fa-location-dot ms-2"></i>
-                            <span class="visually-hidden">Cidade</span>
-                            <select id="home-search-city" name="city" aria-label="Cidade">
-                                <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
-                                @foreach(\App\Core\SergipeCities::getAll() as $cityName)
-                                    <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
+                    <label class="quick-search-model-one-field">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span class="visually-hidden">Cidade</span>
+                        <select id="home-search-city" name="city" aria-label="Cidade">
+                            <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
+                            @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+                                <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label class="quick-search-model-one-field">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                        <span class="visually-hidden">Categoria</span>
+                        <select id="home-search-category-filter" aria-label="Categoria">
+                            <option value="">Todas as categorias</option>
+                            <optgroup label="Anúncios">
+                                <option value="module:real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
+                                <option value="module:products" {{ $module === 'products' ? 'selected' : '' }}>Produtos</option>
+                                <option value="module:vehicles" {{ $module === 'vehicles' ? 'selected' : '' }}>Veículos</option>
+                                <option value="module:jobs" {{ $module === 'jobs' ? 'selected' : '' }}>Empregos</option>
+                                <option value="module:agro" {{ $module === 'agro' ? 'selected' : '' }}>Agro</option>
+                            </optgroup>
+                            <optgroup label="Serviços">
+                                @foreach($serviceSearchCategories as $serviceCategory)
+                                    <option value="service:{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
                                 @endforeach
-                            </select>
-                        </label>
+                            </optgroup>
+                        </select>
+                        <input id="home-search-module-value" type="hidden" name="module" value="{{ $module }}">
+                        <input id="home-search-service-category-value" type="hidden" name="category">
+                    </label>
 
-                        <label class="quick-search-model-one-field w-100" style="border-radius: 12px; min-height: 54px;">
-                            <i class="fa-solid fa-table-cells-large ms-2"></i>
-                            <span class="visually-hidden">Categoria</span>
-                            <select id="home-search-category-filter" aria-label="Categoria">
-                                <option value="">Todas as categorias</option>
-                                <optgroup label="Anúncios">
-                                    <option value="module:real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
-                                    <option value="module:products" {{ $module === 'products' ? 'selected' : '' }}>Produtos</option>
-                                    <option value="module:vehicles" {{ $module === 'vehicles' ? 'selected' : '' }}>Veículos</option>
-                                    <option value="module:jobs" {{ $module === 'jobs' ? 'selected' : '' }}>Empregos</option>
-                                    <option value="module:agro" {{ $module === 'agro' ? 'selected' : '' }}>Agro</option>
-                                </optgroup>
-                                <optgroup label="Serviços">
-                                    @foreach($serviceSearchCategories as $serviceCategory)
-                                        <option value="service:{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                            <input id="home-search-module-value" type="hidden" name="module" value="{{ $module }}">
-                            <input id="home-search-service-category-value" type="hidden" name="category">
-                        </label>
-
-                        <button type="submit" class="quick-search-model-one-submit w-100" style="border-radius: 12px; min-height: 54px; max-width: 200px; margin: 0 auto;">
-                            Buscar
-                        </button>
-                    </div>
+                    <button type="submit" class="quick-search-model-one-submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Buscar
+                    </button>
                 </form>
 
                 <p id="home-voice-status" class="quick-search-voice-status" role="status" aria-live="polite" hidden></p>
 
-                <div class="text-center pb-3">
+                <div class="quick-search-location-row">
                     <button
                         id="home-use-location"
                         type="button"
-                        class="btn btn-link text-decoration-none text-muted small p-0 m-0 d-inline-flex align-items-center gap-2 fw-semibold"
+                        @class([
+                            'quick-search-location-button',
+                            'is-active' => session('location_filter.enabled', false),
+                        ])
                         aria-describedby="home-location-status"
                         aria-pressed="{{ session('location_filter.enabled', false) ? 'true' : 'false' }}"
-                        style="font-size: 0.85rem;"
                     >
-                        <i class="fa-solid {{ session('location_filter.enabled', false) ? 'fa-location-dot text-primary' : 'fa-location-crosshairs' }}"></i>
-                        <span data-location-button-label>{{ session('location_filter.enabled', false) ? 'Desativar localização' : 'Usar minha localização' }}</span>
+                        <span class="quick-search-location-icon" aria-hidden="true">
+                            <i class="fa-solid {{ session('location_filter.enabled', false) ? 'fa-location-dot' : 'fa-location-crosshairs' }}"></i>
+                        </span>
+                        <span>
+                            <strong data-location-button-label>{{ session('location_filter.enabled', false) ? 'Desativar localização' : 'Usar localização atual' }}</strong>
+                            <small data-location-button-detail>
+                                {{ session('location_filter.enabled', false)
+                                    ? 'Resultados filtrados para '.session('location_filter.city').'.'
+                                    : 'Ative para ver ofertas e anúncios mais relevantes perto de você.' }}
+                            </small>
+                        </span>
                     </button>
-                    <p id="home-location-status" class="d-none" role="status" aria-live="polite">
+                    <p id="home-location-status" class="quick-search-location-status {{ session('location_filter.enabled', false) ? 'is-success' : '' }}" role="status" aria-live="polite">
                         @if(session('location_filter.enabled', false))
                             Localização ativa: {{ session('location_filter.city') }}.
                         @endif
