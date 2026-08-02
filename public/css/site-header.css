@@ -645,6 +645,32 @@
         align-items: center !important;
     }
 
+    /* Dropdown do Usuário Flutuando à Direita no Menu Vertical */
+    .marketplace-header-layout-vertical .marketplace-account-dropdown {
+        position: relative;
+    }
+
+    .marketplace-header-layout-vertical .marketplace-account-menu {
+        position: fixed !important;
+        left: 230px !important;
+        bottom: 20px !important;
+        top: auto !important;
+        right: auto !important;
+        transform: none !important;
+        z-index: 1080 !important;
+        min-width: 220px !important;
+        box-shadow: 0 16px 35px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-menu,
+    body.site-header-layout-vertical.header-vertical-collapsed .marketplace-account-menu {
+        left: 80px !important;
+        bottom: 20px !important;
+        top: auto !important;
+        right: auto !important;
+        transform: none !important;
+    }
+
     .marketplace-header-layout-vertical .marketplace-header-shell,
     .marketplace-header-layout-vertical .marketplace-header-row {
         width: 100%;
