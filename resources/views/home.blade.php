@@ -43,6 +43,21 @@
             min-height: 50px;
         }
     }
+    /* Bordas visualmente marcantes e destacadas para todos os cards */
+    .card, .card-premium {
+        border: 1px solid var(--border, rgba(200, 210, 225, 0.85)) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    html[data-theme="dark"] .card,
+    html[data-theme="dark"] .card-premium {
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+    .card:hover, .card-premium:hover {
+        border-color: #0d6efd !important;
+        box-shadow: 0 8px 24px rgba(13, 110, 253, 0.18) !important;
+    }
 </style>
 @endpush
 
@@ -106,14 +121,20 @@
         <div class="col-12">
             <div class="rounded-4 shadow-lg p-2 p-md-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
                 <form
+                    id="home-search-form"
                     action="{{ route('home') }}"
                     method="GET"
+                    data-suggestions-url="{{ route('home.suggestions') }}"
                     class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3 w-100 mb-2 mb-md-3"
                 >
+                    <input type="hidden" id="home-search-module-value" name="module" value="{{ $module }}">
+                    <input type="hidden" id="home-search-service-category-value" name="service_category" value="">
+
                     <!-- Campo Pesquisa -->
                     <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-1 py-md-2 w-100 hero-search-input-box" style="flex: 2.5;">
                         <i class="fa-solid fa-magnifying-glass text-muted me-2"></i>
                         <input
+                            id="home-search-query"
                             class="form-control bg-transparent border-0 shadow-none p-0 text-dark"
                             type="search"
                             name="q"
@@ -121,28 +142,33 @@
                             placeholder="O que você procura?"
                             autocomplete="off"
                         >
-                        <button type="button" class="btn btn-link text-muted p-0 ms-2 text-decoration-none">
+                        <button type="button" id="home-search-microphone" class="btn btn-link text-muted p-0 ms-2 text-decoration-none" title="Buscar por voz">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
+                        <div id="home-search-suggestions" class="quick-search-suggestions" hidden></div>
                     </div>
 
                     <!-- Linha Mobile: Cidade & Categoria -->
                     <div class="d-flex gap-2 w-100" style="flex: 3;">
-                        <!-- Cidade -->
+                        <!-- Cidade com botão GPS -->
                         <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
-                            <i class="fa-solid fa-location-dot text-muted me-2"></i>
-                            <select name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
+                            <i class="fa-solid fa-location-dot text-muted me-1"></i>
+                            <select id="home-search-city" name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
                                 <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
                                 @foreach(\App\Core\SergipeCities::getAll() as $cityName)
                                     <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
                                 @endforeach
                             </select>
+                            <button type="button" id="home-use-location" class="btn btn-link text-primary p-0 ms-1 text-decoration-none flex-shrink-0" title="Detectar minha localização GPS" aria-label="Usar minha localização">
+                                <i class="fa-solid fa-crosshairs fs-6"></i>
+                                <span data-location-button-label class="visually-hidden">Usar minha localização</span>
+                            </button>
                         </div>
 
                         <!-- Categoria -->
                         <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
                             <i class="fa-solid fa-table-cells-large text-muted me-2"></i>
-                            <select name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
+                            <select id="home-search-category-filter" name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
                                 <option value="">Todas categorias</option>
                                 <optgroup label="Anúncios">
                                     <option value="real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
@@ -153,7 +179,7 @@
                                 </optgroup>
                                 <optgroup label="Serviços">
                                     @foreach($serviceSearchCategories as $serviceCategory)
-                                        <option value="{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
+                                        <option value="service:{{ $serviceCategory['name'] }}">{{ $serviceCategory['name'] }}</option>
                                     @endforeach
                                 </optgroup>
                             </select>
@@ -165,6 +191,16 @@
                         <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
                     </button>
                 </form>
+
+                <!-- Status de Localização e Voz -->
+                <div class="d-flex flex-wrap gap-2 px-1 mb-2">
+                    <div id="home-location-status" class="quick-search-location-status small text-light opacity-90">
+                        @if(!empty($city))
+                            <i class="fa-solid fa-location-dot text-success me-1"></i> Cidade ativa: <strong>{{ $city }}</strong>
+                        @endif
+                    </div>
+                    <div id="home-voice-status" class="quick-search-voice-status small text-light opacity-90" hidden></div>
+                </div>
 
                 <!-- Chips de Categoria Horizontal (Rolagem Suave no Mobile) -->
                 <div class="d-flex align-items-center gap-3 gap-md-4 pt-2 px-1 border-top border-secondary border-opacity-25 overflow-x-auto text-nowrap scrollbar-none" style="scrollbar-width: none;">

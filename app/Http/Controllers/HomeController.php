@@ -43,7 +43,6 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $q = $request->input('q');
-        $city = $request->input('city');
         $module = $request->input('module');
         $type = $request->input('type');
         $intent = $request->input('intent');
@@ -51,6 +50,7 @@ class HomeController extends Controller
         $year = $request->input('year');
         $moduleTitle = self::MODULE_LABELS[$module] ?? null;
         $locationPreferenceActive = (bool) $request->session()->get('location_filter.enabled', false);
+        $city = $request->input('city') ?: ($locationPreferenceActive ? $request->session()->get('location_filter.city') : null);
 
         if ($module === 'services') {
             return $this->serviceDirectory($request);
