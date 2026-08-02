@@ -22,6 +22,30 @@
     ])
 @endpush
 
+@push('styles')
+<style>
+    .hero-search-card-container {
+        z-index: 10;
+        margin-top: -45px;
+        margin-bottom: 24px;
+    }
+    @media (min-width: 992px) {
+        .hero-search-card-container {
+            margin-top: -110px;
+            margin-bottom: 30px;
+        }
+    }
+    .hero-search-input-box {
+        min-height: 44px;
+    }
+    @media (min-width: 992px) {
+        .hero-search-input-box {
+            min-height: 50px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Hero Carousel -->
 @if(empty($module))
@@ -36,7 +60,7 @@
                 <div class="swiper-slide d-flex flex-column justify-content-center align-items-center px-3 px-md-5" 
                      style="min-height: 380px; max-height: 480px; background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.65) 100%), url('{{ $bannerUrl }}') center/cover no-repeat;">
                     
-                    <div class="container position-relative h-100 d-flex flex-column justify-content-center text-start" style="padding-bottom: 80px; padding-top: 40px;">
+                    <div class="container position-relative h-100 d-flex flex-column justify-content-center text-start" style="padding-bottom: 60px; padding-top: 30px;">
                         <div class="d-flex justify-content-between align-items-start w-100">
                             <div>
                                 <h1 class="text-white fw-bold mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: clamp(1.8rem, 4vw, 2.8rem);">
@@ -77,17 +101,17 @@
 
 <!-- Container Busca Rápida Responsiva -->
 @if($module !== 'real_estate' && $module !== 'vehicles')
-<div class="container position-relative" style="z-index: 10; margin-top: -120px; margin-bottom: 30px;">
+<div class="container position-relative hero-search-card-container">
     <div class="row justify-content-center">
         <div class="col-12">
-            <div class="rounded-4 shadow-lg p-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
+            <div class="rounded-4 shadow-lg p-2 p-md-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
                 <form
                     action="{{ route('home') }}"
                     method="GET"
-                    class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3 w-100 mb-3"
+                    class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3 w-100 mb-2 mb-md-3"
                 >
                     <!-- Campo Pesquisa -->
-                    <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-2 w-100" style="min-height: 50px; flex: 2.5;">
+                    <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-1 py-md-2 w-100 hero-search-input-box" style="flex: 2.5;">
                         <i class="fa-solid fa-magnifying-glass text-muted me-2"></i>
                         <input
                             class="form-control bg-transparent border-0 shadow-none p-0 text-dark"
@@ -105,9 +129,9 @@
                     <!-- Linha Mobile: Cidade & Categoria -->
                     <div class="d-flex gap-2 w-100" style="flex: 3;">
                         <!-- Cidade -->
-                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-2 w-50" style="min-height: 50px;">
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
                             <i class="fa-solid fa-location-dot text-muted me-2"></i>
-                            <select name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.9rem;">
+                            <select name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
                                 <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
                                 @foreach(\App\Core\SergipeCities::getAll() as $cityName)
                                     <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
@@ -116,9 +140,9 @@
                         </div>
 
                         <!-- Categoria -->
-                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-2 w-50" style="min-height: 50px;">
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
                             <i class="fa-solid fa-table-cells-large text-muted me-2"></i>
-                            <select name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.9rem;">
+                            <select name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
                                 <option value="">Todas categorias</option>
                                 <optgroup label="Anúncios">
                                     <option value="real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
@@ -137,7 +161,7 @@
                     </div>
 
                     <!-- Botão Buscar -->
-                    <button type="submit" class="btn btn-primary fw-bold rounded-3 px-4 w-100" style="min-height: 50px; flex: 1; background-color: #0d6efd; border: none;">
+                    <button type="submit" class="btn btn-primary fw-bold rounded-3 px-4 w-100 hero-search-input-box" style="flex: 1; background-color: #0d6efd; border: none;">
                         <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
                     </button>
                 </form>
