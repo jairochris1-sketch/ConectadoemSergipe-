@@ -1,0 +1,40 @@
+# Logs & Caches
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# IDEs & Ferramentas
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+
+# Dependências (Nunca enviar pastas de pacotes pesadas)
+/node_modules
+/vendor
+composer.phar
+
+# Builds e uploads de usuários
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/public/uploads/ads/*
+/public/uploads/stores/*
+/public/uploads/users/*
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db

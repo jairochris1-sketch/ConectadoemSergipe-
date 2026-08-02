@@ -1,0 +1,715 @@
+/* ─────────────────────────────────────────────
+   LAYOUT GERAL DA PÁGINA DE SERVIÇOS
+───────────────────────────────────────────── */
+.services-results-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.services-directory-sidebar {
+    min-width: 0;
+}
+
+/* ─────────────────────────────────────────────
+   FILTROS SIDEBAR
+───────────────────────────────────────────── */
+.services-directory-filter {
+    color: var(--foreground);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
+    overflow: hidden;
+}
+
+.services-directory-filter-toggle {
+    width: 100%;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    color: var(--foreground);
+    background: var(--card);
+    border: 0;
+    font-weight: 800;
+}
+
+.services-directory-filter-body {
+    padding: 18px;
+}
+
+.services-directory-filter-title {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.services-directory-filter-subtitle {
+    color: var(--muted-foreground);
+    font-size: .75rem;
+    line-height: 1.4;
+    margin-bottom: 18px;
+}
+
+.services-directory-field {
+    margin-bottom: 15px;
+}
+
+.services-directory-field label,
+.services-directory-popular-title {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--foreground);
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.services-directory-field .form-control,
+.services-directory-field .form-select {
+    min-height: 42px;
+    border-radius: 11px;
+    font-size: .78rem;
+}
+
+/* Filtro de avaliação mínima */
+.services-rating-filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.services-rating-btn {
+    flex: 1;
+    min-width: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 6px;
+    color: var(--foreground);
+    background: var(--muted-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .7rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .18s ease;
+}
+
+.services-rating-btn:hover,
+.services-rating-btn.active {
+    color: #f6b800;
+    border-color: #f6b800;
+    background: rgba(246, 184, 0, 0.08);
+}
+
+/* Checkboxes */
+.services-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 15px;
+}
+
+.services-check-list label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 0;
+    color: var(--foreground);
+}
+
+.services-check-list input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #075be8;
+}
+
+.services-check-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.services-check-badge .dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.services-check-badge .tick {
+    color: #075be8;
+    font-size: .7rem;
+}
+
+.services-directory-popular {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 17px;
+}
+
+.services-directory-popular a {
+    padding: 5px 8px;
+    color: var(--foreground);
+    background: var(--muted-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.services-directory-popular a:hover,
+.services-directory-popular a.active {
+    color: #075be8;
+    border-color: color-mix(in srgb, #075be8 45%, var(--border));
+    background: color-mix(in srgb, #075be8 9%, var(--card));
+}
+
+.services-directory-filter-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.services-directory-filter-actions .btn {
+    min-height: 39px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+}
+
+/* ─────────────────────────────────────────────
+   CONTEÚDO PRINCIPAL / GRID
+───────────────────────────────────────────── */
+.services-directory-content {
+    min-width: 0;
+}
+
+.services-directory-heading {
+    min-height: 58px;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.services-directory-heading h1,
+.services-directory-heading h2 {
+    color: var(--foreground);
+    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+}
+
+.services-directory-heading p {
+    color: var(--muted-foreground) !important;
+}
+
+.services-directory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* ─────────────────────────────────────────────
+   CARD DO PRESTADOR (NOVO MODELO)
+───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────
+   CARD DO PRESTADOR (MODELO FOTO CAPA + LOGO OVERLAY)
+───────────────────────────────────────────── */
+.sdc-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, .08);
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    min-width: 0;
+}
+
+.sdc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .14);
+    border-color: color-mix(in srgb, #075be8 35%, var(--border));
+}
+
+/* Banner de Capa Superior */
+.sdc-banner {
+    position: relative;
+    height: 155px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--muted-bg);
+}
+
+.sdc-banner-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #16a34a;
+    color: #ffffff;
+    font-size: .62rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+}
+
+/* Corpo do Card */
+.sdc-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 16px 16px 16px;
+}
+
+/* Avatar Grande Sobreposto */
+.sdc-avatar-wrap {
+    position: relative;
+    width: 145px;
+    height: 145px;
+    margin-top: -72px;
+    margin-bottom: 4px;
+    border-radius: 28px;
+    overflow: visible;
+    text-decoration: none;
+    display: block;
+    border: 3px solid var(--card);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+    flex-shrink: 0;
+    background: var(--card);
+}
+
+.sdc-avatar-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #22c55e;
+    border: 2px solid var(--card);
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
+}
+
+.sdc-avatar-dot-offline {
+    background: #9ca3af !important;
+}
+
+
+.sdc-badge-available i {
+    color: #22c55e;
+}
+
+.sdc-badge-offline {
+    color: #4b5563;
+    background: rgba(156, 163, 175, 0.14);
+    border: 1px solid rgba(156, 163, 175, 0.28);
+}
+
+.sdc-badge-offline i {
+    color: #6b7280;
+}
+
+
+.sdc-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 18px;
+}
+
+.sdc-avatar-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #075be8, #3b82f6);
+    color: #fff;
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+/* Categoria em Azul */
+.sdc-category {
+    color: #075be8;
+    font-size: .83rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+/* Título do Card */
+.sdc-title {
+    font-size: .88rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.sdc-title a {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+.sdc-title a:hover {
+    color: #075be8;
+}
+
+/* Avaliação com Estrela Amarela */
+.sdc-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .78rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sdc-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.sdc-stars i {
+    color: #f59e0b;
+    font-size: .8rem;
+}
+
+.sdc-rating-val {
+    font-weight: 800;
+    color: var(--foreground);
+    flex-shrink: 0;
+}
+
+.sdc-reviews-count {
+    color: var(--muted-foreground);
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Localização Destaque em Azul */
+.sdc-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: #075be8 !important;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.sdc-location i {
+    color: #075be8 !important;
+    font-size: .8rem;
+}
+
+/* Descrição */
+.sdc-description {
+    font-size: .78rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+    margin: 2px 0 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Badges */
+.sdc-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.sdc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+.sdc-badge-available {
+    color: #166534;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+}
+
+.sdc-badge-available i {
+    color: #22c55e;
+}
+
+.sdc-badge-home {
+    color: #0369a1;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(14, 165, 233, 0.22);
+}
+
+/* Botões de Ação Inferiores */
+.sdc-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 2px;
+    width: 100%;
+}
+
+.sdc-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 10px;
+    font-size: .78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .18s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sdc-btn i {
+    font-size: .85rem;
+    flex-shrink: 0;
+}
+
+.sdc-btn-profile {
+    color: var(--foreground);
+    background: transparent;
+    border-color: var(--border);
+}
+
+.sdc-btn-profile:hover {
+    color: #075be8;
+    border-color: #075be8;
+    background: rgba(7, 91, 232, 0.05);
+}
+
+.sdc-btn-whatsapp {
+    flex: 1.25 1 0;
+    color: #ffffff;
+    background: #16a34a;
+    border-color: #16a34a;
+}
+
+.sdc-btn-whatsapp:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #ffffff;
+}
+
+.sdc-btn-chat {
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.25);
+}
+
+.sdc-btn-chat:hover {
+    color: #ffffff;
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.sdc-btn-disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   PAGINAÇÃO
+───────────────────────────────────────────── */
+.services-directory-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 26px;
+}
+
+.services-directory-pagination .pagination {
+    margin-bottom: 0;
+}
+
+/* ─────────────────────────────────────────────
+   PILLS CONTAGEM
+───────────────────────────────────────────── */
+.services-count-pill {
+    background: #0b5cff;
+    color: #ffffff;
+    font-size: 0.78rem;
+    padding: 0.25rem 0.55rem;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVO
+───────────────────────────────────────────── */
+@media (max-width: 1399.98px) {
+    .services-directory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .services-directory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1099.98px) {
+    .services-results-layout {
+        grid-template-columns: 210px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .services-results-layout {
+        display: block;
+    }
+
+    .services-directory-sidebar {
+        margin-bottom: 18px;
+    }
+
+    .services-directory-filter-toggle {
+        display: flex;
+    }
+
+    .services-directory-filter-body {
+        border-top: 1px solid var(--border);
+    }
+
+    .services-directory-heading {
+        align-items: center;
+    }
+
+    .services-directory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .services-directory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    /* Ajuste do banner para 2 colunas no celular */
+    .sdc-banner {
+        height: 85px;
+    }
+
+    /* Avatar menor para caber nas 2 colunas */
+    .sdc-avatar-wrap {
+        width: 105px;
+        height: 105px;
+        margin-top: -52px;
+        border-radius: 20px;
+    }
+
+    .sdc-avatar-dot {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Corpo do card mais compacto */
+    .sdc-body {
+        gap: 5px;
+        padding: 0 10px 12px 10px;
+    }
+
+    /* Texto menor para caber nas 2 colunas */
+    .sdc-category {
+        font-size: .72rem;
+    }
+
+    .sdc-title {
+        font-size: .76rem;
+        line-height: 1.25;
+    }
+
+    .sdc-rating {
+        font-size: .68rem;
+        gap: 3px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .sdc-stars {
+        gap: 1px;
+    }
+
+    .sdc-stars i {
+        font-size: .64rem;
+    }
+
+    .sdc-location {
+        font-size: .68rem;
+        color: #075be8 !important;
+    }
+
+    /* Descrição visível no mobile com botões reduzidos */
+    .sdc-description {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Badges menores */
+    .sdc-badge {
+        font-size: .58rem;
+        padding: 2px 7px;
+    }
+
+    .sdc-actions {
+        flex-direction: row;
+        gap: 3px;
+        margin-top: 4px;
+    }
+
+    .sdc-btn {
+        height: 32px;
+        font-size: .64rem;
+        padding: 0 3px;
+        gap: 3px;
+    }
+}
+

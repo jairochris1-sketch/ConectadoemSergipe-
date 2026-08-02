@@ -1,0 +1,516 @@
+/* =========================================================
+   TEMA GLOBAL - CONECTADO EM SERGIPE
+   ========================================================= */
+
+:root {
+    color-scheme: light;
+
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-foreground: #ffffff;
+    --secondary: #64748b;
+    --secondary-foreground: #ffffff;
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --accent: #eff6ff;
+    --accent-foreground: #1e40af;
+    --muted: #64748b;
+    --muted-foreground: #94a3b8;
+    --muted-bg: #f1f5f9;
+    --border: #e2e8f0;
+    --input: #f1f5f9;
+    --ring: #3b82f6;
+    --header-bg: rgba(255, 255, 255, 0.88);
+    --card-footer-bg: #f8fafc;
+    --badge-bg: #ffffff;
+    --site-footer-bg: #f8f9fa;
+    --radius: 1rem;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.14);
+}
+
+/* =========================================================
+   ESCURO
+   ========================================================= */
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-foreground: #ffffff;
+    --secondary: #94a3b8;
+    --secondary-foreground: #f8fafc;
+    --background: #0b1120;
+    --foreground: #f8fafc;
+    --card: #111827;
+    --card-foreground: #f8fafc;
+    --accent: #172554;
+    --accent-foreground: #dbeafe;
+    --muted: #94a3b8;
+    --muted-foreground: #94a3b8;
+    --muted-bg: #172033;
+    --border: #283548;
+    --input: #172033;
+    --ring: #3b82f6;
+    --header-bg: rgba(11, 17, 32, 0.88);
+    --card-footer-bg: #131c2c;
+    --badge-bg: #1e293b;
+    --site-footer-bg: #0b1120;
+    --shadow: 0 2px 5px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+/* Mantém componentes antigos e Bootstrap ligados à mesma paleta global. */
+html[data-theme] {
+    --color-bg: var(--background);
+    --color-surface: var(--muted-bg);
+    --color-surface-2: var(--input);
+    --color-text: var(--foreground);
+    --color-text-muted: var(--muted);
+    --color-border: var(--border);
+    --color-card-bg: var(--card);
+    --color-nav-bg: var(--header-bg);
+    --color-nav-text: var(--foreground);
+    --color-nav-link: var(--muted);
+    --color-footer-bg: var(--site-footer-bg);
+    --color-footer-text: var(--foreground);
+    --color-footer-muted: var(--muted);
+    --bs-body-bg: var(--background);
+    --bs-body-color: var(--foreground);
+    --bs-border-color: var(--border);
+    --bs-secondary-color: var(--muted);
+    --bs-tertiary-bg: var(--muted-bg);
+}
+
+/* =========================================================
+   TRANSIÇÃO
+   ========================================================= */
+
+html {
+    background: var(--background);
+}
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    transition: background-color .2s ease, color .2s ease;
+}
+
+/* =========================================================
+   ELEMENTOS GERAIS
+   ========================================================= */
+
+.site-header {
+    background: var(--header-bg);
+    border-color: var(--border);
+}
+
+.admin-topbar {
+    background: var(--card) !important;
+    color: var(--foreground);
+    border-color: var(--border);
+}
+
+.site-footer {
+    background: var(--site-footer-bg) !important;
+    color: var(--foreground);
+    border-top: 1px solid var(--border) !important;
+}
+
+.site-footer h5,
+.site-footer h6 {
+    color: var(--foreground) !important;
+}
+
+.site-footer p,
+.site-footer li,
+.site-footer small,
+.site-footer a {
+    color: var(--muted) !important;
+}
+
+.site-footer a:hover {
+    color: var(--primary) !important;
+}
+
+.site-footer .site-footer-social {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--muted) !important;
+}
+
+.site-footer .site-footer-social:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground) !important;
+}
+
+.site-footer hr {
+    border-color: var(--border) !important;
+    opacity: 1;
+}
+
+.service-card,
+.mini-card,
+.category-card,
+.quick-card,
+.sidebar-card,
+.content-section,
+.ad-header-card,
+.search-input-wrapper,
+.sidebar-block,
+.plan-card {
+    background: var(--card);
+    color: var(--card-foreground);
+    border-color: var(--border);
+}
+
+input,
+textarea,
+select {
+    background-color: var(--input);
+    color: var(--foreground);
+    border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted-foreground);
+}
+
+.bg-white {
+    background-color: var(--card) !important;
+}
+
+.bg-light {
+    background-color: var(--muted-bg) !important;
+}
+
+.text-dark {
+    color: var(--foreground) !important;
+}
+
+.card,
+.modal-content,
+.dropdown-menu,
+.list-group-item {
+    color: var(--card-foreground);
+    background-color: var(--card);
+    border-color: var(--border);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    color: var(--foreground);
+    background-color: var(--input);
+    border-color: var(--border);
+}
+
+.form-control:focus,
+.form-select:focus {
+    color: var(--foreground);
+    background-color: var(--card);
+    border-color: var(--ring);
+}
+
+.table {
+    --bs-table-color: var(--foreground);
+    --bs-table-bg: var(--card);
+    --bs-table-border-color: var(--border);
+}
+
+/* =========================================================
+   BOTÃO DE TEMA
+   ========================================================= */
+
+.theme-toggle-container {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 99999;
+}
+
+.back-to-top-btn {
+    position: fixed;
+    right: 27px;
+    bottom: 90px;
+    z-index: 99998;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    color: var(--primary-foreground);
+    background: var(--primary);
+    border: 0;
+    border-radius: 50%;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity .2s ease, visibility .2s ease, transform .2s ease, background .2s ease;
+}
+
+.back-to-top-btn.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.back-to-top-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.back-to-top-btn:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, .30);
+    outline-offset: 3px;
+}
+
+.theme-toggle-btn {
+    width: 54px;
+    height: 54px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: translateY(-3px);
+    background: var(--primary-hover);
+}
+
+.theme-toggle-btn:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, .30);
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   MENU DE TEMA
+   ========================================================= */
+
+.theme-dropdown {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 12px);
+    width: 225px;
+    padding: 7px;
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px) scale(.96);
+    transform-origin: bottom right;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
+}
+
+.theme-toggle-container.active .theme-dropdown {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+/* =========================================================
+   OPÇÕES
+   ========================================================= */
+
+.theme-option {
+    width: 100%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: var(--foreground);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+
+.theme-option:hover {
+    background: var(--muted-bg);
+}
+
+.theme-option.active {
+    background: var(--accent);
+    color: var(--primary);
+}
+
+.theme-option-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.theme-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.theme-option-content strong {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.theme-option-content small {
+    font-size: 11px;
+    color: var(--muted-foreground);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .back-to-top-btn {
+        right: 11px;
+        bottom: 68px;
+        width: 38px;
+        height: 38px;
+        font-size: .85rem;
+    }
+
+    .theme-toggle-container {
+        right: 10px;
+        bottom: 18px;
+    }
+
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .theme-dropdown {
+        width: min(215px, calc(100vw - 24px));
+        bottom: calc(100% + 10px);
+    }
+}
+
+/* =========================================================
+   PÁGINA SOBRE (ABOUT) - MODO ESCURO
+   ========================================================= */
+
+html[data-theme="dark"] .about-page-wrapper {
+    background: var(--background);
+}
+
+html[data-theme="dark"] .about-badge {
+    background-color: var(--accent);
+    color: var(--primary);
+}
+
+html[data-theme="dark"] .about-title {
+    color: var(--foreground);
+}
+
+html[data-theme="dark"] .about-lead {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] .about-trust-box {
+    background: var(--muted-bg);
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] .about-trust-text {
+    color: var(--foreground);
+}
+
+/* Cards */
+html[data-theme="dark"] .about-card {
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .about-card:hover {
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] .about-card-img-wrapper {
+    background-color: var(--muted-bg);
+}
+
+/* Selo verificado: boa visibilidade no modo escuro */
+html[data-theme="dark"] .about-card-avatar {
+    background: var(--primary);
+    border-color: var(--card);
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+}
+
+html[data-theme="dark"] .about-card-subtitle {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] .about-card-title {
+    color: var(--card-foreground);
+}
+
+html[data-theme="dark"] .about-card-text {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] .about-icon-circle {
+    background: var(--accent);
+    color: var(--primary);
+}
+
+html[data-theme="dark"] .about-checklist li {
+    color: var(--foreground);
+}
+
+html[data-theme="dark"] .about-checklist li i {
+    color: var(--primary);
+}
+
+/* Banner de Estatísticas */
+html[data-theme="dark"] .about-stats-banner {
+    background: linear-gradient(135deg, #060d1f 0%, #0f2260 100%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Barra de Features */
+html[data-theme="dark"] .about-features-bar {
+    background: var(--card);
+    border-top-color: var(--border);
+}
+
+html[data-theme="dark"] .feature-text {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] .feature-text strong {
+    color: var(--foreground);
+}
+
+html[data-theme="dark"] .feature-icon {
+    color: var(--primary);
+}
