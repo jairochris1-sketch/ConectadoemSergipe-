@@ -192,13 +192,13 @@
                                 <p class="text-muted" id="details-subtitle">Preencha os detalhes para que os clientes encontrem você.</p>
                             </div>
 
-                            <div class="mb-4 bg-light p-3 rounded-4 border d-flex align-items-center justify-content-between">
+                            <div class="mb-4 bg-light p-3 rounded-4 border d-flex flex-wrap align-items-center justify-content-between gap-3">
                                 <div>
                                     <small class="text-muted d-block">Categoria selecionada:</small>
                                     <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold fs-6" id="badge-cat-name">🛠️ Serviço</span>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" onclick="goToStep(1)">
-                                    <i class="fa-solid fa-arrow-left me-1"></i> Voltar / Alterar categoria
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-2 fw-bold text-nowrap align-self-center" onclick="goToStep(1)" style="font-size: 0.82rem; height: 36px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fa-solid fa-arrow-left"></i> Alterar categoria
                                 </button>
                             </div>
 
@@ -210,7 +210,7 @@
 
                             <div class="mb-3">
                                 <label for="title" class="form-label fw-semibold" id="title-label">Nome do perfil profissional *</label>
-                                <input type="text" class="form-control form-control-lg rounded-3" id="title" name="title" value="{{ old('title') }}" placeholder="Ex: Eletricista Residencial e Comercial em Aracaju" required oninput="updatePreview()">
+                                <input type="text" class="form-control form-control-lg rounded-3" id="title" name="title" value="{{ old('title') }}" placeholder="Ex: iPhone 13 Pro Max 128GB Lacrado, Sofá Retrátil, etc." required oninput="updatePreview()">
                                 <small class="text-muted" id="title-help">Dica: seja claro e direto no nome do seu perfil.</small>
                             </div>
 
@@ -1175,9 +1175,23 @@
         }
     }
 
+    const categoryPlaceholders = {
+        services: 'Ex: Eletricista Residencial e Comercial em Aracaju',
+        products: 'Ex: iPhone 13 Pro Max 128GB Lacrado, Sofá Retrátil, etc.',
+        real_estate: 'Ex: Casa 3 Quartos com Suíte no Luzia, Terreno 250m², etc.',
+        vehicles: 'Ex: Honda Civic 2.0 Flex 2020 Automático, Moto Fazer 250, etc.',
+        jobs: 'Ex: Vaga para Atendente de Loja, Vendedor Interno, etc.',
+        agro: 'Ex: Trator Massey Ferguson 275, Sementes de Milho, etc.'
+    };
+
     function updateModuleLanguage(modKey) {
         const isService = modKey === 'services';
         const isProduct = modKey === 'products';
+
+        const titleInput = document.getElementById('title');
+        if (titleInput) {
+            titleInput.placeholder = categoryPlaceholders[modKey] || categoryPlaceholders.products;
+        }
 
         document.getElementById('details-heading').textContent = isService
             ? 'Informações do seu perfil profissional'
@@ -1250,9 +1264,25 @@
         const catSelect = document.getElementById('category_select');
         const citySelect = document.getElementById('city');
         const titleInput = document.getElementById('title');
+        const modKey = document.querySelector('input[name="module"]:checked')?.value || 'services';
+        const cityName = citySelect ? citySelect.value.replace(' - SE', '') : 'Sergipe';
 
-        if (catSelect.value) {
-            titleInput.value = `${catSelect.value} Residencial e Comercial em ${citySelect.value.replace(' - SE', '')}`;
+        if (!catSelect.value) return;
+
+        const currentTitle = titleInput.value.trim();
+        const isDefaultPattern = !currentTitle || 
+            currentTitle.includes('Residencial e Comercial em') || 
+            currentTitle.endsWith(` em ${cityName}`) || 
+            currentTitle.startsWith('Vaga: ');
+
+        if (isDefaultPattern) {
+            if (modKey === 'services') {
+                titleInput.value = `${catSelect.value} em ${cityName}`;
+            } else if (modKey === 'jobs') {
+                titleInput.value = `Vaga: ${catSelect.value} em ${cityName}`;
+            } else {
+                titleInput.value = `${catSelect.value} em ${cityName}`;
+            }
         }
         updatePreview();
     }
