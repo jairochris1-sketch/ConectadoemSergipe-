@@ -42,6 +42,12 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        try {
+            \App\Services\DemoAdSeeder::seedIfNeeded();
+        } catch (\Throwable $e) {
+            // Silence seeder exception
+        }
+
         $q = $request->input('q');
         $module = $request->input('module');
         $type = $request->input('type');
