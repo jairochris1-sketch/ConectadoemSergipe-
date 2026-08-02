@@ -514,3 +514,183 @@ html[data-theme="dark"] .feature-text strong {
 html[data-theme="dark"] .feature-icon {
     color: var(--primary);
 }
+
+/* =========================================================
+   PÁGINA DE PLANOS (PLANS) - MODO ESCURO
+   ========================================================= */
+
+html[data-theme="dark"] .plans-page-wrapper {
+    background: linear-gradient(180deg, #051647 0%, #092066 450px, #0b1120 450px, #0b1120 100%);
+}
+
+@media (max-width: 991px) {
+    html[data-theme="dark"] .plans-page-wrapper {
+        background: linear-gradient(180deg, #051647 0%, #092066 520px, #0b1120 520px, #0b1120 100%);
+    }
+}
+
+html[data-theme="dark"] .plan-card {
+    background: #111827;
+    border-color: #283548;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .plan-card:hover {
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="dark"] .plan-card.is-pro {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 36px rgba(59, 130, 246, 0.3);
+}
+
+html[data-theme="dark"] .plan-card-headline {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .plan-card-desc {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .plan-card-price-block {
+    border-bottom-color: #1f2937;
+}
+
+html[data-theme="dark"] .plan-card-price-currency,
+html[data-theme="dark"] .plan-card-price-amount {
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .plan-card-price-period {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .plan-card-features li {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .plan-card-features li.blocked-feature {
+    color: #475569;
+}
+
+html[data-theme="dark"] .icon-check-blue {
+    color: #3b82f6;
+}
+
+html[data-theme="dark"] .icon-cross-grey {
+    color: #475569;
+}
+
+html[data-theme="dark"] .plan-cta-btn.btn-free {
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .plan-cta-btn.btn-free:hover {
+    background: #172554;
+    color: #93c5fd;
+    border-color: #60a5fa;
+}
+
+html[data-theme="dark"] .plan-trust-badge {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .plan-trust-badge i {
+    color: #3b82f6;
+}
+
+/* Banner de Garantias */
+html[data-theme="dark"] .plans-bottom-banner {
+    background: #111827;
+    border-color: #283548;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .guarantee-icon-box {
+    background: #172554;
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .guarantee-title {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .guarantee-desc {
+    color: #94a3b8;
+}
+
+/* FAQ */
+html[data-theme="dark"] .plans-faq-title {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .plans-faq-subtitle {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .faq-item {
+    background: #111827;
+    border-color: #283548;
+}
+
+html[data-theme="dark"] .faq-btn {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .faq-btn:hover,
+html[data-theme="dark"] .faq-btn[aria-expanded="true"] {
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .faq-btn .faq-icon {
+    background: #172554;
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .faq-btn[aria-expanded="true"] .faq-icon {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .faq-body {
+    color: #94a3b8;
+    border-top-color: #1f2937;
+}
+
+/* Sobre o Conectado */
+html[data-theme="dark"] .plans-about-section {
+    background: #111827;
+    border-color: #283548;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .plans-about-tag {
+    background: #172554;
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .plans-about-title {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .plans-about-lead {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .plans-about-stat-number {
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .plans-about-stat-label {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .plans-about-map-box {
+    background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .plans-about-map-label {
+    color: #93c5fd;
+}
