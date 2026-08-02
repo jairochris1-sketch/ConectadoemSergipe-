@@ -17,10 +17,6 @@
 }
 
 .plans-back-btn {
-    position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
-    z-index: 1050;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -42,7 +38,7 @@
 
 /* ─── Hero Header ────────────────────────────────────────────────────────── */
 .plans-hero-section {
-    padding: 60px 0 70px;
+    padding: 30px 0 60px;
     position: relative;
 }
 .plans-hero-tag {
@@ -500,13 +496,14 @@
 
 @section('content')
 <div class="plans-page-wrapper">
-    <a href="{{ url('/') }}" class="plans-back-btn">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
-    </a>
-
     {{-- ─── Cabeçalho Hero ────────────────────────────────────────────────── --}}
     <section class="plans-hero-section text-center">
         <div class="container">
+            <div class="d-flex align-items-center mb-3">
+                <a href="{{ url('/') }}" class="plans-back-btn">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar
+                </a>
+            </div>
             <span class="plans-hero-tag">Planos e Benefícios</span>
             <h1 class="plans-hero-title">Escolha o plano ideal para o seu negócio</h1>
             <p class="plans-hero-lead">
