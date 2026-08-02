@@ -40,24 +40,27 @@ class AdminUpdateController extends Controller
             $logBuffer[] = "\n[ETAPA 1/3] Atualizando arquivos do repositório (Git Pull)...";
             try {
                 $basePath = base_path();
+                $gitBin = $this->getGitBinary();
                 
                 // Detectar branch atual ou usar main
-                $branchResult = Process::path($basePath)->run('git rev-parse --abbrev-ref HEAD');
+                $branchResult = Process::path($basePath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
                 $branch = $branchResult->successful() ? trim($branchResult->output()) : 'main';
 
                 $logBuffer[] = "Branch detectada: {$branch}";
+                $logBuffer[] = "Executável Git utilizado: {$gitBin}";
 
                 // Git fetch & pull
-                $fetchResult = Process::path($basePath)->run('git fetch origin');
+                $fetchResult = Process::path($basePath)->run("{$gitBin} fetch origin");
                 if ($fetchResult->successful() && !empty(trim($fetchResult->output()))) {
                     $logBuffer[] = "Git Fetch: " . trim($fetchResult->output());
                 }
 
-                $pullResult = Process::path($basePath)->run("git pull origin {$branch}");
+                $pullResult = Process::path($basePath)->run("{$gitBin} pull origin {$branch}");
                 $pullOutput = trim($pullResult->output() . "\n" . $pullResult->errorOutput());
                 $logBuffer[] = "Saída do Git Pull:\n" . ($pullOutput ?: 'Comando executado com sucesso.');
 
                 if (!$pullResult->successful()) {
+                    $hasErrors = true;
                     $logBuffer[] = "AVISO: O comando git pull retornou código diferente de 0. Verifique as permissões ou status do git.";
                 }
             } catch (Throwable $e) {
@@ -120,7 +123,7 @@ class AdminUpdateController extends Controller
 
         $logBuffer[] = "\n==========================================================";
         $logBuffer[] = $hasErrors 
-            ? " ATUALIZAÇÃO CONCLUÍDA COM ALERTAS/ERROS EM " . now()->format('d/m/Y H:i:s')
+            ? " ATUALIZAÇÃO CONCLUÍDA COM ALERTAS EM " . now()->format('d/m/Y H:i:s')
             : " ATUALIZAÇÃO CONCLUÍDA COM SUCESSO EM " . now()->format('d/m/Y H:i:s');
         $logBuffer[] = "==========================================================";
 
@@ -139,15 +142,16 @@ class AdminUpdateController extends Controller
     private function getGitInformation(): array
     {
         $basePath = base_path();
+        $gitBin = $this->getGitBinary();
         
         try {
-            $branchResult = Process::path($basePath)->run('git rev-parse --abbrev-ref HEAD');
+            $branchResult = Process::path($basePath)->run("{$gitBin} rev-parse --abbrev-ref HEAD");
             $branch = $branchResult->successful() ? trim($branchResult->output()) : 'N/D';
 
-            $commitResult = Process::path($basePath)->run('git log -1 --pretty=format:"%h - %s (%cr) <%an>"');
+            $commitResult = Process::path($basePath)->run("{$gitBin} log -1 --pretty=format:\"%h - %s (%cr) <%an>\"");
             $commit = $commitResult->successful() ? trim($commitResult->output()) : 'Informação do git não disponível';
 
-            $statusResult = Process::path($basePath)->run('git status --short');
+            $statusResult = Process::path($basePath)->run("{$gitBin} status --short");
             $hasLocalChanges = $statusResult->successful() && !empty(trim($statusResult->output()));
 
             return [
@@ -164,5 +168,30 @@ class AdminUpdateController extends Controller
                 'has_local_changes' => false,
             ];
         }
+    }
+
+    private function getGitBinary(): string
+    {
+        $customGit = env('GIT_PATH') ?: Setting::get('system_git_path');
+        if ($customGit && file_exists($customGit)) {
+            return (str_contains($customGit, ' ') ? '"' . $customGit . '"' : $customGit);
+        }
+
+        $possiblePaths = [
+            'C:\\Program Files\\Git\\cmd\\git.exe',
+            'C:\\Program Files\\Git\\bin\\git.exe',
+            'C:\\Program Files (x86)\\Git\\cmd\\git.exe',
+            'C:\\Program Files (x86)\\Git\\bin\\git.exe',
+            '/usr/bin/git',
+            '/usr/local/bin/git',
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+                return (str_contains($path, ' ') ? '"' . $path . '"' : $path);
+            }
+        }
+
+        return 'git';
     }
 }
