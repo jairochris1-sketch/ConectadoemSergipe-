@@ -271,25 +271,25 @@
                         <div class="swiper-slide">
                             <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                                 <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                                    <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Destaque</span>
-                                    <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar">
-                                        <i class="fa-regular fa-heart"></i>
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Destaque</span>
+                                    <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
+                                        <i class="fa-regular fa-bookmark text-primary"></i>
                                     </button>
                                     @if($ad->card_image)
-                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 140px; object-fit: cover;">
+                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 120px; object-fit: cover;">
                                     @else
-                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 140px;">
+                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 120px;">
                                             <i class="fa-solid fa-tag fs-2"></i>
                                         </div>
                                     @endif
-                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                    <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
-                                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                            <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -372,22 +372,25 @@
                 <div class="swiper-slide">
                     <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                         <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                            <span class="badge bg-primary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Imóvel</span>
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Imóvel</span>
+                            <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
+                                <i class="fa-regular fa-bookmark text-primary"></i>
+                            </button>
                             @if($ad->card_image)
-                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 120px; object-fit: cover;">
                             @else
-                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 120px;">
                                     <i class="fa-solid fa-house fs-2"></i>
                                 </div>
                             @endif
-                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
                         </div>
@@ -421,22 +424,25 @@
                 <div class="swiper-slide">
                     <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                         <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                            <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Veículo</span>
+                            <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Veículo</span>
+                            <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
+                                <i class="fa-regular fa-bookmark text-primary"></i>
+                            </button>
                             @if($ad->card_image)
-                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 120px; object-fit: cover;">
                             @else
-                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 120px;">
                                     <i class="fa-solid fa-car fs-2"></i>
                                 </div>
                             @endif
-                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
                         </div>
@@ -470,22 +476,25 @@
                 <div class="swiper-slide">
                     <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                         <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                            <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Produto</span>
+                            <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Produto</span>
+                            <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
+                                <i class="fa-regular fa-bookmark text-primary"></i>
+                            </button>
                             @if($ad->card_image)
-                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 120px; object-fit: cover;">
                             @else
-                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 120px;">
                                     <i class="fa-solid fa-tag fs-2"></i>
                                 </div>
                             @endif
-                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
                         </div>
@@ -522,22 +531,25 @@
                         <div class="swiper-slide">
                             <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                                 <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">{{ strtoupper($ad->module) }}</span>
+                                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">{{ strtoupper($ad->module) }}</span>
+                                    <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
+                                        <i class="fa-regular fa-bookmark text-primary"></i>
+                                    </button>
                                     @if($ad->card_image)
-                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 120px; object-fit: cover;">
                                     @else
-                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 120px;">
                                             <i class="fa-solid fa-briefcase fs-2"></i>
                                         </div>
                                     @endif
-                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                    <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
-                                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                            <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -734,13 +746,12 @@
     });
 
     const swiperFeatured = new Swiper('.swiper-featured-ads', {
-        slidesPerView: 1.15,
-        spaceBetween: 12,
+        slidesPerView: 2,
+        spaceBetween: 10,
         loop: true,
         autoplay: {
-            delay: 2500,
+            delay: 3500,
             disableOnInteraction: false,
-            pauseOnMouseEnter: false,
         },
         pagination: {
             el: '.swiper-featured-pagination',
@@ -760,13 +771,12 @@
     document.querySelectorAll('.swiper-category-ads').forEach((el) => {
         const pagEl = el.parentElement.querySelector('.swiper-cat-pagination');
         new Swiper(el, {
-            slidesPerView: 1.15,
-            spaceBetween: 12,
+            slidesPerView: 2,
+            spaceBetween: 10,
             loop: true,
             autoplay: {
-                delay: 2800,
+                delay: 4000,
                 disableOnInteraction: false,
-                pauseOnMouseEnter: false,
             },
             pagination: pagEl ? { el: pagEl, clickable: true } : false,
             breakpoints: {
