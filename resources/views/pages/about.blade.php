@@ -388,26 +388,9 @@ body.about-page-no-header .site-header {
 </style>
 @endpush
 
-@push('scripts')
-<script>
-    // Adiciona classe especial no body para ocultar o cabeçalho
-    document.body.classList.add('about-page-no-header');
-</script>
-@endpush
-
 @section('content')
 
-{{-- Barra de navegação com botão de voltar --}}
-<div class="about-back-bar">
-    <div class="container">
-        <a href="{{ route('home') }}" class="about-back-btn">
-            <i class="fa-solid fa-arrow-left"></i>
-            Voltar para o início
-        </a>
-    </div>
-</div>
-
-<div class="about-page-wrapper">
+<div class="about-page-wrapper pt-3 pt-md-4">
     <div class="container"> <!-- Alterado para container para ficar "encolhido" -->
         <div class="row g-4 g-xl-5 align-items-start">
             
