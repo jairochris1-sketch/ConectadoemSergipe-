@@ -362,155 +362,22 @@
         </a>
     </div>
 
-    <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
-        @php
-            $displayRealEstate = count($realEstateAds) ? $realEstateAds : $recentAds->where('module', 'real_estate')->take(4);
-        @endphp
-        @foreach($displayRealEstate as $ad)
-        <div class="col">
-            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
-                <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                    <span class="badge bg-primary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Imóvel</span>
-                    @if($ad->card_image)
-                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
-                    @else
-                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
-                            <i class="fa-solid fa-house fs-2"></i>
-                        </div>
-                    @endif
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
-                        </div>
-                        <div>
-                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        @endforeach
-    </div>
-</div>
-
-<!-- Section 3: 🚗 Veículos em Destaque -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
-            <i class="fa-solid fa-car text-primary"></i> Veículos em Destaque
-        </h4>
-        <a href="{{ route('module.vehicles') }}" class="text-primary text-decoration-none small fw-bold">
-            Ver todos os veículos <i class="fa-solid fa-arrow-right ms-1"></i>
-        </a>
-    </div>
-
-    <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
-        @php
-            $displayVehicles = count($vehicleAds) ? $vehicleAds : $recentAds->where('module', 'vehicles')->take(4);
-        @endphp
-        @foreach($displayVehicles as $ad)
-        <div class="col">
-            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
-                <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                    <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Veículo</span>
-                    @if($ad->card_image)
-                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
-                    @else
-                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
-                            <i class="fa-solid fa-car fs-2"></i>
-                        </div>
-                    @endif
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
-                        </div>
-                        <div>
-                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        @endforeach
-    </div>
-</div>
-
-<!-- Section 4: 🏷️ Produtos & Eletrônicos -->
-<div class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
-            <i class="fa-solid fa-tag text-primary"></i> Produtos & Eletrônicos
-        </h4>
-        <a href="{{ route('module.products') }}" class="text-primary text-decoration-none small fw-bold">
-            Ver todos os produtos <i class="fa-solid fa-arrow-right ms-1"></i>
-        </a>
-    </div>
-
-    <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
-        @php
-            $displayProducts = count($productAds) ? $productAds : $recentAds->where('module', 'products')->take(4);
-        @endphp
-        @foreach($displayProducts as $ad)
-        <div class="col">
-            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
-                <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                    <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Produto</span>
-                    @if($ad->card_image)
-                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
-                    @else
-                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
-                            <i class="fa-solid fa-tag fs-2"></i>
-                        </div>
-                    @endif
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
-                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
-                        </div>
-                        <div>
-                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        @endforeach
-    </div>
-</div>
-
-<!-- Section 5: 💼 Empregos & Agronegócio + Bloco de Planos -->
-<div class="container mb-5">
-    <div class="row g-4">
-        <!-- Esquerda: Empregos e Agro -->
-        <div class="col-12 col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
-                    <i class="fa-solid fa-briefcase text-primary"></i> Empregos & Agro
-                </h4>
-                <a href="{{ route('module.jobs') }}" class="text-primary text-decoration-none small fw-bold">
-                    Ver oportunidades <i class="fa-solid fa-arrow-right ms-1"></i>
-                </a>
-            </div>
-
-            <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3">
+    <div class="position-relative">
+        <div class="swiper swiper-category-ads rounded-3 p-1">
+            <div class="swiper-wrapper">
                 @php
-                    $displayJobAgro = count($jobAgroAds) ? $jobAgroAds : $recentAds->whereIn('module', ['jobs', 'agro'])->take(4);
+                    $displayRealEstate = count($realEstateAds) ? $realEstateAds : $recentAds->where('module', 'real_estate')->take(6);
                 @endphp
-                @foreach($displayJobAgro as $ad)
-                <div class="col">
+                @foreach($displayRealEstate as $ad)
+                <div class="swiper-slide">
                     <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                         <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                            <span class="badge bg-secondary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">{{ strtoupper($ad->module) }}</span>
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Imóvel</span>
                             @if($ad->card_image)
                                 <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
                             @else
                                 <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
-                                    <i class="fa-solid fa-briefcase fs-2"></i>
+                                    <i class="fa-solid fa-house fs-2"></i>
                                 </div>
                             @endif
                             <div class="card-body p-3 d-flex flex-column justify-content-between">
@@ -527,6 +394,159 @@
                     </a>
                 </div>
                 @endforeach
+            </div>
+        </div>
+        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+    </div>
+</div>
+
+<!-- Section 3: 🚗 Veículos em Destaque -->
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
+            <i class="fa-solid fa-car text-primary"></i> Veículos em Destaque
+        </h4>
+        <a href="{{ route('module.vehicles') }}" class="text-primary text-decoration-none small fw-bold">
+            Ver todos os veículos <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="position-relative">
+        <div class="swiper swiper-category-ads rounded-3 p-1">
+            <div class="swiper-wrapper">
+                @php
+                    $displayVehicles = count($vehicleAds) ? $vehicleAds : $recentAds->where('module', 'vehicles')->take(6);
+                @endphp
+                @foreach($displayVehicles as $ad)
+                <div class="swiper-slide">
+                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                        <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Veículo</span>
+                            @if($ad->card_image)
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                            @else
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                    <i class="fa-solid fa-car fs-2"></i>
+                                </div>
+                            @endif
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+    </div>
+</div>
+
+<!-- Section 4: 🏷️ Produtos & Eletrônicos -->
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
+            <i class="fa-solid fa-tag text-primary"></i> Produtos & Eletrônicos
+        </h4>
+        <a href="{{ route('module.products') }}" class="text-primary text-decoration-none small fw-bold">
+            Ver todos os produtos <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="position-relative">
+        <div class="swiper swiper-category-ads rounded-3 p-1">
+            <div class="swiper-wrapper">
+                @php
+                    $displayProducts = count($productAds) ? $productAds : $recentAds->where('module', 'products')->take(6);
+                @endphp
+                @foreach($displayProducts as $ad)
+                <div class="swiper-slide">
+                    <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                        <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
+                            <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Produto</span>
+                            @if($ad->card_image)
+                                <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                            @else
+                                <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                    <i class="fa-solid fa-tag fs-2"></i>
+                                </div>
+                            @endif
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                </div>
+                                <div>
+                                    <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
+    </div>
+</div>
+
+<!-- Section 5: 💼 Empregos & Agronegócio + Bloco de Planos -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <!-- Esquerda: Empregos e Agro em Swiper -->
+        <div class="col-12 col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.25rem;">
+                    <i class="fa-solid fa-briefcase text-primary"></i> Empregos & Agro
+                </h4>
+                <a href="{{ route('module.jobs') }}" class="text-primary text-decoration-none small fw-bold">
+                    Ver oportunidades <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="position-relative">
+                <div class="swiper swiper-category-ads rounded-3 p-1">
+                    <div class="swiper-wrapper">
+                        @php
+                            $displayJobAgro = count($jobAgroAds) ? $jobAgroAds : $recentAds->whereIn('module', ['jobs', 'agro'])->take(6);
+                        @endphp
+                        @foreach($displayJobAgro as $ad)
+                        <div class="swiper-slide">
+                            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                                <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
+                                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2 z-1 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">{{ strtoupper($ad->module) }}</span>
+                                    @if($ad->card_image)
+                                        <img src="{{ asset($ad->card_image) }}" class="card-img-top" alt="{{ $ad->title }}" style="height: 145px; object-fit: cover;">
+                                    @else
+                                        <div class="card-img-placeholder d-flex align-items-center justify-content-center bg-light text-muted" style="height: 145px;">
+                                            <i class="fa-solid fa-briefcase fs-2"></i>
+                                        </div>
+                                    @endif
+                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.85rem;">{{ $ad->title }}</h6>
+                                            <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.72rem;">{{ \Illuminate\Support\Str::limit($ad->description, 32) }}</small>
+                                        </div>
+                                        <div>
+                                            <strong class="text-primary fs-6 d-block">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                            <small class="text-muted" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="swiper-pagination swiper-cat-pagination mt-2 position-relative"></div>
             </div>
         </div>
 
@@ -714,12 +734,13 @@
     });
 
     const swiperFeatured = new Swiper('.swiper-featured-ads', {
-        slidesPerView: 1,
+        slidesPerView: 1.15,
         spaceBetween: 12,
         loop: true,
         autoplay: {
-            delay: 3000,
+            delay: 2500,
             disableOnInteraction: false,
+            pauseOnMouseEnter: false,
         },
         pagination: {
             el: '.swiper-featured-pagination',
@@ -734,6 +755,26 @@
             768: { slidesPerView: 3, spaceBetween: 14 },
             992: { slidesPerView: 4, spaceBetween: 14 },
         },
+    });
+
+    document.querySelectorAll('.swiper-category-ads').forEach((el) => {
+        const pagEl = el.parentElement.querySelector('.swiper-cat-pagination');
+        new Swiper(el, {
+            slidesPerView: 1.15,
+            spaceBetween: 12,
+            loop: true,
+            autoplay: {
+                delay: 2800,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: false,
+            },
+            pagination: pagEl ? { el: pagEl, clickable: true } : false,
+            breakpoints: {
+                576: { slidesPerView: 2, spaceBetween: 12 },
+                768: { slidesPerView: 3, spaceBetween: 14 },
+                992: { slidesPerView: 4, spaceBetween: 14 },
+            },
+        });
     });
     @endif
 
