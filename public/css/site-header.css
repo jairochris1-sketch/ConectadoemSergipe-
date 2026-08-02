@@ -594,6 +594,11 @@
         display: none !important;
     }
 
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-search-button::after {
+        display: none !important;
+        content: "" !important;
+    }
+
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-nav-item {
         justify-content: center !important;
         padding: 10px 0 !important;
@@ -618,11 +623,22 @@
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button,
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-search-button,
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-location-active {
+        display: flex !important;
+        align-items: center !important;
         justify-content: center !important;
-        padding: 8px !important;
+        padding: 0 !important;
+        width: 44px !important;
+        height: 44px !important;
         max-width: 44px !important;
         margin: 0 auto !important;
         overflow: hidden !important;
+    }
+
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-search-button i,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-account-button i,
+    body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-announce-button i {
+        margin: 0 !important;
+        font-size: 1.15rem !important;
     }
 
     body.header-vertical-collapsed .marketplace-header-layout-vertical .marketplace-header-actions {
