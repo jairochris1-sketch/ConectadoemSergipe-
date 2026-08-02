@@ -24,12 +24,29 @@
 
 @push('styles')
 <style>
+    /* Hero Carousel Responsivo - Mobile vs Desktop */
+    .hero-swiper-slide-responsive {
+        min-height: 250px;
+        max-height: 300px;
+    }
+    .hero-slide-container-responsive {
+        padding-top: 15px;
+        padding-bottom: 60px;
+    }
     .hero-search-card-container {
         z-index: 10;
-        margin-top: -45px;
+        margin-top: -75px;
         margin-bottom: 24px;
     }
     @media (min-width: 992px) {
+        .hero-swiper-slide-responsive {
+            min-height: 380px;
+            max-height: 480px;
+        }
+        .hero-slide-container-responsive {
+            padding-top: 40px;
+            padding-bottom: 80px;
+        }
         .hero-search-card-container {
             margin-top: -110px;
             margin-bottom: 30px;
@@ -72,10 +89,10 @@
                 @php
                     $bannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
                 @endphp
-                <div class="swiper-slide d-flex flex-column justify-content-center align-items-center px-3 px-md-5" 
-                     style="min-height: 380px; max-height: 480px; background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.65) 100%), url('{{ $bannerUrl }}') center/cover no-repeat;">
+                <div class="swiper-slide hero-swiper-slide-responsive d-flex flex-column justify-content-center align-items-center px-3 px-md-5" 
+                     style="background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.65) 100%), url('{{ $bannerUrl }}') center/cover no-repeat;">
                     
-                    <div class="container position-relative h-100 d-flex flex-column justify-content-center text-start" style="padding-bottom: 60px; padding-top: 30px;">
+                    <div class="container hero-slide-container-responsive position-relative h-100 d-flex flex-column justify-content-center text-start">
                         <div class="d-flex justify-content-between align-items-start w-100">
                             <div>
                                 <h1 class="text-white fw-bold mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: clamp(1.8rem, 4vw, 2.8rem);">
