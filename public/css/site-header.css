@@ -117,7 +117,7 @@
     display: grid;
     place-items: center;
     color: var(--marketplace-icon-color, #52627b);
-    font-size: 1.35rem;
+    font-size: 1.0rem;
 }
 
 .marketplace-nav-item:hover,
@@ -405,6 +405,10 @@
         gap: 2px;
         padding: 2px 4px;
         font-size: .67rem;
+    }
+
+    .marketplace-nav-icon {
+        font-size: .92rem;
     }
 
     .marketplace-nav-item::after {
