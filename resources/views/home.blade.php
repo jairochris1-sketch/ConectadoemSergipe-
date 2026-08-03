@@ -257,7 +257,7 @@
         <div class="col-12 col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
-                    <i class="fa-solid fa-fire text-danger"></i> Destaques para você
+                    Destaques para você
                 </h4>
                 <a href="{{ route('home') }}" class="text-primary text-decoration-none small fw-bold">
                     Ver todos os destaques <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -265,6 +265,11 @@
             </div>
 
             <style>
+                .swiper-marquee-esteira .swiper-wrapper {
+                    -webkit-transition-timing-function: linear !important;
+                    -o-transition-timing-function: linear !important;
+                    transition-timing-function: linear !important;
+                }
                 .swiper-providers, .swiper-providers .swiper-wrapper, .swiper-providers .swiper-slide {
                     touch-action: auto !important;
                 }
@@ -275,7 +280,7 @@
                 }
             </style>
             <div class="position-relative overflow-hidden px-md-3">
-                <div class="swiper swiper-featured-ads rounded-3 p-1">
+                <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
                     <div class="swiper-wrapper">
                         @php
                             $loopAds = count($recentAds) < 8 ? $recentAds->concat($recentAds) : $recentAds;
@@ -808,9 +813,11 @@
         slidesPerView: 2,
         spaceBetween: 10,
         loop: true,
+        speed: 6000,
         autoplay: {
-            delay: 7500,
+            delay: 0,
             disableOnInteraction: false,
+            pauseOnMouseEnter: false,
         },
         navigation: {
             prevEl: '.swiper-featured-prev',
