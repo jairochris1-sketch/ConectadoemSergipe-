@@ -270,8 +270,8 @@
                     -o-transition-timing-function: linear !important;
                     transition-timing-function: linear !important;
                 }
-                .swiper-providers .swiper-wrapper {
-                    touch-action: pan-y !important;
+                .swiper-providers, .swiper-providers .swiper-wrapper, .swiper-providers .swiper-slide {
+                    touch-action: auto !important;
                 }
                 @media (max-width: 991.98px) {
                     .swiper-providers-container {
@@ -351,7 +351,7 @@
                 <div class="swiper swiper-providers h-100">
                     <div class="swiper-wrapper">
                         @foreach($serviceProviders as $provider)
-                        <div class="swiper-slide">
+                        <div class="swiper-slide swiper-no-swiping">
                             <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
                                 <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
                                     @if($provider->card_image)
@@ -807,6 +807,8 @@
         slidesPerView: 4,
         spaceBetween: 8,
         allowTouchMove: false,
+        noSwiping: true,
+        noSwipingClass: 'swiper-no-swiping',
         navigation: {
             prevEl: '.swiper-providers-prev',
             nextEl: '.swiper-providers-next',
