@@ -265,33 +265,17 @@
             </div>
 
             <style>
-                .swiper-marquee-esteira .swiper-wrapper {
-                    -webkit-transition-timing-function: linear !important;
-                    -o-transition-timing-function: linear !important;
-                    transition-timing-function: linear !important;
-                }
                 .swiper-providers, .swiper-providers .swiper-wrapper, .swiper-providers .swiper-slide {
                     touch-action: auto !important;
                 }
-                @media (max-width: 991.98px) {
-                    .swiper-providers-container {
-                        height: 315px; /* 4 * 68 + 3 * 8 = 296, plus some padding */
-                        padding-top: 10px;
-                        padding-bottom: 10px;
-                    }
-                }
-                @media (min-width: 992px) {
-                    .swiper-providers-container .swiper-slide {
-                        margin-bottom: 0.5rem;
-                        height: auto !important;
-                    }
-                    .swiper-providers-container .swiper-slide:nth-child(n+5) {
-                        display: none !important;
-                    }
+                .swiper-providers-container {
+                    height: 315px; /* 4 * 68 + 3 * 8 = 296, plus some padding */
+                    padding-top: 10px;
+                    padding-bottom: 10px;
                 }
             </style>
             <div class="position-relative overflow-hidden px-md-3">
-                <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
+                <div class="swiper swiper-featured-ads rounded-3 p-1">
                     <div class="swiper-wrapper">
                         @php
                             $loopAds = count($recentAds) < 8 ? $recentAds->concat($recentAds) : $recentAds;
@@ -376,11 +360,11 @@
                         @endforeach
                     </div>
                 </div>
-                <!-- Navigation Arrows for Mobile -->
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex d-lg-none align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -8px;" aria-label="Anterior">
+                <!-- Navigation Arrows -->
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -8px;" aria-label="Anterior">
                     <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.85rem;"></i>
                 </button>
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex d-lg-none align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -8px;" aria-label="Próximo">
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -8px;" aria-label="Próximo">
                     <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.85rem;"></i>
                 </button>
             </div>
@@ -806,17 +790,17 @@
         direction: 'vertical',
         slidesPerView: 4,
         spaceBetween: 8,
+        loop: true,
+        autoplay: {
+            delay: 7500,
+            disableOnInteraction: false,
+        },
         allowTouchMove: false,
         noSwiping: true,
         noSwipingClass: 'swiper-no-swiping',
         navigation: {
             prevEl: '.swiper-providers-prev',
             nextEl: '.swiper-providers-next',
-        },
-        breakpoints: {
-            992: {
-                enabled: false,
-            }
         }
     });
 
@@ -824,11 +808,9 @@
         slidesPerView: 2,
         spaceBetween: 10,
         loop: true,
-        speed: 6000,
         autoplay: {
-            delay: 0,
+            delay: 7500,
             disableOnInteraction: false,
-            pauseOnMouseEnter: false,
         },
         navigation: {
             prevEl: '.swiper-featured-prev',
@@ -851,7 +833,7 @@
             spaceBetween: 10,
             loop: true,
             autoplay: {
-                delay: 4000,
+                delay: 7500,
                 disableOnInteraction: false,
             },
             navigation: (prevBtn && nextBtn) ? { prevEl: prevBtn, nextEl: nextBtn } : false,
