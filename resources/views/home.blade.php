@@ -609,11 +609,21 @@
         </div>
 
         <!-- Direita: Card Quer Anunciar (Planos de Anúncio) -->
+        <style>
+            .card-planos-cta {
+                background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);
+                border: 1px solid rgba(13, 110, 253, 0.2) !important;
+            }
+            [data-bs-theme="dark"] .card-planos-cta {
+                background: linear-gradient(135deg, rgba(13,110,253,0.1) 0%, rgba(25,135,84,0.05) 100%);
+                border: 1px solid rgba(13, 110, 253, 0.3) !important;
+            }
+        </style>
         <div class="col-12 col-lg-4">
-            <div class="p-4 rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%); border: 1px solid rgba(13, 110, 253, 0.2) !important;">
+            <div class="p-4 rounded-4 shadow-sm border h-100 d-flex flex-column justify-content-between card-planos-cta">
                 <div>
                     <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1 rounded-pill small fw-bold">Planos de Anúncio</span>
-                    <h5 class="fw-bold text-dark mb-2">Quer anunciar sua empresa ou produto?</h5>
+                    <h5 class="fw-bold mb-2" style="color: var(--bs-heading-color, #212529);">Quer anunciar sua empresa ou produto?</h5>
                     <p class="text-muted small mb-4">Escolha o plano ideal para você e alcance milhares de clientes em todo o estado de Sergipe.</p>
                     <a href="{{ route('page.plans') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm d-flex align-items-center justify-content-center gap-2">
                         <i class="fa-solid fa-gem"></i> Conheça nossos Planos
