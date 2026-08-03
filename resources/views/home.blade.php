@@ -270,6 +270,22 @@
                     -o-transition-timing-function: linear !important;
                     transition-timing-function: linear !important;
                 }
+                @media (max-width: 991.98px) {
+                    .swiper-providers-container {
+                        height: 310px;
+                    }
+                    .swiper-providers-container .swiper-slide {
+                        height: auto !important;
+                    }
+                }
+                @media (min-width: 992px) {
+                    .swiper-providers-container .swiper-slide {
+                        margin-bottom: 0.5rem;
+                    }
+                    .swiper-providers-container .swiper-slide:nth-child(n+5) {
+                        display: none !important;
+                    }
+                }
             </style>
             <div class="position-relative overflow-hidden px-md-3">
                 <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
@@ -328,29 +344,42 @@
                 </a>
             </div>
 
-            <div class="d-flex flex-column gap-2">
-                @foreach($serviceProviders->take(4) as $provider)
-                <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
-                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
-                        @if($provider->card_image)
-                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
-                        @else
-                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 56px; height: 56px; border-radius: 12px !important;">
-                                <i class="fa-solid fa-user fs-3"></i>
+            <div class="position-relative overflow-hidden swiper-providers-container pt-1 pb-1">
+                <div class="swiper swiper-providers h-100">
+                    <div class="swiper-wrapper">
+                        @foreach($serviceProviders as $provider)
+                        <div class="swiper-slide h-auto">
+                            <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
+                                <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
+                                    @if($provider->card_image)
+                                        <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
+                                    @else
+                                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 56px; height: 56px; border-radius: 12px !important;">
+                                            <i class="fa-solid fa-user fs-3"></i>
+                                        </div>
+                                    @endif
+                                    <div class="overflow-hidden my-auto ms-1">
+                                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">{{ $provider->title }}</h6>
+                                        <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
+                                        <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
+                                    </div>
+                                </a>
+                                <div class="d-flex gap-2 flex-shrink-0 my-auto ms-1">
+                                    <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                                    <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
+                                </div>
                             </div>
-                        @endif
-                        <div class="overflow-hidden my-auto ms-1">
-                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">{{ $provider->title }}</h6>
-                            <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
-                            <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
                         </div>
-                    </a>
-                    <div class="d-flex gap-2 flex-shrink-0 my-auto ms-1">
-                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
+                        @endforeach
                     </div>
                 </div>
-                @endforeach
+                <!-- Navigation Arrows for Mobile -->
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex d-lg-none align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -6px;" aria-label="Anterior">
+                    <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.65rem;"></i>
+                </button>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex d-lg-none align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -6px;" aria-label="Próximo">
+                    <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.65rem;"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -768,6 +797,21 @@
         loop: true,
         autoplay: { delay: 5000 },
         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+    });
+
+    const swiperProviders = new Swiper('.swiper-providers', {
+        direction: 'vertical',
+        slidesPerView: 4,
+        spaceBetween: 8,
+        navigation: {
+            prevEl: '.swiper-providers-prev',
+            nextEl: '.swiper-providers-next',
+        },
+        breakpoints: {
+            992: {
+                enabled: false,
+            }
+        }
     });
 
     const swiperFeatured = new Swiper('.swiper-featured-ads', {
