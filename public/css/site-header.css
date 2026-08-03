@@ -370,27 +370,27 @@
     }
 
     .marketplace-header-row {
-        min-height: 54px;
-        gap: 9px;
-        padding: 2px 12px;
+        min-height: 44px;
+        gap: 8px;
+        padding: 1px 12px;
     }
 
     .marketplace-brand {
-        gap: 9px;
+        gap: 8px;
     }
 
     .marketplace-brand-logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
     }
 
     .marketplace-brand-name {
-        font-size: .9rem;
+        font-size: .8rem;
     }
 
     .marketplace-brand-divider {
-        margin: 6px 0;
+        margin: 4px 0;
     }
 
     .marketplace-desktop-nav {
@@ -399,37 +399,38 @@
     }
 
     .marketplace-nav-item {
-        min-width: 60px;
-        min-height: 46px;
-        flex: 0 1 86px;
+        min-width: 54px;
+        min-height: 38px;
+        flex: 0 1 80px;
         gap: 2px;
-        padding: 3px 6px;
-        font-size: .7rem;
+        padding: 2px 4px;
+        font-size: .67rem;
     }
 
     .marketplace-nav-item::after {
-        bottom: -3px;
+        bottom: -2px;
         height: 2px;
     }
 
     .marketplace-header-actions {
-        gap: 8px;
+        gap: 6px;
     }
 
     .marketplace-search-button {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
     }
 
     .marketplace-account-button,
     .marketplace-announce-button {
-        min-height: 36px;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        min-height: 32px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        font-size: 0.78rem;
     }
 
     .marketplace-account-button {
-        min-height: 32px;
+        min-height: 30px;
     }
 }
 

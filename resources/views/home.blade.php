@@ -53,11 +53,11 @@
         }
     }
     .hero-search-input-box {
-        min-height: 44px;
+        min-height: 38px;
     }
     @media (min-width: 992px) {
         .hero-search-input-box {
-            min-height: 50px;
+            min-height: 42px;
         }
     }
     /* Bordas visualmente marcantes e destacadas para todos os cards */
@@ -136,7 +136,7 @@
 <div class="container position-relative hero-search-card-container">
     <div class="row justify-content-center">
         <div class="col-12">
-            <div class="rounded-4 shadow-lg p-2 p-md-3 p-xl-4 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
+            <div class="rounded-4 shadow-lg p-2 p-md-2.5 px-xl-3 py-xl-2.5 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
                 <form
                     id="home-search-form"
                     action="{{ route('home') }}"
