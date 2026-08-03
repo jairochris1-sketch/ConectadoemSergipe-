@@ -377,11 +377,11 @@
                     </div>
                 </div>
                 <!-- Navigation Arrows for Mobile -->
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex d-lg-none align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -6px;" aria-label="Anterior">
-                    <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.65rem;"></i>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex d-lg-none align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -8px;" aria-label="Anterior">
+                    <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.85rem;"></i>
                 </button>
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex d-lg-none align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -6px;" aria-label="Próximo">
-                    <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.65rem;"></i>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex d-lg-none align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -8px;" aria-label="Próximo">
+                    <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.85rem;"></i>
                 </button>
             </div>
         </div>
