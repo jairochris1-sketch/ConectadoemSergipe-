@@ -65,15 +65,7 @@
                 </div>
 
                 <!-- Conteúdo dos Termos -->
-                <div class="p-4 p-md-5 terms-text">
-                    
-                    <div class="alert alert-primary bg-primary bg-opacity-10 border-0 text-primary rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
-                        <i class="fa-solid fa-circle-info fs-4 flex-shrink-0"></i>
-                        <div class="small">
-                            Seja bem-vindo ao <strong>Conectado em Sergipe</strong>. Agradecemos por utilizar nossa plataforma. Ao acessar ou utilizar nosso site, aplicativo e canais de comunicação, você concorda com as regras estabelecidas abaixo.
-                        </div>
-                    </div>
-
+                <div class="p-3 p-md-4 text-dark terms-text">
                     <!-- Seção 1 -->
                     <div class="mb-4 pb-3 border-bottom">
                         <h4 class="fw-bold terms-section-title d-flex align-items-center gap-2 mb-3" style="font-size: 1.2rem;">

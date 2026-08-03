@@ -528,8 +528,8 @@ body.about-page-no-header .site-header {
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3">
                 <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon-badge"><i class="fa-solid fa-heart-circle-check"></i></div>
-                        <p class="feature-text">Somos mais que uma plataforma.<br><span class="text-primary fw-bold">Movimento por Sergipe</span></p>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-store"></i></div>
+                        <p class="feature-text"><strong>Classificados & Lojas</strong><br>Anúncios em todo Sergipe</p>
                     </div>
                 </div>
                 <div class="col">
@@ -540,20 +540,20 @@ body.about-page-no-header .site-header {
                 </div>
                 <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon-badge"><i class="fa-solid fa-seedling"></i></div>
-                        <p class="feature-text"><strong>Oportunidades</strong><br>para todos</p>
+                        <div class="feature-icon-badge"><i class="fa-brands fa-whatsapp"></i></div>
+                        <p class="feature-text"><strong>Contato Direto</strong><br>sem taxas ou intermediários</p>
                     </div>
                 </div>
                 <div class="col">
                     <div class="feature-box">
-                        <div class="feature-icon-badge"><i class="fa-solid fa-microchip"></i></div>
-                        <p class="feature-text"><strong>Tecnologia</strong><br>a serviço das pessoas</p>
+                        <div class="feature-icon-badge"><i class="fa-solid fa-shield-halved"></i></div>
+                        <p class="feature-text"><strong>Negócios Locais</strong><br>com segurança e praticidade</p>
                     </div>
                 </div>
                 <div class="col">
                     <div class="feature-box">
                         <div class="feature-icon-badge"><i class="fa-solid fa-handshake-angle"></i></div>
-                        <p class="feature-text">Conexão que gera<br><strong>Confiança e resultados</strong></p>
+                        <p class="feature-text">Conexão que gera<br><strong>confiança e resultados</strong></p>
                     </div>
                 </div>
             </div>

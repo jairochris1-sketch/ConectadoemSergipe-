@@ -502,16 +502,31 @@ html[data-theme="dark"] .about-stats-banner {
 
 /* Barra de Features */
 html[data-theme="dark"] .about-features-bar {
-    background: var(--card);
-    border-top-color: var(--border);
+    background: var(--background, #0b1120);
+    border-top-color: var(--border, #1e293b);
+}
+
+html[data-theme="dark"] .feature-box {
+    background: var(--card, #1e293b) !important;
+    border-color: var(--border, #334155) !important;
+}
+
+html[data-theme="dark"] .feature-box:hover {
+    background: #0f172a !important;
+    border-color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] .feature-icon-badge {
+    background: rgba(59, 130, 246, 0.2) !important;
+    color: #60a5fa !important;
 }
 
 html[data-theme="dark"] .feature-text {
-    color: var(--muted);
+    color: #cbd5e1 !important;
 }
 
 html[data-theme="dark"] .feature-text strong {
-    color: var(--foreground);
+    color: #f8fafc !important;
 }
 
 html[data-theme="dark"] .feature-icon {
