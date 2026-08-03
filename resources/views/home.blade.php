@@ -330,24 +330,24 @@
 
             <div class="d-flex flex-column gap-2">
                 @foreach($serviceProviders->take(4) as $provider)
-                <div class="py-2 px-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
-                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2">
+                <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
+                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
                         @if($provider->card_image)
-                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="76" height="76" style="width: 76px; height: 76px; object-fit: cover; border-radius: 16px !important;" alt="{{ $provider->title }}">
+                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
                         @else
-                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 76px; height: 76px; border-radius: 16px !important;">
-                                <i class="fa-solid fa-user fs-2"></i>
+                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 56px; height: 56px; border-radius: 12px !important;">
+                                <i class="fa-solid fa-user fs-3"></i>
                             </div>
                         @endif
-                        <div class="overflow-hidden">
-                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem;">{{ $provider->title }}</h6>
-                            <small class="text-muted d-block text-truncate" style="font-size: 0.73rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
+                        <div class="overflow-hidden my-auto">
+                            <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">{{ $provider->title }}</h6>
+                            <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
                             <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
                         </div>
                     </a>
-                    <div class="d-flex gap-2 flex-shrink-0">
-                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
+                    <div class="d-flex gap-1.5 flex-shrink-0 my-auto">
+                        <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
                     </div>
                 </div>
                 @endforeach
