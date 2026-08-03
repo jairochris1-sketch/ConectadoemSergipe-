@@ -321,7 +321,7 @@
         <div class="col-12 col-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
-                    <i class="fa-solid fa-user-tie text-primary"></i> Profissionais em destaque
+                    <i class="fa-solid fa-briefcase text-primary"></i> Prestadores de Serviços em destaque
                 </h4>
                 <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">
                     Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
