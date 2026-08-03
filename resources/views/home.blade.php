@@ -30,13 +30,13 @@
         max-height: 300px;
     }
     .hero-slide-container-responsive {
-        padding-top: 15px;
-        padding-bottom: 60px;
+        padding-top: 10px;
+        padding-bottom: 75px;
     }
     .hero-search-card-container {
         z-index: 10;
-        margin-top: -75px;
-        margin-bottom: 24px;
+        margin-top: -105px;
+        margin-bottom: 20px;
     }
     @media (min-width: 992px) {
         .hero-swiper-slide-responsive {
@@ -44,12 +44,12 @@
             max-height: 480px;
         }
         .hero-slide-container-responsive {
-            padding-top: 40px;
-            padding-bottom: 80px;
+            padding-top: 20px;
+            padding-bottom: 100px;
         }
         .hero-search-card-container {
-            margin-top: -110px;
-            margin-bottom: 30px;
+            margin-top: -155px;
+            margin-bottom: 24px;
         }
     }
     .hero-search-input-box {
