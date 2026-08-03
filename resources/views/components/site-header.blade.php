@@ -19,7 +19,7 @@
 <header class="marketplace-header marketplace-header-layout-{{ $headerLayout ?? 'horizontal' }} {{ auth()->guest() ? 'marketplace-header-guest' : '' }}" id="marketplaceHeader">
     <!-- Botão Flutuante de Encolher/Abrir Cabeçalho Vertical -->
     <button
-        class="marketplace-vertical-toggle"
+        class="marketplace-vertical-toggle d-none d-lg-flex"
         id="marketplaceVerticalToggle"
         type="button"
         aria-label="Encolher ou Expandir Menu"
