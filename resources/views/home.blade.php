@@ -333,10 +333,10 @@
                 <div class="py-2 px-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
                     <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2">
                         @if($provider->card_image)
-                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="68" height="68" style="width: 68px; height: 68px; object-fit: cover; border-radius: 14px !important;" alt="{{ $provider->title }}">
+                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="76" height="76" style="width: 76px; height: 76px; object-fit: cover; border-radius: 16px !important;" alt="{{ $provider->title }}">
                         @else
-                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 68px; height: 68px; border-radius: 14px !important;">
-                                <i class="fa-solid fa-user fs-3"></i>
+                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 76px; height: 76px; border-radius: 16px !important;">
+                                <i class="fa-solid fa-user fs-2"></i>
                             </div>
                         @endif
                         <div class="overflow-hidden">
