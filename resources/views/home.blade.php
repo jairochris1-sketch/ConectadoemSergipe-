@@ -321,7 +321,7 @@
         <div class="col-12 col-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
-                    <i class="fa-solid fa-users-gear text-primary"></i> Profissionais em destaque
+                    <i class="fa-solid fa-user-tie text-primary"></i> Profissionais em destaque
                 </h4>
                 <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">
                     Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -331,7 +331,7 @@
             <div class="d-flex flex-column gap-2">
                 @foreach($serviceProviders->take(4) as $provider)
                 <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
-                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
+                    <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
                         @if($provider->card_image)
                             <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
                         @else
@@ -339,13 +339,13 @@
                                 <i class="fa-solid fa-user fs-3"></i>
                             </div>
                         @endif
-                        <div class="overflow-hidden my-auto">
+                        <div class="overflow-hidden my-auto ms-1">
                             <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">{{ $provider->title }}</h6>
                             <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
                             <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
                         </div>
                     </a>
-                    <div class="d-flex gap-1.5 flex-shrink-0 my-auto">
+                    <div class="d-flex gap-2 flex-shrink-0 my-auto ms-1">
                         <a href="https://wa.me/5579999999999" target="_blank" class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                         <a href="{{ route('provider.show', $provider->slug) }}" class="btn btn-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;" title="Ligar"><i class="fa-solid fa-phone"></i></a>
                     </div>
