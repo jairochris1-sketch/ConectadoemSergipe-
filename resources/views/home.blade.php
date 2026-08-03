@@ -270,17 +270,20 @@
                     -o-transition-timing-function: linear !important;
                     transition-timing-function: linear !important;
                 }
+                .swiper-providers .swiper-wrapper {
+                    touch-action: pan-y !important;
+                }
                 @media (max-width: 991.98px) {
                     .swiper-providers-container {
-                        height: 310px;
-                    }
-                    .swiper-providers-container .swiper-slide {
-                        height: auto !important;
+                        height: 315px; /* 4 * 68 + 3 * 8 = 296, plus some padding */
+                        padding-top: 10px;
+                        padding-bottom: 10px;
                     }
                 }
                 @media (min-width: 992px) {
                     .swiper-providers-container .swiper-slide {
                         margin-bottom: 0.5rem;
+                        height: auto !important;
                     }
                     .swiper-providers-container .swiper-slide:nth-child(n+5) {
                         display: none !important;
@@ -348,7 +351,7 @@
                 <div class="swiper swiper-providers h-100">
                     <div class="swiper-wrapper">
                         @foreach($serviceProviders as $provider)
-                        <div class="swiper-slide h-auto">
+                        <div class="swiper-slide">
                             <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
                                 <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
                                     @if($provider->card_image)
