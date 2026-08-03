@@ -795,6 +795,7 @@
         direction: 'vertical',
         slidesPerView: 4,
         spaceBetween: 8,
+        speed: 800,
         loop: true,
         autoplay: {
             delay: 7500,
@@ -838,6 +839,7 @@
         new Swiper(el, {
             slidesPerView: 2,
             spaceBetween: 10,
+            speed: 800,
             loop: true,
             autoplay: {
                 delay: 7500,
