@@ -333,10 +333,10 @@
                 <div class="p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card);">
                     <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2">
                         @if($provider->card_image)
-                            <img src="{{ asset($provider->card_image) }}" class="rounded-circle flex-shrink-0" width="44" height="44" style="object-fit: cover;" alt="{{ $provider->title }}">
+                            <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="60" height="60" style="object-fit: cover; border-radius: 16px !important;" alt="{{ $provider->title }}">
                         @else
-                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0" style="width: 44px; height: 44px;">
-                                <i class="fa-solid fa-user"></i>
+                            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 60px; height: 60px; border-radius: 16px !important;">
+                                <i class="fa-solid fa-user fs-4"></i>
                             </div>
                         @endif
                         <div class="overflow-hidden">
