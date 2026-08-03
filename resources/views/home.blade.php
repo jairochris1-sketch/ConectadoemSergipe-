@@ -803,6 +803,7 @@
         direction: 'vertical',
         slidesPerView: 4,
         spaceBetween: 8,
+        allowTouchMove: false,
         navigation: {
             prevEl: '.swiper-providers-prev',
             nextEl: '.swiper-providers-next',
