@@ -8,10 +8,10 @@
                 @if($work->cover_path)
                     <img src="{{ asset($work->cover_path) }}" alt="{{ $work->title }}" class="cordel-cover-img rounded-3 shadow-sm" style="max-height: 155px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto;">
                 @else
-                    <div class="cordel-cover-placeholder rounded-3 d-flex flex-column align-items-center justify-content-center text-muted w-100" style="height: 150px; background: var(--cordel-placeholder-bg, rgba(255,255,255,0.6));">
+                    <div class="cordel-cover-placeholder rounded-3 d-flex flex-column align-items-center justify-content-center text-muted w-100 overflow-hidden" style="height: 150px; background: var(--cordel-placeholder-bg, rgba(255,255,255,0.6));">
                         <i class="fa-solid fa-book-open fs-2 mb-1 text-warning"></i>
-                        <span class="fw-bold small text-dark px-2 text-center text-truncate max-w-100" style="font-size: 0.78rem;">{{ $work->title }}</span>
-                        <small class="text-muted" style="font-size: 0.7rem;">{{ $work->user->name }}</small>
+                        <span class="fw-bold small text-dark px-2 text-center text-truncate w-100" style="font-size: 0.78rem;">{{ $work->title }}</span>
+                        <small class="text-muted text-truncate w-100 px-2 text-center" style="font-size: 0.7rem;">{{ $work->user->name }}</small>
                     </div>
                 @endif
 
