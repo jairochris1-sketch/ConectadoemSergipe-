@@ -77,7 +77,7 @@
 
                 <div class="stores-search-controls">
                     <button id="stores-near-me" type="button" @class(['stores-near-me', 'is-active' => session('location_filter.enabled', false)]) aria-pressed="{{ session('location_filter.enabled', false) ? 'true' : 'false' }}">
-                        <i class="fa-solid {{ session('location_filter.enabled', false) ? 'fa-location-dot' : 'fa-location-crosshairs' }}"></i>
+                        <i class="fa-solid fa-location-dot text-danger"></i>
                         <span>{{ session('location_filter.enabled', false) ? 'Desativar localização' : 'Perto de mim' }}</span>
                     </button>
 
