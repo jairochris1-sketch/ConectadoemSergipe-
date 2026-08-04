@@ -40,7 +40,7 @@
                         <div class="avatar-circle-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 22px; height: 22px; font-size: 0.65rem;">
                             {{ strtoupper(substr($work->user->name, 0, 1)) }}
                         </div>
-                        <a href="{{ route('culture.author', $work->user->username) }}" class="small text-muted text-truncate text-decoration-none hover-primary" style="font-size: 0.75rem;">{{ $work->user->name }}</a>
+                        <a href="{{ route('culture.author', $work->user->username ?: $work->user->id) }}" class="small text-muted text-truncate text-decoration-none hover-primary" style="font-size: 0.75rem;">{{ $work->user->name }}</a>
                     </div>
 
                     <h4 class="fw-bold text-dark mb-1 text-truncate" style="font-size: 0.9rem;" title="{{ $work->title }}">

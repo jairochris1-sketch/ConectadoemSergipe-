@@ -272,7 +272,7 @@
                         </div>
                         <div>
                             <h6 class="fw-bold mb-0 text-dark">
-                                <a href="{{ route('culture.author', $work->user->username) }}" class="text-decoration-none text-dark">{{ $work->user->name }}</a>
+                                <a href="{{ route('culture.author', $work->user->username ?: $work->user->id) }}" class="text-decoration-none text-dark">{{ $work->user->name }}</a>
                             </h6>
                             <small class="text-muted">Autor(a) em Sergipe</small>
                         </div>
@@ -283,7 +283,7 @@
                             <i class="fa-brands fa-whatsapp me-2"></i> Falar com o Autor no WhatsApp
                         </a>
                     @endif
-                    <a href="{{ route('culture.author', $work->user->username) }}" class="btn btn-outline-primary rounded-pill w-100 fw-bold">
+                    <a href="{{ route('culture.author', $work->user->username ?: $work->user->id) }}" class="btn btn-outline-primary rounded-pill w-100 fw-bold">
                         <i class="fa-solid fa-user me-2"></i> Ver Perfil Completo
                     </a>
                 </div>

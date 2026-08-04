@@ -87,9 +87,11 @@ class CultureWorkController extends Controller
     /**
      * Perfil Público do Artista/Cordelista
      */
-    public function authorProfile($username)
+    public function authorProfile($identifier)
     {
-        $author = \App\Models\User::where('username', $username)->firstOrFail();
+        $author = \App\Models\User::where('username', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
         
         $works = CultureWork::published()
             ->where('user_id', $author->id)
