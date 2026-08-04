@@ -97,6 +97,28 @@
         background: #d4a373;
         border-radius: 50%;
     }
+    
+    /* Dark Mode Overrides */
+    [data-bs-theme="dark"] .cordel-reader-page { background: #121212; }
+    [data-bs-theme="dark"] .cordel-booklet-paper { 
+        background: #1e1e1e; 
+        border-color: #333; 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+    }
+    [data-bs-theme="dark"] .cordel-verses, 
+    [data-bs-theme="dark"] .cordel-verses-flip { 
+        color: #e0e0e0; 
+    }
+    [data-bs-theme="dark"] .flip-btn { 
+        background: #333; 
+        border-color: #666; 
+        color: #e0e0e0; 
+    }
+    [data-bs-theme="dark"] .flip-btn:hover { 
+        background: #555; 
+        color: #fff; 
+        border-color: #888;
+    }
 </style>
 @endpush
 

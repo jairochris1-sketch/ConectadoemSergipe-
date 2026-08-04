@@ -21,8 +21,20 @@
         width: 120px;
         height: 120px;
         border: 4px solid #fff;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         object-fit: cover;
+    }
+    
+    /* Dark Mode Overrides */
+    [data-bs-theme="dark"] .author-hero {
+        background-color: #1a1511;
+        border-bottom-color: #3d3024;
+    }
+    [data-bs-theme="dark"] .author-hero-pattern {
+        background-image: radial-gradient(#6e5743 1px, transparent 1px);
+        opacity: 0.1;
+    }
+    [data-bs-theme="dark"] .author-avatar {
+        border-color: #1a1511;
     }
 </style>
 @endpush

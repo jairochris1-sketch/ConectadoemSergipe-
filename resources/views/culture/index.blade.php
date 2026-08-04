@@ -54,6 +54,35 @@
         background-color: #2B2118;
         color: #EFE4D3;
     }
+    /* Dark Mode Overrides for Cordel Hero */
+    [data-bs-theme="dark"] .cordel-hero {
+        background-color: #1a1511;
+        border-bottom-color: #3d3024;
+        color: #f4ebd9;
+    }
+    [data-bs-theme="dark"] .cordel-hero-pattern {
+        background-image: radial-gradient(#6e5743 1px, transparent 1px);
+        opacity: 0.1;
+    }
+    [data-bs-theme="dark"] .hero-title-serif {
+        color: #fdfbf7;
+    }
+    [data-bs-theme="dark"] .btn-cordel-outline {
+        color: #fdfbf7;
+        border-color: #fdfbf7;
+    }
+    [data-bs-theme="dark"] .btn-cordel-outline:hover {
+        background-color: #fdfbf7;
+        color: #1a1511;
+    }
+
+    [data-bs-theme="dark"] .cordel-cover-wrapper {
+        --cordel-cover-bg: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%) !important;
+    }
+    [data-bs-theme="dark"] .cordel-cover-placeholder {
+        --cordel-placeholder-bg: rgba(0, 0, 0, 0.4) !important;
+    }
+
     /* Pegador de Cordel no Card */
     .cordel-pegador-clip {
         width: 32px;

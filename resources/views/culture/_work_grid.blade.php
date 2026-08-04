@@ -4,11 +4,11 @@
             <!-- Pregador / Clipes de Cordel (Design exclusivo) -->
             <div class="cordel-pegador-clip" title="Pendurado no Varal de Cordel"></div>
 
-            <div class="cordel-cover-wrapper position-relative text-center p-2 border-bottom d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #fdfbf7 0%, #f4ebd9 100%); min-height: 170px; max-height: 170px;">
+            <div class="cordel-cover-wrapper position-relative text-center p-2 border-bottom d-flex align-items-center justify-content-center" style="background: var(--cordel-cover-bg, linear-gradient(135deg, #fdfbf7 0%, #f4ebd9 100%)); min-height: 170px; max-height: 170px;">
                 @if($work->cover_path)
                     <img src="{{ asset($work->cover_path) }}" alt="{{ $work->title }}" class="cordel-cover-img rounded-3 shadow-sm" style="max-height: 155px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto;">
                 @else
-                    <div class="cordel-cover-placeholder rounded-3 d-flex flex-column align-items-center justify-content-center text-muted w-100" style="height: 150px; background: rgba(255,255,255,0.6);">
+                    <div class="cordel-cover-placeholder rounded-3 d-flex flex-column align-items-center justify-content-center text-muted w-100" style="height: 150px; background: var(--cordel-placeholder-bg, rgba(255,255,255,0.6));">
                         <i class="fa-solid fa-book-open fs-2 mb-1 text-warning"></i>
                         <span class="fw-bold small text-dark px-2 text-center text-truncate max-w-100" style="font-size: 0.78rem;">{{ $work->title }}</span>
                         <small class="text-muted" style="font-size: 0.7rem;">{{ $work->user->name }}</small>
@@ -34,7 +34,7 @@
                 @endif
             </div>
 
-            <div class="card-body p-3 d-flex flex-column justify-content-between flex-grow-1 bg-white">
+            <div class="card-body p-3 d-flex flex-column justify-content-between flex-grow-1 bg-body">
                 <div>
                     <div class="d-flex align-items-center gap-1 mb-1">
                         <div class="avatar-circle-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 22px; height: 22px; font-size: 0.65rem;">
