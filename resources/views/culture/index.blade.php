@@ -75,6 +75,9 @@
         background-color: #fdfbf7;
         color: #1a1511;
     }
+    [data-bs-theme="dark"] .cordel-hero p {
+        color: #c9bdae !important;
+    }
 
     [data-bs-theme="dark"] .cordel-cover-wrapper {
         --cordel-cover-bg: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%) !important;
@@ -158,6 +161,18 @@
     }
     .culture-view-list .cordel-pegador-clip {
         display: none !important;
+    }
+    .culture-view-list .card-body {
+        width: calc(100% - 150px) !important;
+        overflow: hidden;
+    }
+    .culture-view-list .card-body > div:first-child {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .culture-view-list .card-body p.line-clamp-2 {
+        -webkit-line-clamp: 1 !important;
     }
 </style>
 @endpush
