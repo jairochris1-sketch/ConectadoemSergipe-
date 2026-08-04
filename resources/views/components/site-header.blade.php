@@ -17,9 +17,10 @@
 @endphp
 
 <header class="marketplace-header marketplace-header-layout-{{ $headerLayout ?? 'horizontal' }} {{ auth()->guest() ? 'marketplace-header-guest' : '' }}" id="marketplaceHeader">
+    @if(($headerLayout ?? 'horizontal') === 'vertical')
     <!-- Botão Flutuante de Encolher/Abrir Cabeçalho Vertical -->
     <button
-        class="marketplace-vertical-toggle d-none d-lg-flex"
+        class="marketplace-vertical-toggle"
         id="marketplaceVerticalToggle"
         type="button"
         aria-label="Encolher ou Expandir Menu"
@@ -27,6 +28,7 @@
     >
         <i class="fa-solid fa-chevron-left" id="marketplaceVerticalToggleIcon"></i>
     </button>
+    @endif
     <div class="marketplace-header-shell">
         <div class="marketplace-header-row">
             <button
