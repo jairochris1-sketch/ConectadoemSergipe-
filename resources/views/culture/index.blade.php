@@ -6,17 +6,53 @@
 <style>
     /* Estilos Especiais do Módulo Cultural & Cordel */
     .cordel-hero {
-        background: linear-gradient(135deg, #2c1810 0%, #4a2c11 50%, #1a0f0a 100%);
-        color: #fcf8f2;
+        background-color: #EFE4D3; /* Bege pergaminho/papel antigo */
+        border-bottom: 2px solid #2B2118;
+        color: #2B2118;
         position: relative;
         overflow: hidden;
     }
     .cordel-hero-pattern {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        opacity: 0.08;
-        background-image: radial-gradient(#fcd34d 1px, transparent 1px);
+        opacity: 0.15;
+        background-image: radial-gradient(#2B2118 1px, transparent 1px);
         background-size: 20px 20px;
+    }
+    .hero-title-serif {
+        font-family: "Playfair Display", "Georgia", serif;
+        font-weight: 900;
+        letter-spacing: -1px;
+        color: #2B2118;
+        line-height: 1.1;
+    }
+    .btn-cordel-red {
+        background-color: #9C2720;
+        color: white;
+        border: 2px solid #5B130E;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 0;
+        transition: all 0.3s;
+    }
+    .btn-cordel-red:hover {
+        background-color: #5B130E;
+        color: white;
+    }
+    .btn-cordel-outline {
+        background-color: transparent;
+        color: #2B2118;
+        border: 2px solid #2B2118;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 0;
+        transition: all 0.3s;
+    }
+    .btn-cordel-outline:hover {
+        background-color: #2B2118;
+        color: #EFE4D3;
     }
     /* Pegador de Cordel no Card */
     .cordel-pegador-clip {
@@ -100,30 +136,45 @@
 @section('content')
 <main class="culture-page pb-5">
     <!-- Hero Banner Cultural -->
-    <section class="cordel-hero py-5 mb-4 position-relative">
+    <section class="cordel-hero pt-5 pb-5 mb-5 position-relative">
         <div class="cordel-hero-pattern"></div>
-        <div class="container position-relative z-index-2 text-center py-4">
-            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3 shadow-sm" style="letter-spacing: 1px;">
-                <i class="fa-solid fa-feather-pointed me-1"></i> Literatura & Arte Sergipana
-            </span>
-            <h1 class="display-4 fw-extrabold mb-3">Varal de Cordel & Espaço Cultural</h1>
-            <p class="lead max-w-2xl mx-auto opacity-90 mb-4" style="max-width: 700px;">
-                Descubra e valorize os folhetos de cordel, poesias, obras literárias, canções e artes dos talentosos artistas de todo o estado de Sergipe.
-            </p>
+        <div class="container position-relative z-index-2 py-4">
+            <div class="row align-items-center">
+                <!-- Coluna Esquerda: Textos e Botões -->
+                <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start">
+                    <span class="badge text-white px-3 py-2 text-uppercase mb-4 shadow-sm" style="background-color: #9C2720; border: 1px solid #5B130E; letter-spacing: 2px; border-radius: 0;">
+                        LITERATURA DE CORDEL
+                    </span>
+                    <h1 class="display-4 hero-title-serif mb-4">A banca de folhetos dos artistas sergipanos</h1>
+                    <p class="lead mb-4 mx-auto mx-lg-0" style="color: #4A3E31; font-family: Georgia, serif; max-width: 550px;">
+                        Escritores, repentistas e xilogravadores anunciam suas obras, publicam seus versos para ler on-line e recebem pedidos direto no WhatsApp. Sem intermediário, sem taxa.
+                    </p>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-center gap-3">
-                @auth
-                    <a href="{{ route('culture.create') }}" class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-dark shadow">
-                        <i class="fa-solid fa-pen-nib me-2"></i> Publicar minha Obra / Cordel
-                    </a>
-                    <a href="{{ route('culture.my-works') }}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-bold">
-                        <i class="fa-solid fa-book-bookmark me-2"></i> Meus Rascunhos & Obras
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-dark shadow">
-                        <i class="fa-solid fa-right-to-bracket me-2"></i> Entrar para Publicar Cordel
-                    </a>
-                @endauth
+                    <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                        @auth
+                            <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-4 py-3">
+                                Publicar minha Obra
+                            </a>
+                            <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline px-4 py-3">
+                                Meus Rascunhos
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-cordel-red px-4 py-3">
+                                Sou Escritor / Publicar
+                            </a>
+                        @endauth
+                        <a href="#culture-works-container" class="btn btn-cordel-outline px-4 py-3">
+                            Buscar Folhetos
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Imagem de Xilogravura -->
+                <div class="col-lg-6 text-center text-lg-end">
+                    <div class="p-2 d-inline-block shadow" style="background: #EFE4D3; border: 3px solid #2B2118;">
+                        <img src="{{ asset('images/cordelista_hero.png') }}" alt="Cordelista Sergipano" class="img-fluid" style="max-height: 400px; border: 2px solid #2B2118; mix-blend-mode: multiply;">
+                    </div>
+                </div>
             </div>
         </div>
     </section>
