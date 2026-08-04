@@ -85,6 +85,21 @@ class CultureWorkController extends Controller
     }
 
     /**
+     * Perfil Público do Artista/Cordelista
+     */
+    public function authorProfile($username)
+    {
+        $author = \App\Models\User::where('username', $username)->firstOrFail();
+        
+        $works = CultureWork::published()
+            ->where('user_id', $author->id)
+            ->latest()
+            ->paginate(12);
+
+        return view('culture.author', compact('author', 'works'));
+    }
+
+    /**
      * Minhas Obras (Painel do Escritor / Artista)
      */
     public function myWorks()

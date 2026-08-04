@@ -214,6 +214,7 @@ Route::get('/termos', [PageController::class, 'terms'])->name('page.terms');
 
 // Módulo de Cultura, Cordel & Arte (Estante Pública)
 Route::get('/cultura-e-cordel', [CultureWorkController::class, 'index'])->name('culture.index');
+Route::get('/cordelista/{username}', [CultureWorkController::class, 'authorProfile'])->name('culture.author');
 Route::get('/cultura-e-cordel/{slug}', [CultureWorkController::class, 'show'])->name('culture.show');
 
 Route::middleware('auth')->group(function () {
