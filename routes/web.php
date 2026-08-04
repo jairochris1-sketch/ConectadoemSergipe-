@@ -218,6 +218,8 @@ Route::get('/cordelista/{username}', [CultureWorkController::class, 'authorProfi
 Route::get('/cultura-e-cordel/{slug}', [CultureWorkController::class, 'show'])->name('culture.show');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/cultura-e-cordel/{id}/like', [CultureWorkController::class, 'toggleLike'])->name('culture.like');
+
     Route::get('/minhas-obras', [CultureWorkController::class, 'myWorks'])->name('culture.my-works');
     Route::get('/obras/criar', [CultureWorkController::class, 'create'])->name('culture.create');
     Route::post('/obras', [CultureWorkController::class, 'store'])->name('culture.store');

@@ -23,6 +23,59 @@
         color: #2c1810;
         white-space: pre-wrap;
     }
+    
+    /* Leitor Paginado (Flipbook) */
+    .cordel-flip-wrapper {
+        position: relative;
+    }
+    .cordel-flip-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        column-width: calc(100% - 20px);
+        column-gap: 40px;
+        height: 60vh;
+        min-height: 400px;
+        padding-bottom: 20px;
+    }
+    
+    @media (min-width: 768px) {
+        .cordel-flip-container {
+            column-width: calc(50% - 20px);
+        }
+    }
+    
+    .cordel-flip-container > p, .cordel-flip-container > div {
+        break-inside: avoid;
+    }
+    .cordel-verses-flip {
+        /* Estilos base herdados do cordel-verses */
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-size: 1.18rem;
+        line-height: 1.8;
+        color: #2c1810;
+        white-space: pre-wrap;
+    }
+    .flip-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        background: #fff;
+        border: 2px solid #8b5e34;
+        color: #8b5e34;
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    .flip-btn:hover { background: #8b5e34; color: #fff; }
+    .flip-prev { left: -20px; }
+    .flip-next { right: -20px; }
     .cordel-top-pegador {
         width: 48px;
         height: 24px;
@@ -130,10 +183,39 @@
 
                     <!-- Conteúdo Principal do Cordel / Texto -->
                     @if($work->content)
-                        <div class="cordel-verses py-3 mb-4">
-                            {{ $work->content }}
+                        <div class="cordel-flip-wrapper my-4">
+                            <button class="flip-btn flip-prev" onclick="document.getElementById('cordel-reader').scrollBy({left: -300, behavior: 'smooth'})">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <div class="cordel-flip-container" id="cordel-reader">
+                                <div class="cordel-verses-flip">{{ $work->content }}</div>
+                            </div>
+                            <button class="flip-btn flip-next" onclick="document.getElementById('cordel-reader').scrollBy({left: 300, behavior: 'smooth'})">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
                         </div>
                     @endif
+
+                    <!-- Ações: Curtir e Compartilhar -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between border-top pt-4 mt-4">
+                        <button class="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm" id="like-btn" data-id="{{ $work->id }}" @guest onclick="window.location='{{ route('login') }}'" @endguest>
+                            <i class="{{ $work->is_liked_by_current_user ? 'fa-solid' : 'fa-regular' }} fa-heart me-2" id="like-icon"></i>
+                            <span id="like-text">{{ $work->is_liked_by_current_user ? 'Curtiu' : 'Curtir' }}</span>
+                            <span class="badge bg-danger ms-2" id="like-count">{{ $work->likes_count }}</span>
+                        </button>
+
+                        <div class="d-flex gap-2 mt-3 mt-md-0">
+                            <a href="https://api.whatsapp.com/send?text={{ urlencode('Olha que incrível essa obra: ' . $work->title . ' - ' . url()->current()) }}" target="_blank" class="btn btn-success rounded-circle shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text={{ urlencode('Olha que incrível essa obra: ' . $work->title) }}&url={{ urlencode(url()->current()) }}" target="_blank" class="btn btn-info text-white rounded-circle shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-brands fa-twitter"></i>
+                            </a>
+                            <button onclick="navigator.clipboard.writeText('{{ url()->current() }}'); alert('Link copiado!');" class="btn btn-secondary rounded-circle shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Copiar Link">
+                                <i class="fa-solid fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Link Externo Adicional -->
                     @if($work->external_url)
@@ -226,4 +308,52 @@
         </div>
     </div>
 </main>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeBtn = document.getElementById('like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            @guest
+                window.location = '{{ route('login') }}';
+                return;
+            @endguest
+
+            const workId = this.dataset.id;
+            
+            fetch(`/cultura-e-cordel/${workId}/like`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const icon = document.getElementById('like-icon');
+                    const text = document.getElementById('like-text');
+                    const count = document.getElementById('like-count');
+                    
+                    if (data.liked) {
+                        icon.classList.remove('fa-regular');
+                        icon.classList.add('fa-solid');
+                        text.textContent = 'Curtiu';
+                    } else {
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        text.textContent = 'Curtir';
+                    }
+                    
+                    count.textContent = data.likes_count;
+                }
+            })
+            .catch(error => console.error('Erro ao curtir:', error));
+        });
+    }
+});
+</script>
+@endpush
 @endsection

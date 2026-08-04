@@ -43,6 +43,19 @@ class CultureWork extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'culture_work_likes', 'culture_work_id', 'user_id')->withTimestamps();
+    }
+
+    public function getIsLikedByCurrentUserAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+        return $this->likes()->where('user_id', auth()->id())->exists();
+    }
+
     public function ad()
     {
         return $this->belongsTo(Ad::class);

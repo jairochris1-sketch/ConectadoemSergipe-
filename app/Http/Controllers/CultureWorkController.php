@@ -100,6 +100,31 @@ class CultureWorkController extends Controller
     }
 
     /**
+     * Alternar curtida (Like/Unlike) via AJAX
+     */
+    public function toggleLike(Request $request, $id)
+    {
+        $work = CultureWork::findOrFail($id);
+        $user = auth()->user();
+
+        if ($work->likes()->where('user_id', $user->id)->exists()) {
+            $work->likes()->detach($user->id);
+            $work->decrement('likes_count');
+            $liked = false;
+        } else {
+            $work->likes()->attach($user->id);
+            $work->increment('likes_count');
+            $liked = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'liked' => $liked,
+            'likes_count' => $work->likes_count
+        ]);
+    }
+
+    /**
      * Minhas Obras (Painel do Escritor / Artista)
      */
     public function myWorks()
