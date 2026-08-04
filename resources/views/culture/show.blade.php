@@ -162,8 +162,21 @@
                             <span class="fs-4 fw-extrabold text-success">R$ {{ number_format($work->ad->price, 2, ',', '.') }}</span>
                         </div>
 
+                        @if($work->user->pix_key)
+                            <div class="alert alert-success border-success bg-success bg-opacity-10 py-2 px-3 mb-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="fa-brands fa-pix text-success fs-5 me-2"></i>
+                                    <strong class="text-success">Pague direto via PIX:</strong>
+                                </div>
+                                <div class="d-flex align-items-center bg-white border rounded px-2 py-1 user-select-all font-monospace small">
+                                    {{ $work->user->pix_key }}
+                                </div>
+                                <div class="small text-muted mt-1" style="font-size: 0.75rem;">Faça o PIX e envie o comprovante no WhatsApp abaixo.</div>
+                            </div>
+                        @endif
+
                         <a href="{{ route('ad.show', $work->ad->slug ?: $work->ad->id) }}" class="btn btn-success btn-lg rounded-pill fw-bold w-100 shadow-sm">
-                            <i class="fa-solid fa-cart-shopping me-2"></i> Fazer Pedido do Produto
+                            <i class="fa-brands fa-whatsapp me-2"></i> Falar no WhatsApp
                         </a>
                     </div>
                 @endif

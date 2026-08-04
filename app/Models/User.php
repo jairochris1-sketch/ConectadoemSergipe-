@@ -28,6 +28,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'whatsapp',
+        'pix_key',
         'city',
         'state',
         'avatar',

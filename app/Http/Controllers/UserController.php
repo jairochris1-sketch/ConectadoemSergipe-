@@ -224,6 +224,7 @@ class UserController extends Controller
             ],
             'phone' => 'nullable|digits_between:10,11',
             'whatsapp' => 'required|digits_between:10,11',
+            'pix_key' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
@@ -237,6 +238,7 @@ class UserController extends Controller
                 'username' => $request->username,
                 'phone' => $request->phone,
                 'whatsapp' => $request->whatsapp,
+                'pix_key' => $request->pix_key,
                 'city' => $request->city,
             ];
 

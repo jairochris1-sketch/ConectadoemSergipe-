@@ -62,6 +62,14 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="pix_key" class="form-label fw-semibold">
+                                <i class="fa-brands fa-pix text-success me-1"></i> Chave PIX <span class="badge bg-success ms-1">Receber Pagamentos</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg rounded-3 border-success" id="pix_key" name="pix_key" value="{{ old('pix_key', $user->pix_key ?? '') }}" placeholder="CPF, E-mail, Celular ou Chave Aleatória">
+                            <small class="text-muted">Utilizado para receber pagamentos diretos de suas vendas (ex: Livros de Cordel).</small>
+                        </div>
+
                         <div class="mb-4">
                             <label for="city" class="form-label fw-semibold">Cidade em SE</label>
                             <select class="form-select form-select-lg rounded-3" id="city" name="city">
