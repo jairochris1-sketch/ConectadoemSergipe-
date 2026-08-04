@@ -37,6 +37,9 @@
     @stack('styles')
 </head>
 <body class="{{ $showPublicHeader ? 'site-header-layout-'.$userHeaderLayout : '' }}">
+    <!-- Splash Screen -->
+    @include('components.splash-screen')
+
     @if(!request()->is('login') && !request()->is('cadastro') && !request()->is('esqueci-senha*') && !request()->is('admin*'))
     <!-- Navbar Pública -->
     @include('components.site-header', ['headerLayout' => $userHeaderLayout])
