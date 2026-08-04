@@ -347,7 +347,10 @@
                                     <p class="mb-1 fw-bold text-dark">Arraste sua foto ou <span class="text-primary text-decoration-underline cursor-pointer">clique para selecionar</span></p>
                                     <small class="text-muted d-block mb-3">jpg, png ou webp (otimização automática)</small>
                                     <input type="file" class="form-control d-none" id="logo" name="logo" accept="image/*" onchange="previewMainPhoto(this)">
-                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" onclick="document.getElementById('logo').click()">Selecionar arquivo</button>
+                                    <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" onclick="document.getElementById('logo').click()">Selecionar arquivo</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4" onclick="importImageByUrl('logo')"><i class="fa-solid fa-link"></i> Importar por Link</button>
+                                    </div>
                                     
                                     <!-- Container da Foto Principal com Botão de Remover X -->
                                 <div id="main-photo-preview-box" class="d-none mt-3 position-relative">
@@ -366,7 +369,10 @@
                                     <p class="mb-1 fw-bold text-dark" id="cover-photo-title">Envie uma capa para destacar seu perfil</p>
                                     <small class="text-muted d-block mb-3" id="cover-photo-help">Se não enviar, será usada uma imagem da cidade escolhida.</small>
                                     <input type="file" class="form-control d-none" id="banner" name="banner" accept="image/*" onchange="previewBannerPhoto(this)">
-                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" onclick="document.getElementById('banner').click()">Selecionar capa</button>
+                                    <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" onclick="document.getElementById('banner').click()">Selecionar capa</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4" onclick="importImageByUrl('banner')"><i class="fa-solid fa-link"></i> Importar por Link</button>
+                                    </div>
                                     <div id="banner-photo-preview-box" class="d-none mt-3 position-relative">
                                         <img id="banner-photo-img" src="" class="rounded-3 shadow-sm object-fit-cover w-100" style="max-height: 180px;">
                                     </div>
@@ -384,6 +390,10 @@
                                         <button type="button" class="btn btn-outline-dashed border-2 rounded-3 p-4 d-flex flex-column align-items-center justify-content-center bg-white" style="width: 110px; height: 110px;" onclick="document.getElementById('images').click()">
                                             <i class="fa-solid fa-plus text-primary fs-3 mb-1"></i>
                                             <small class="fw-bold text-muted" style="font-size: 0.7rem;">Adicionar fotos</small>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-dashed border-2 rounded-3 p-4 d-flex flex-column align-items-center justify-content-center bg-white" style="width: 110px; height: 110px;" onclick="importImageByUrl('images')">
+                                            <i class="fa-solid fa-link text-primary fs-3 mb-1"></i>
+                                            <small class="fw-bold text-muted" style="font-size: 0.7rem;">Importar link</small>
                                         </button>
                                     </div>
                                 </div>
@@ -1576,6 +1586,53 @@
         } else {
             alert('Por favor, digite o nome do produto antes de buscar no Google.');
             titleInput.focus();
+        }
+    }
+
+    async function importImageByUrl(inputId) {
+        let url = prompt("Cole o link (URL) da imagem que você copiou do Google ou de outro site:");
+        if (!url || !url.trim()) return;
+        url = url.trim();
+
+        try {
+            document.body.style.cursor = 'wait';
+            
+            // Usando um proxy CORS gratuito para permitir baixar imagens de outros domínios
+            let response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+            if (!response.ok) throw new Error("Não foi possível carregar a imagem. Verifique se o link é público.");
+            
+            let blob = await response.blob();
+            let ext = blob.type.split('/')[1] || 'jpg';
+            if (!blob.type.startsWith('image/')) {
+                throw new Error("O link fornecido não parece ser uma imagem válida.");
+            }
+
+            let file = new File([blob], `imported_image_${Date.now()}.${ext}`, { type: blob.type });
+
+            let dataTransfer = new DataTransfer();
+            let fileInput = document.getElementById(inputId);
+            
+            if (fileInput.multiple) {
+                // Se for galeria, preserva os arquivos que já estão lá
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    dataTransfer.items.add(fileInput.files[i]);
+                }
+                dataTransfer.items.add(file);
+            } else {
+                // Se for único (logo, banner) apenas adiciona
+                dataTransfer.items.add(file);
+            }
+            
+            fileInput.files = dataTransfer.files;
+            
+            // Dispara o evento onchange para rodar o preview
+            let event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+            
+        } catch(e) {
+            alert("Erro ao importar a imagem: " + e.message);
+        } finally {
+            document.body.style.cursor = 'default';
         }
     }
 

@@ -197,8 +197,11 @@
                                             </label>
                                         </div>
                                     @endif
-                                    <input type="file" class="form-control rounded-3" id="logo" name="logo" accept="image/*">
-                                    <small class="text-muted">Escolha outra imagem para substituir a atual.</small>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*" style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="importImageByUrl('logo')" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"><i class="fa-solid fa-link"></i> Importar por Link</button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Escolha outra imagem ou importe via link para substituir a atual.</small>
                                 </div>
 
                                 <div class="col-12 col-md-6">
@@ -212,8 +215,11 @@
                                             </label>
                                         </div>
                                     @endif
-                                    <input type="file" class="form-control rounded-3" id="banner" name="banner" accept="image/*">
-                                    <small class="text-muted">Escolha outra capa para substituir a atual.</small>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="banner" name="banner" accept="image/*" style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="importImageByUrl('banner')" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"><i class="fa-solid fa-link"></i> Importar por Link</button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Escolha outra capa ou importe via link para substituir a atual.</small>
                                 </div>
                             </div>
 
@@ -236,7 +242,10 @@
                             @endif
 
                             <label for="images" class="form-label fw-semibold">Adicionar novas fotos à galeria</label>
-                            <input type="file" class="form-control rounded-3" id="images" name="images[]" accept="image/*" multiple>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="images" name="images[]" accept="image/*" multiple style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
+                                <button type="button" class="btn btn-outline-secondary" onclick="importImageByUrl('images')" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"><i class="fa-solid fa-link"></i> Importar por Link</button>
+                            </div>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -263,6 +272,50 @@
         } else {
             alert('Por favor, digite o nome do produto antes de buscar no Google.');
             titleInput.focus();
+        }
+    }
+    async function importImageByUrl(inputId) {
+        let url = prompt("Cole o link (URL) da imagem que você copiou do Google ou de outro site:");
+        if (!url || !url.trim()) return;
+        url = url.trim();
+
+        try {
+            document.body.style.cursor = 'wait';
+            
+            let response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+            if (!response.ok) throw new Error("Não foi possível carregar a imagem. Verifique se o link é público.");
+            
+            let blob = await response.blob();
+            let ext = blob.type.split('/')[1] || 'jpg';
+            if (!blob.type.startsWith('image/')) {
+                throw new Error("O link fornecido não parece ser uma imagem válida.");
+            }
+
+            let file = new File([blob], `imported_image_${Date.now()}.${ext}`, { type: blob.type });
+
+            let dataTransfer = new DataTransfer();
+            let fileInput = document.getElementById(inputId);
+            
+            if (fileInput.multiple) {
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    dataTransfer.items.add(fileInput.files[i]);
+                }
+                dataTransfer.items.add(file);
+            } else {
+                dataTransfer.items.add(file);
+            }
+            
+            fileInput.files = dataTransfer.files;
+            
+            let event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+            
+            alert("Imagem importada com sucesso! Lembre-se de salvar as alterações.");
+            
+        } catch(e) {
+            alert("Erro ao importar a imagem: " + e.message);
+        } finally {
+            document.body.style.cursor = 'default';
         }
     }
 </script>
