@@ -52,7 +52,47 @@
     .cordel-varal-line {
         height: 4px;
         background: repeating-linear-gradient(90deg, #8b5e34 0, #8b5e34 10px, transparent 10px, transparent 15px);
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Estilos dos Modos de Exibição (Grade, Lista, Carrossel) */
+    .btn-view-mode {
+        border: none !important;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.82rem;
+        transition: all 0.2s ease;
+    }
+    .btn-view-mode.active, .btn-view-mode:hover {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    /* MODO LISTA */
+    .culture-view-list .cordel-item-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+    .culture-view-list .cordel-card {
+        flex-direction: row !important;
+        align-items: center;
+    }
+    .culture-view-list .cordel-cover-wrapper {
+        width: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+        height: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
+        border-bottom: none !important;
+        border-end: 1px solid #dee2e6 !important;
+    }
+    .culture-view-list .cordel-cover-img {
+        max-height: 140px !important;
+    }
+    .culture-view-list .cordel-pegador-clip {
+        display: none !important;
     }
 </style>
 @endpush
@@ -138,11 +178,32 @@
             </div>
         </div>
 
+        <!-- Control Bar (Header + Switcher de Modos) -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <h3 class="h5 fw-bold text-dark mb-0"><i class="fa-solid fa-book-open text-warning me-2"></i> Estante Cultural</h3>
+                <span class="badge bg-light text-dark border rounded-pill px-3">{{ $works->total() }} obras</span>
+            </div>
+
+            <!-- Botões de Modo de Exibição: Grade, Lista, Carrossel -->
+            <div class="btn-group border rounded-pill p-1 bg-white shadow-sm" role="group" aria-label="Modo de Exibição">
+                <button type="button" class="btn btn-sm rounded-pill px-3 btn-view-mode active" id="btn-mode-grid" onclick="setCultureViewMode('grid')" title="Grade Compacta">
+                    <i class="fa-solid fa-border-all me-1"></i> Grade
+                </button>
+                <button type="button" class="btn btn-sm rounded-pill px-3 btn-view-mode" id="btn-mode-list" onclick="setCultureViewMode('list')" title="Modo Lista">
+                    <i class="fa-solid fa-list me-1"></i> Lista
+                </button>
+                <button type="button" class="btn btn-sm rounded-pill px-3 btn-view-mode" id="btn-mode-carousel" onclick="setCultureViewMode('carousel')" title="Modo Carrossel">
+                    <i class="fa-solid fa-sliders me-1"></i> Carrossel
+                </button>
+            </div>
+        </div>
+
         <!-- Linha Simbolizando o Varal de Cordel -->
         <div class="cordel-varal-line"></div>
 
-        <!-- Grid da Estante / Varal -->
-        <div class="row g-4" id="culture-works-container">
+        <!-- Grid / Lista da Estante / Varal -->
+        <div class="row g-3" id="culture-works-container">
             @if($works->isEmpty())
                 <div class="col-12 text-center py-5">
                     <div class="p-5 bg-light rounded-4 border">
@@ -159,6 +220,16 @@
             @else
                 @include('culture._work_grid', ['works' => $works])
             @endif
+        </div>
+
+        <!-- Container Carrossel (Swiper.js com Transição Automática de 7.5s) -->
+        <div id="culture-carousel-container" class="d-none my-4 position-relative">
+            <div class="swiper culture-swiper-instance p-3 bg-white rounded-4 border shadow-sm overflow-hidden">
+                <div class="swiper-wrapper" id="culture-carousel-wrapper"></div>
+                <div class="swiper-button-next text-warning"></div>
+                <div class="swiper-button-prev text-warning"></div>
+                <div class="swiper-pagination mt-3"></div>
+            </div>
         </div>
 
         <!-- Indicator de Carregamento Infinito (AJAX Infinite Scroll) -->
@@ -272,8 +343,88 @@
         });
     }
 
+    let cultureSwiper = null;
+
+    function setCultureViewMode(mode) {
+        const gridContainer = document.getElementById('culture-works-container');
+        const carouselContainer = document.getElementById('culture-carousel-container');
+        const btnGrid = document.getElementById('btn-mode-grid');
+        const btnList = document.getElementById('btn-mode-list');
+        const btnCarousel = document.getElementById('btn-mode-carousel');
+
+        [btnGrid, btnList, btnCarousel].forEach(btn => btn?.classList.remove('active'));
+
+        if (mode === 'grid') {
+            btnGrid?.classList.add('active');
+            carouselContainer?.classList.add('d-none');
+            gridContainer?.classList.remove('d-none', 'culture-view-list');
+        } else if (mode === 'list') {
+            btnList?.classList.add('active');
+            carouselContainer?.classList.add('d-none');
+            gridContainer?.classList.remove('d-none');
+            gridContainer?.classList.add('culture-view-list');
+        } else if (mode === 'carousel') {
+            btnCarousel?.classList.add('active');
+            gridContainer?.classList.add('d-none');
+            carouselContainer?.classList.remove('d-none');
+            initCultureCarousel();
+        }
+
+        try {
+            localStorage.setItem('conectado_culture_view_mode', mode);
+        } catch(e){}
+    }
+
+    function initCultureCarousel() {
+        const wrapper = document.getElementById('culture-carousel-wrapper');
+        const gridContainer = document.getElementById('culture-works-container');
+        if (!wrapper || !gridContainer) return;
+
+        if (!cultureSwiper) {
+            wrapper.innerHTML = '';
+            const items = gridContainer.querySelectorAll('.cordel-item-col');
+            items.forEach(col => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide';
+                const clone = col.cloneNode(true);
+                clone.className = 'cordel-item-col w-100';
+                slide.appendChild(clone);
+                wrapper.appendChild(slide);
+            });
+
+            cultureSwiper = new Swiper('.culture-swiper-instance', {
+                slidesPerView: 1,
+                spaceBetween: 16,
+                loop: true,
+                autoplay: {
+                    delay: 7500,
+                    disableOnInteraction: false,
+                },
+                speed: 800,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    576: { slidesPerView: 2 },
+                    992: { slidesPerView: 3 },
+                    1200: { slidesPerView: 4 }
+                }
+            });
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         renderSavedSearches();
+
+        const savedMode = localStorage.getItem('conectado_culture_view_mode') || 'grid';
+        if (savedMode !== 'grid') {
+            setCultureViewMode(savedMode);
+        }
 
         let nextPageUrl = "{{ $works->nextPageUrl() }}";
         let isLoading = false;
