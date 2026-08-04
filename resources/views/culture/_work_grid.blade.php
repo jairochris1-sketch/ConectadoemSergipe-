@@ -19,7 +19,15 @@
                     {{ $work->category_label }}
                 </span>
 
-                @if($work->theme)
+                @if($work->ad)
+                    <span class="badge bg-success text-white position-absolute top-0 end-0 m-3 shadow-sm fw-bold">
+                        <i class="fa-solid fa-bag-shopping me-1"></i> Livro R$ {{ number_format($work->ad->price, 2, ',', '.') }}
+                    </span>
+                @elseif($work->embed_media_url)
+                    <span class="badge bg-danger text-white position-absolute top-0 end-0 m-3 shadow-sm fw-bold">
+                        <i class="fa-solid fa-play me-1"></i> YouTube / Spotify
+                    </span>
+                @elseif($work->theme)
                     <span class="badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 end-0 m-3 shadow-sm">
                         <i class="fa-solid fa-hashtag me-1"></i>{{ $work->theme }}
                     </span>
@@ -56,9 +64,19 @@
                         @endif
                     </div>
 
-                    <a href="{{ route('culture.show', $work->slug) }}" class="btn btn-outline-warning btn-sm rounded-pill fw-bold text-dark px-3">
-                        Ler Obra <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </a>
+                    @if($work->ad)
+                        <a href="{{ route('culture.show', $work->slug) }}" class="btn btn-success btn-sm rounded-pill fw-bold text-white px-3 shadow-sm">
+                            <i class="fa-solid fa-cart-shopping me-1"></i> Pedir Livro
+                        </a>
+                    @elseif($work->embed_media_url || $work->category === 'musica')
+                        <a href="{{ route('culture.show', $work->slug) }}" class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-3">
+                            <i class="fa-solid fa-play me-1"></i> Ouvir / Ver
+                        </a>
+                    @else
+                        <a href="{{ route('culture.show', $work->slug) }}" class="btn btn-outline-warning btn-sm rounded-pill fw-bold text-dark px-3">
+                            Ler Obra <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
