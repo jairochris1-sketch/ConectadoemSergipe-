@@ -117,13 +117,25 @@
                     <input type="text" name="author" value="{{ request('author') }}" class="form-control bg-light rounded-3" placeholder="Nome do Artista/Autor">
                 </div>
 
-                <!-- Botão Filtrar -->
-                <div class="col-12 col-md-2 d-grid">
-                    <button type="submit" class="btn btn-warning rounded-3 fw-bold text-dark">
+                <!-- Botão Filtrar e Salvar -->
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning rounded-3 fw-bold text-dark flex-grow-1">
                         <i class="fa-solid fa-filter me-1"></i> Filtrar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary rounded-3" id="btn-save-search" onclick="saveCurrentCultureSearch()" title="Salvar esta busca para voltar depois">
+                        <i class="fa-regular fa-bookmark"></i>
                     </button>
                 </div>
             </form>
+
+            <!-- Container de Buscas Salvas -->
+            <div id="saved-searches-container" class="mt-3 pt-3 border-top d-none">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <small class="fw-bold text-muted"><i class="fa-solid fa-bookmark text-warning me-1"></i> Minhas Buscas Salvas:</small>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-muted text-decoration-none small" onclick="clearAllSavedSearches()">Limpar todas</button>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="saved-searches-pills"></div>
+            </div>
         </div>
 
         <!-- Linha Simbolizando o Varal de Cordel -->
@@ -162,7 +174,107 @@
 
 @push('scripts')
 <script>
+    const SEARCHES_STORAGE_KEY = 'conectado_culture_saved_searches';
+
+    function getSavedSearches() {
+        try {
+            return JSON.parse(localStorage.getItem(SEARCHES_STORAGE_KEY)) || [];
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function renderSavedSearches() {
+        const searches = getSavedSearches();
+        const container = document.getElementById('saved-searches-container');
+        const pills = document.getElementById('saved-searches-pills');
+        if (!container || !pills) return;
+
+        if (searches.length === 0) {
+            container.classList.add('d-none');
+            return;
+        }
+
+        container.classList.remove('d-none');
+        pills.innerHTML = '';
+
+        searches.forEach((item, index) => {
+            const badge = document.createElement('div');
+            badge.className = 'badge bg-light text-dark border p-2 d-flex align-items-center gap-2 rounded-pill shadow-sm';
+            badge.style.cursor = 'pointer';
+            badge.innerHTML = `
+                <span onclick="applySavedSearch(${index})"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i> ${escapeHtml(item.label)}</span>
+                <i class="fa-solid fa-xmark text-danger ms-1" style="cursor:pointer;" onclick="deleteSavedSearch(${index}, event)" title="Excluir busca"></i>
+            `;
+            pills.appendChild(badge);
+        });
+    }
+
+    function saveCurrentCultureSearch() {
+        const form = document.getElementById('culture-filter-form');
+        const q = form.querySelector('[name="q"]').value.trim();
+        const category = form.querySelector('[name="category"]').value;
+        const author = form.querySelector('[name="author"]').value.trim();
+
+        if (!q && !category && !author) {
+            alert('Selecione ao menos um filtro ou digite um termo para salvar a busca.');
+            return;
+        }
+
+        let parts = [];
+        if (q) parts.push(`"${q}"`);
+        if (category) parts.push(category.toUpperCase());
+        if (author) parts.push(`Autor: ${author}`);
+
+        const label = parts.join(' + ');
+
+        let searches = getSavedSearches();
+        searches = searches.filter(s => s.label !== label);
+        searches.unshift({ label, q, category, author, timestamp: Date.now() });
+        if (searches.length > 10) searches.pop();
+
+        localStorage.setItem(SEARCHES_STORAGE_KEY, JSON.stringify(searches));
+        renderSavedSearches();
+        alert('Busca e filtros salvos com sucesso! Você pode clicar nela quando quiser voltar.');
+    }
+
+    function applySavedSearch(index) {
+        const searches = getSavedSearches();
+        const item = searches[index];
+        if (!item) return;
+
+        const url = new URL(window.location.origin + window.location.pathname);
+        if (item.q) url.searchParams.set('q', item.q);
+        if (item.category) url.searchParams.set('category', item.category);
+        if (item.author) url.searchParams.set('author', item.author);
+
+        window.location.href = url.toString();
+    }
+
+    function deleteSavedSearch(index, event) {
+        event.stopPropagation();
+        let searches = getSavedSearches();
+        searches.splice(index, 1);
+        localStorage.setItem(SEARCHES_STORAGE_KEY, JSON.stringify(searches));
+        renderSavedSearches();
+    }
+
+    function clearAllSavedSearches() {
+        if (confirm('Deseja apagar todas as suas buscas salvas?')) {
+            localStorage.removeItem(SEARCHES_STORAGE_KEY);
+            renderSavedSearches();
+        }
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        renderSavedSearches();
+
         let nextPageUrl = "{{ $works->nextPageUrl() }}";
         let isLoading = false;
         const container = document.getElementById('culture-works-container');
@@ -173,7 +285,6 @@
         window.addEventListener('scroll', function() {
             if (isLoading || !nextPageUrl) return;
 
-            // Se o usuário rolou até próximo do final da página (250px do fim)
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 250) {
                 isLoading = true;
                 loader.classList.remove('d-none');
