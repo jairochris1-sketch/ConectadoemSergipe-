@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\CultureWork;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -126,8 +127,7 @@ class CultureWorkController extends Controller
 
         $coverPath = null;
         if ($request->hasFile('cover')) {
-            $coverPath = $request->file('cover')->store('culture_covers', 'public');
-            $coverPath = 'storage/' . $coverPath;
+            $coverPath = ImageOptimizer::convertToWebp($request->file('cover'), 'culture_cover');
         }
 
         $work = CultureWork::create([
@@ -186,8 +186,10 @@ class CultureWorkController extends Controller
         ]);
 
         if ($request->hasFile('cover')) {
-            $coverPath = $request->file('cover')->store('culture_covers', 'public');
-            $work->cover_path = 'storage/' . $coverPath;
+            $coverPath = ImageOptimizer::convertToWebp($request->file('cover'), 'culture_cover');
+            if ($coverPath) {
+                $work->cover_path = $coverPath;
+            }
         }
 
         $work->title = $request->title;
