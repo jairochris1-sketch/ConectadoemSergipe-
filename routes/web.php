@@ -22,6 +22,7 @@ use App\Http\Controllers\StoreBusinessHoursController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\StorePromotionController;
+use App\Http\Controllers\CultureWorkController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -210,3 +211,16 @@ Route::post('/contato', [PageController::class, 'sendContact'])
     ->name('page.contact.send');
 Route::get('/privacidade', [PageController::class, 'privacy'])->name('page.privacy');
 Route::get('/termos', [PageController::class, 'terms'])->name('page.terms');
+
+// Módulo de Cultura, Cordel & Arte (Estante Pública)
+Route::get('/cultura-e-cordel', [CultureWorkController::class, 'index'])->name('culture.index');
+Route::get('/cultura-e-cordel/{slug}', [CultureWorkController::class, 'show'])->name('culture.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/minhas-obras', [CultureWorkController::class, 'myWorks'])->name('culture.my-works');
+    Route::get('/obras/criar', [CultureWorkController::class, 'create'])->name('culture.create');
+    Route::post('/obras', [CultureWorkController::class, 'store'])->name('culture.store');
+    Route::get('/obras/{id}/editar', [CultureWorkController::class, 'edit'])->name('culture.edit');
+    Route::put('/obras/{id}', [CultureWorkController::class, 'update'])->name('culture.update');
+    Route::delete('/obras/{id}', [CultureWorkController::class, 'destroy'])->name('culture.destroy');
+});

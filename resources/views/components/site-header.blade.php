@@ -12,7 +12,7 @@
         ['label' => 'Produtos', 'route' => 'module.products', 'icon' => 'fa-bag-shopping', 'class' => 'products', 'active' => request()->is('produtos*')],
         ['label' => 'Serviços', 'route' => 'module.services', 'icon' => 'fa-screwdriver-wrench', 'class' => 'services', 'active' => request()->is('servicos*') || request()->is('prestadores*')],
         ['label' => 'Empregos', 'route' => 'module.jobs', 'icon' => 'fa-briefcase', 'class' => 'jobs', 'active' => request()->is('empregos*')],
-        ['label' => 'Agro', 'route' => 'module.agro', 'icon' => 'fa-tractor', 'class' => 'agro', 'active' => request()->is('agro*')],
+        ['label' => 'Cordel & Arte', 'route' => 'culture.index', 'icon' => 'fa-feather-pointed', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
     ];
 @endphp
 
@@ -116,6 +116,7 @@
                             </li>
                             <li><a class="dropdown-item" href="{{ route('page.plans') }}"><i class="fa-solid fa-gem text-warning"></i>Planos</a></li>
                             <li><a class="dropdown-item" href="{{ route('orders.index') }}"><i class="fa-solid fa-box text-success"></i>Meus pedidos</a></li>
+                            <li><a class="dropdown-item" href="{{ route('culture.my-works') }}"><i class="fa-solid fa-feather-pointed text-warning"></i>Minhas Obras (Cordel)</a></li>
                             <li><a class="dropdown-item" href="{{ route('chat.index') }}"><i class="fa-solid fa-comments text-success"></i>Mensagens</a></li>
                             @if(auth()->user()->role === 'admin')
                                 <li><hr class="dropdown-divider"></li>
