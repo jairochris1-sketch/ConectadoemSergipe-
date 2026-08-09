@@ -712,3 +712,90 @@ html[data-theme="dark"] .plans-about-map-box {
 html[data-theme="dark"] .plans-about-map-label {
     color: #93c5fd;
 }
+
+/* =========================================================
+   GERENCIAMENTO DE LOJA & MODAIS - MODO ESCURO
+   ========================================================= */
+
+html[data-theme="dark"] .store-products-manager {
+    background: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+html[data-theme="dark"] .store-products-manager-heading h2,
+html[data-theme="dark"] .store-products-manager-info h3 {
+    color: var(--foreground) !important;
+}
+
+html[data-theme="dark"] .store-products-manager-heading p,
+html[data-theme="dark"] .store-products-manager-empty p,
+html[data-theme="dark"] .store-products-manager-info p {
+    color: var(--muted) !important;
+}
+
+html[data-theme="dark"] .store-products-manager-list article {
+    background: var(--muted-bg) !important;
+    border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .store-products-manager-image {
+    background: var(--input) !important;
+    color: var(--muted) !important;
+}
+
+html[data-theme="dark"] .store-products-manager-actions a {
+    background: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+/* Dialogs, Modais e Elementos Expansíveis */
+html[data-theme="dark"] dialog {
+    background: var(--card);
+    color: var(--foreground);
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] dialog .modal-content {
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+}
+
+html[data-theme="dark"] dialog .bg-light,
+html[data-theme="dark"] dialog .modal-footer,
+html[data-theme="dark"] details.bg-light {
+    background-color: var(--muted-bg) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] dialog .bg-body {
+    background-color: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] dialog .text-dark,
+html[data-theme="dark"] details .text-dark {
+    color: var(--foreground) !important;
+}
+
+html[data-theme="dark"] dialog .text-muted,
+html[data-theme="dark"] dialog .text-secondary,
+html[data-theme="dark"] details .text-muted {
+    color: var(--muted) !important;
+}
+
+html[data-theme="dark"] dialog .nav-pills.bg-light {
+    background-color: var(--input) !important;
+}
+
+html[data-theme="dark"] dialog .nav-pills .nav-link {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] dialog .nav-pills .nav-link.active {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}

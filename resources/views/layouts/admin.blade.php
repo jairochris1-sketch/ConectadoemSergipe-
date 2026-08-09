@@ -8,7 +8,7 @@
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     @include('components.theme-head')
@@ -18,7 +18,7 @@
 
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background-color: var(--background);
             color: var(--foreground);
         }
@@ -26,12 +26,67 @@
         .admin-sidebar {
             width: 260px;
             background-color: #0f172a;
-            min-height: 100vh;
+            height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
             transition: all 0.3s ease;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #334155 #0f172a;
+        }
+
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Barra de Rolagem Horizontal do Cabeçalho Admin */
+        .admin-topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 4px;
+            margin-top: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        .admin-topbar-nav::-webkit-scrollbar {
+            height: 5px;
+        }
+        .admin-topbar-nav::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .admin-topbar-nav .topbar-nav-link {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #475569;
+            background-color: #f1f5f9;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .admin-topbar-nav .topbar-nav-link:hover,
+        .admin-topbar-nav .topbar-nav-link.active {
+            background-color: #4f46e5;
+            color: #ffffff;
         }
 
         .admin-sidebar .nav-link {
@@ -146,11 +201,17 @@
             <a href="{{ route('admin.ads') }}" class="nav-link {{ request()->is('admin/anuncios*') ? 'active' : '' }}">
                 <i class="fa-solid fa-rectangle-ad text-warning"></i> Anúncios
             </a>
+            <a href="{{ route('admin.provider_claims.index') }}" class="nav-link {{ request()->is('admin/reivindicacoes*') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-check text-success"></i> Reivindicações
+            </a>
             <a href="{{ route('admin.reports') }}" class="nav-link {{ request()->is('admin/denuncias*') ? 'active' : '' }}">
                 <i class="fa-solid fa-flag text-danger"></i> Denúncias
             </a>
             <a href="{{ route('admin.reviews') }}" class="nav-link {{ request()->is('admin/avaliacoes*') ? 'active' : '' }}">
                 <i class="fa-solid fa-star text-warning"></i> Avaliações
+            </a>
+            <a href="{{ route('admin.feed.index') }}" class="nav-link {{ request()->is('admin/comunidade*') ? 'active' : '' }}">
+                <i class="fa-solid fa-users text-info"></i> Comunidade
             </a>
             <a href="{{ route('admin.categories') }}" class="nav-link {{ request()->is('admin/categorias*') ? 'active' : '' }}">
                 <i class="fa-solid fa-list-check text-success"></i> Categorias
@@ -186,16 +247,58 @@
     <!-- Main Content -->
     <main class="admin-content">
         <!-- Header -->
-        <header class="admin-topbar d-flex align-items-center justify-content-between bg-white rounded-4 shadow-sm p-3 mb-4">
-            <div class="d-flex align-items-center gap-3">
-                <button type="button" class="admin-menu-toggle btn btn-outline-primary rounded-3" aria-label="Abrir menu administrativo" aria-expanded="false">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <span class="admin-header-environment badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">Ambiente de Controle</span>
+        <header class="admin-topbar bg-white rounded-4 shadow-sm p-3 mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="admin-menu-toggle btn btn-outline-primary rounded-3" aria-label="Abrir menu administrativo" aria-expanded="false">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <span class="admin-header-environment badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">Ambiente de Controle</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="admin-current-user fw-bold text-dark me-2"><i class="fa-solid fa-user-gear text-primary me-1"></i> {{ auth()->user()->name ?? 'Administrador' }}</span>
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <span class="admin-current-user fw-bold text-dark me-2"><i class="fa-solid fa-user-gear text-primary me-1"></i> {{ auth()->user()->name ?? 'Administrador' }}</span>
-            </div>
+
+            <!-- Barra de Rolagem Horizontal do Cabeçalho (Apenas Celular/Tablet) -->
+            <nav class="admin-topbar-nav d-lg-none mt-2 pt-2 border-top">
+                <a href="{{ route('admin.dashboard') }}" class="topbar-nav-link {{ request()->is('admin') ? 'active' : '' }}">
+                    <i class="fa-solid fa-chart-line text-info"></i> Dashboard
+                </a>
+                <a href="{{ route('admin.users') }}" class="topbar-nav-link {{ request()->is('admin/usuarios*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-users text-primary"></i> Usuários
+                </a>
+                <a href="{{ route('admin.ads') }}" class="topbar-nav-link {{ request()->is('admin/anuncios*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-rectangle-ad text-warning"></i> Anúncios
+                </a>
+                <a href="{{ route('admin.provider_claims.index') }}" class="topbar-nav-link {{ request()->is('admin/reivindicacoes*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-check text-success"></i> Reivindicações
+                </a>
+                <a href="{{ route('admin.reports') }}" class="topbar-nav-link {{ request()->is('admin/denuncias*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-flag text-danger"></i> Denúncias
+                </a>
+                <a href="{{ route('admin.reviews') }}" class="topbar-nav-link {{ request()->is('admin/avaliacoes*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-star text-warning"></i> Avaliações
+                </a>
+                <a href="{{ route('admin.feed.index') }}" class="topbar-nav-link {{ request()->is('admin/comunidade*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-users text-info"></i> Comunidade
+                </a>
+                <a href="{{ route('admin.categories') }}" class="topbar-nav-link {{ request()->is('admin/categorias*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-list-check text-success"></i> Categorias
+                </a>
+                <a href="{{ route('admin.plans.index') }}" class="topbar-nav-link {{ request()->is('admin/planos*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-layer-group text-info"></i> Planos
+                </a>
+                <a href="{{ route('admin.stores') }}" class="topbar-nav-link {{ request()->is('admin/lojas*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-store text-danger"></i> Lojas & Empresas
+                </a>
+                <a href="{{ route('admin.settings') }}" class="topbar-nav-link {{ request()->is('admin/configuracoes*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-gears text-secondary"></i> Configurações
+                </a>
+                <a href="{{ route('admin.system.update') }}" class="topbar-nav-link {{ request()->is('admin/atualizacao*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-cloud-arrow-down text-warning"></i> Atualização
+                </a>
+            </nav>
         </header>
 
         @if(session('error'))

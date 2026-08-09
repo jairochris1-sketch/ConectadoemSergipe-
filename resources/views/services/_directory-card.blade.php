@@ -70,8 +70,8 @@
         </p>
 
         {{-- Descrição do Prestador --}}
-        @if($description)
-        <p class="sdc-description">{{ $description }}</p>
+        @if($provider->description)
+        <p class="sdc-description">{{ $provider->description }}</p>
         @endif
 
         {{-- Badge (Atendimento em domicílio quando aplicável) --}}

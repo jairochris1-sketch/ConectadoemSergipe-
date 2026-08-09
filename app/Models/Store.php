@@ -33,6 +33,7 @@ class Store extends Model
         'website',
         'logo',
         'banner',
+        'map_location',
         'active',
         'moderation_status',
         'moderation_note',
@@ -55,9 +56,18 @@ class Store extends Model
         'delivery_fee' => 'decimal:2',
         'free_delivery_threshold' => 'decimal:2',
         'minimum_order' => 'decimal:2',
-        'delivery_min_minutes' => 'integer',
         'delivery_max_minutes' => 'integer',
     ];
+
+    public function getLogoPathAttribute(): ?string
+    {
+        return $this->logo ?: null;
+    }
+
+    public function getBannerPathAttribute(): ?string
+    {
+        return $this->banner ?: null;
+    }
 
     public function user()
     {

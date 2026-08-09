@@ -20,7 +20,7 @@
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Bootstrap 5 CSS & Swiper -->
@@ -31,7 +31,7 @@
     @include('components.theme-head')
 
     <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=7.2">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=7.7">
     <link rel="stylesheet" href="{{ asset('css/site-header.css') }}?v=2.3">
     <link rel="stylesheet" href="{{ asset('css/theme-toggle.css') }}?v=2.3">
     @stack('styles')
@@ -40,7 +40,7 @@
     <!-- Splash Screen -->
     @include('components.splash-screen')
 
-    @if(!request()->is('login') && !request()->is('cadastro') && !request()->is('esqueci-senha*') && !request()->is('admin*'))
+    @if($showPublicHeader)
     <!-- Navbar Pública -->
     @include('components.site-header', ['headerLayout' => $userHeaderLayout])
     {{--
@@ -132,7 +132,7 @@
         @yield('content')
     </main>
 
-    @if(!request()->is('login') && !request()->is('cadastro') && !request()->is('esqueci-senha*') && !request()->is('admin*'))
+    @if($showPublicHeader)
     <!-- Footer -->
     <footer class="site-footer py-5 mt-5">
         <div class="container">
@@ -179,6 +179,7 @@
     @include('components.share-modal')
 
     @include('components.theme-toggle')
+    @include('components.vlibras-widget')
 
     <!-- Scripts JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

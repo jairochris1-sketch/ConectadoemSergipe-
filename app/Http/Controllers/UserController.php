@@ -14,6 +14,38 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    public function publicProfile(string $username)
+    {
+        $user = User::query()
+            ->where('username', mb_strtolower($username))
+            ->firstOrFail();
+
+        $ads = $user->ads()
+            ->with('mainImage')
+            ->where('status', 'active')
+            ->latest()
+            ->limit(6)
+            ->get();
+        $stores = $user->stores()
+            ->where('active', true)
+            ->where('moderation_status', 'approved')
+            ->latest()
+            ->limit(6)
+            ->get();
+        $works = $user->cultureWorks()
+            ->published()
+            ->latest()
+            ->limit(6)
+            ->get();
+        $posts = $user->feedPosts()
+            ->where('status', 'published')
+            ->latest('published_at')
+            ->limit(6)
+            ->get();
+
+        return view('user.public-profile', compact('user', 'ads', 'stores', 'works', 'posts'));
+    }
+
     public function panel()
     {
         if (! Auth::check()) {

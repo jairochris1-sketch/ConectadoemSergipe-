@@ -1,19 +1,42 @@
 @php
-    $citySlideshowImages = collect(\Illuminate\Support\Facades\File::files(public_path('images/cidadesimagem')))
+    $rawFiles = collect(\Illuminate\Support\Facades\File::files(public_path('Cidades')))
         ->filter(fn ($file) => in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'], true))
         ->sortBy(fn ($file) => $file->getFilename())
-        ->values()
-        ->map(fn ($file) => asset('images/cidadesimagem/'.$file->getFilename()));
+        ->values();
+
+    $citySlideshowImages = $rawFiles->map(function($file) {
+        $filename = $file->getFilename();
+        // The city name is the filename without extension
+        $cityName = pathinfo($filename, PATHINFO_FILENAME);
+        // Normalize multiple spaces just in case (e.g. 'Nossa Senhora das  Dores')
+        $cityName = trim(preg_replace('/\s+/', ' ', $cityName));
+        
+        return [
+            'url' => asset('Cidades/'.$filename),
+            'city' => $cityName,
+        ];
+    });
+    
+    // Determine the first city to sync with floating cards
+    $firstCity = $citySlideshowImages->first()['city'] ?? 'Sergipe';
 @endphp
 
 <div class="auth-city-slideshow" aria-hidden="true">
-    @foreach($citySlideshowImages as $image)
+    @foreach($citySlideshowImages as $index => $item)
         <div
             class="auth-city-slide {{ $loop->first ? 'is-active' : '' }}"
-            style="background-image: url('{{ $image }}');"
+            data-city="{{ $item['city'] }}"
+            data-index="{{ $index }}"
+            style="background-image: url('{{ $item['url'] }}');"
         ></div>
     @endforeach
     <div class="auth-city-overlay"></div>
+
+    <!-- Badge Indicador da Cidade no Topo Direito -->
+    <div id="slideshow-city-badge" class="position-absolute top-0 end-0 m-4 px-3 py-2 rounded-pill text-white fw-bold shadow-lg d-flex align-items-center gap-2 border border-white border-opacity-20" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); z-index: 10; font-size: 0.85rem; transition: opacity 0.5s ease;">
+        <i class="fa-solid fa-location-dot text-danger fs-6"></i>
+        <span id="slideshow-city-name">{{ $citySlideshowImages[0]['city'] === 'Sergipe' ? 'Conectado em Sergipe' : ($citySlideshowImages[0]['city'] . ', SE') }}</span>
+    </div>
 </div>
 
 @once
@@ -35,7 +58,7 @@
             background-repeat: no-repeat;
             background-size: cover;
             opacity: 0;
-            filter: blur(1.5px);
+            filter: blur(0px);
             transform: scale(1.025);
             transition: opacity 1.4s ease-in-out;
             will-change: opacity;
@@ -49,8 +72,8 @@
             z-index: 1;
             background: linear-gradient(
                 135deg,
-                rgba(2, 6, 23, .58),
-                rgba(15, 23, 42, .72)
+                rgba(2, 6, 23, .15),
+                rgba(15, 23, 42, .30)
             );
             pointer-events: none;
         }
@@ -73,12 +96,36 @@
 
                 let currentSlide = 0;
 
+                function updateCityDisplay(slideIndex) {
+                    const cityName = slides[slideIndex].getAttribute('data-city');
+                    const badgeEl = document.getElementById('slideshow-city-name');
+                    const badgeContainer = document.getElementById('slideshow-city-badge');
+
+                    if (badgeEl && badgeContainer) {
+                        badgeContainer.style.opacity = '0';
+                        setTimeout(function() {
+                            badgeEl.textContent = cityName === 'Sergipe' ? 'Conectado em Sergipe' : (cityName + ', SE');
+                            badgeContainer.style.opacity = '1';
+                        }, 350);
+                    }
+
+                    if (typeof window.updateFloatingCardsForCity === 'function') {
+                        window.updateFloatingCardsForCity(cityName);
+                    }
+                }
+
+                // Inicializa na primeira cidade
+                updateCityDisplay(0);
+
+                // Intervalo de troca de slide a cada 8 segundos
                 window.setInterval(function () {
                     const nextSlide = (currentSlide + 1) % slides.length;
                     slides[nextSlide].classList.add('is-active');
                     slides[currentSlide].classList.remove('is-active');
                     currentSlide = nextSlide;
-                }, 10000);
+
+                    updateCityDisplay(currentSlide);
+                }, 8000);
             });
         });
     </script>

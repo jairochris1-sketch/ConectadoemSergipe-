@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -167,5 +168,119 @@ class AuthController extends Controller
     private function normalizeUsername(?string $username): string
     {
         return mb_strtolower(ltrim(trim($username ?? ''), '@'));
+    }
+
+    public function redirectToGoogle()
+    {
+        if (Setting::get('google_login_enabled', '1') != '1') {
+            return redirect()->route('login')->with('error', 'O login com o Google está temporariamente desativado pelo administrador.');
+        }
+
+        $clientId = Setting::get('google_client_id', env('GOOGLE_CLIENT_ID'));
+        if (empty($clientId)) {
+            return redirect()->route('login')->with('error', 'O login com o Google ainda não foi ativado com as credenciais do Google OAuth.');
+        }
+
+        $redirectUri = route('auth.google.callback');
+        $query = http_build_query([
+            'client_id' => $clientId,
+            'redirect_uri' => $redirectUri,
+            'response_type' => 'code',
+            'scope' => 'openid email profile',
+            'access_type' => 'online',
+            'prompt' => 'select_account',
+        ]);
+
+        return redirect('https://accounts.google.com/o/oauth2/v2/auth?'.$query);
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        if ($request->has('error') || ! $request->has('code')) {
+            return redirect()->route('login')->with('error', 'O login com o Google foi cancelado.');
+        }
+
+        $clientId = Setting::get('google_client_id', env('GOOGLE_CLIENT_ID'));
+        $clientSecret = Setting::get('google_client_secret', env('GOOGLE_CLIENT_SECRET'));
+        $redirectUri = route('auth.google.callback');
+
+        try {
+            $tokenResponse = \Illuminate\Support\Facades\Http::asForm()->post('https://oauth2.googleapis.com/token', [
+                'code' => $request->code,
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'redirect_uri' => $redirectUri,
+                'grant_type' => 'authorization_code',
+            ]);
+
+            if ($tokenResponse->failed()) {
+                \Illuminate\Support\Facades\Log::error('[GoogleOAuth] Troca de token falhou: '.$tokenResponse->body());
+
+                return redirect()->route('login')->with('error', 'Falha ao autenticar com o Google. Verifique se o Client Secret está correto.');
+            }
+
+            $accessToken = $tokenResponse->json('access_token');
+            $userResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->get('https://www.googleapis.com/oauth2/v3/userinfo');
+
+            if ($userResponse->failed()) {
+                return redirect()->route('login')->with('error', 'Não foi possível carregar os dados do seu perfil Google.');
+            }
+
+            $googleUser = $userResponse->json();
+            $email = $googleUser['email'] ?? null;
+            $googleId = $googleUser['sub'] ?? null;
+            $name = $googleUser['name'] ?? 'Usuário Google';
+            $avatar = $googleUser['picture'] ?? null;
+
+            if (! $email) {
+                return redirect()->route('login')->with('error', 'O Google não forneceu um e-mail válido.');
+            }
+
+            $user = User::where('google_id', $googleId)
+                ->orWhere('email', $email)
+                ->first();
+
+            if (! $user) {
+                $baseUsername = \Illuminate\Support\Str::slug(explode('@', $email)[0]);
+                $username = $baseUsername;
+                $counter = 1;
+                while (User::where('username', $username)->exists()) {
+                    $username = $baseUsername.$counter;
+                    $counter++;
+                }
+
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'username' => $username,
+                    'google_id' => $googleId,
+                    'avatar' => $avatar,
+                    'password' => Hash::make(\Illuminate\Support\Str::random(24)),
+                    'role' => 'user',
+                ]);
+            } else {
+                $user->update([
+                    'google_id' => $googleId,
+                    'avatar' => $user->avatar ?: $avatar,
+                    'is_available' => true,
+                    'last_login_ip' => $request->ip(),
+                ]);
+                $user->ads()->where('status', 'inactive')->update(['status' => 'active']);
+                $user->stores()->where('active', false)->update(['active' => true]);
+            }
+
+            if ($user->suspended_at) {
+                return redirect()->route('login')->with('error', 'Esta conta está suspensa. Entre em contato com o suporte.');
+            }
+
+            Auth::login($user, true);
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('home'))->with('success', "Bem-vindo(a), {$user->name}!");
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[GoogleOAuth] Exceção no login Google: '.$e->getMessage());
+
+            return redirect()->route('login')->with('error', 'Ocorreu um erro ao processar o login com o Google.');
+        }
     }
 }

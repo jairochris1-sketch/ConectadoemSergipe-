@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($store ? 'Gerenciar minha loja' : 'Criar minha loja') . ' - Conectado em Sergipe')
+@section('title', ($store ? 'Gerenciar minha loja' : ($requestedCategory === 'Alimentação' ? 'Cadastrar restaurante' : 'Criar minha loja')) . ' - Conectado em Sergipe')
 
 @section('content')
 @php
@@ -18,8 +18,8 @@
                     <i class="fa-solid fa-store"></i>
                     Minha loja
                 </span>
-                <h1>{{ $editing ? 'Gerenciar minha loja' : 'Crie sua vitrine comercial' }}</h1>
-                <p>{{ $editing ? 'Atualize as informações que seus clientes encontram na vitrine.' : 'Cadastre sua loja para apresentar seus produtos aos clientes de Sergipe.' }}</p>
+                <h1>{{ $editing ? 'Gerenciar minha loja' : ($requestedCategory === 'Alimentação' ? 'Cadastre seu restaurante' : 'Crie sua vitrine comercial') }}</h1>
+                <p>{{ $editing ? 'Atualize as informações que seus clientes encontram na vitrine.' : ($requestedCategory === 'Alimentação' ? 'Apresente seu cardápio, atendimento e opções de entrega aos clientes de Sergipe.' : 'Cadastre sua loja para apresentar seus produtos aos clientes de Sergipe.') }}</p>
             </div>
 
             @if($editing)
@@ -281,17 +281,19 @@
 
                 <div class="store-media-fields">
                     <div class="store-logo-field">
-                        <div id="store-logo-preview" class="store-logo-preview">
-                            @if($store?->logo)
-                                <img src="{{ asset($store->logo) }}" alt="Logo atual da loja">
-                            @else
-                                <i class="fa-solid fa-store"></i>
-                            @endif
+                        <div class="store-logo-header">
+                            <div id="store-logo-preview" class="store-logo-preview">
+                                @if($store?->logo)
+                                    <img src="{{ asset($store->logo) }}" alt="Logo atual da loja">
+                                @else
+                                    <i class="fa-solid fa-store"></i>
+                                @endif
+                            </div>
+                            <label for="store-logo-input" class="store-media-label">
+                                <strong>Logo da loja</strong>
+                                <span>Quadrado, JPG, PNG ou WEBP. Até 5 MB.</span>
+                            </label>
                         </div>
-                        <label for="store-logo-input">
-                            <strong>Logo da loja</strong>
-                            <span>Quadrado, JPG, PNG ou WEBP. Até 5 MB.</span>
-                        </label>
                         <input id="store-logo-input" type="file" name="logo" accept=".jpg,.jpeg,.png,.webp">
                         @if($store?->logo)
                             <label class="store-remove-media">
@@ -309,7 +311,7 @@
                                 <div><i class="fa-solid fa-panorama"></i><span>Prévia do banner</span></div>
                             @endif
                         </div>
-                        <label for="store-banner-input">
+                        <label for="store-banner-input" class="store-media-label">
                             <strong>Banner da loja</strong>
                             <span>Imagem horizontal, JPG, PNG ou WEBP. Até 8 MB.</span>
                         </label>
@@ -396,7 +398,7 @@
                         <select name="category" id="store-category" required>
                             <option value="">Escolha uma categoria</option>
                             @foreach($categories as $categoryOption)
-                                <option value="{{ $categoryOption['name'] }}" @selected(old('category', $store?->category) === $categoryOption['name'])>
+                                <option value="{{ $categoryOption['name'] }}" @selected(old('category', $store?->category ?? $requestedCategory) === $categoryOption['name'])>
                                     {{ $categoryOption['name'] }}
                                 </option>
                             @endforeach
@@ -529,6 +531,50 @@
                         <span>Site</span>
                         <input type="url" name="website" value="{{ old('website', $store?->website) }}" maxlength="255" placeholder="https://sualoja.com.br">
                     </label>
+
+                    <div class="store-form-field store-form-field-wide">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                            <span class="fw-semibold">Localização no Google Maps (Coordenadas, Link ou iFrame)</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 text-decoration-none fw-bold shadow-sm" onclick="document.getElementById('coords-help-dialog').showModal()" style="font-size: 0.82rem;">
+                                <i class="fa-solid fa-circle-question me-1"></i> Como pegar o mapa?
+                            </button>
+                        </div>
+                        <input type="text" id="map_location" name="map_location" value="{{ old('map_location', $store?->map_location) }}" maxlength="1000" placeholder="Ex: -10.9472, -37.0731 ou https://maps.google.com/... ou <iframe... >">
+                        <small class="text-muted d-block mt-1">
+                            <strong>Formatos aceitos:</strong> Coordenadas (ex: <code>-10.9472, -37.0731</code>), link direto do Google Maps ou código <code>&lt;iframe&gt;</code>. O sistema gerará o mapa automaticamente na sua loja.
+                        </small>
+
+                        <details class="mt-2 border rounded-3 p-3 bg-light" style="font-size: 0.85rem;">
+                            <summary class="fw-semibold text-primary cursor-pointer" style="user-select: none;">
+                                <i class="fa-solid fa-lightbulb text-warning me-1"></i> Ver opções e passo a passo (Coordenadas, Link ou iFrame)
+                            </summary>
+                            <div class="mt-3 pt-3 border-top">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-location-crosshairs text-primary me-1"></i> 1. Coordenadas:</strong>
+                                        <ul class="ps-3 mb-0 text-muted" style="line-height: 1.5;">
+                                            <li>Clique c/ botão direito no mapa ou segure o dedo no celular sobre sua loja.</li>
+                                            <li>Copie os números da latitude e longitude (ex: <code>-10.9472, -37.0731</code>).</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-link text-success me-1"></i> 2. Link do Google Maps:</strong>
+                                        <ul class="ps-3 mb-0 text-muted" style="line-height: 1.5;">
+                                            <li>No Google Maps, clique no botão <strong>Compartilhar</strong>.</li>
+                                            <li>Clique em <strong>Copiar link</strong> e cole o link direto aqui.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-code text-secondary me-1"></i> 3. Código iFrame:</strong>
+                                        <ul class="ps-3 mb-0 text-muted" style="line-height: 1.5;">
+                                            <li>No Google Maps, clique em <strong>Compartilhar</strong> &gt; <strong>Incorporar um mapa</strong>.</li>
+                                            <li>Clique em <strong>Copiar HTML</strong> (código <code>&lt;iframe...&gt;</code>) e cole aqui.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
                 </div>
             </section>
 
@@ -832,6 +878,86 @@
             </section>
         @endif
     </div>
+
+    <!-- Modal de Instruções sobre Localização e Mapa -->
+    <dialog id="coords-help-dialog" class="border-0 rounded-4 shadow-lg p-0" style="max-width: 620px; width: 92%; backdrop-filter: blur(4px);">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-primary text-white p-3 rounded-top-4 d-flex align-items-center justify-content-between">
+                <h5 class="modal-title m-0 fs-6 fw-bold">
+                    <i class="fa-solid fa-map-location-dot me-2"></i> Como adicionar o Mapa da sua Loja
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('coords-help-dialog').close()" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-4" style="font-size: 0.9rem;">
+                <p class="text-muted mb-3">
+                    O sistema aceita <strong>3 formas simples</strong> para exibir o mapa interativo e rota GPS na página da sua loja:
+                </p>
+
+                <ul class="nav nav-pills nav-fill mb-3 gap-2 p-1 bg-light rounded-3" id="coordsModalTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-2 py-2 fw-bold" id="coords-tab" data-bs-toggle="tab" data-bs-target="#coords-tab-pane" type="button" role="tab">
+                            <i class="fa-solid fa-location-crosshairs me-1"></i> Coordenadas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-2 py-2 fw-bold" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-tab-pane" type="button" role="tab">
+                            <i class="fa-solid fa-link me-1"></i> Link Direto
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-2 py-2 fw-bold" id="iframe-tab" data-bs-toggle="tab" data-bs-target="#iframe-tab-pane" type="button" role="tab">
+                            <i class="fa-solid fa-code me-1"></i> Código iFrame
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content border rounded-3 p-3 bg-body" id="coordsModalTabsContent">
+                    <!-- Aba Coordenadas -->
+                    <div class="tab-pane fade show active" id="coords-tab-pane" role="tabpanel">
+                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-circle-check text-primary me-1"></i> Opção 1: Coordenadas (Latitude e Longitude)</strong>
+                        <ol class="ps-3 mb-0 text-secondary" style="line-height: 1.6;">
+                            <li>Acesse o <a href="https://maps.google.com" target="_blank" rel="noopener" class="fw-bold text-primary text-decoration-underline">Google Maps <i class="fa-solid fa-arrow-up-right-from-square small"></i></a>.</li>
+                            <li><strong>No PC:</strong> Clique com o <u>botão direito</u> no local da loja e clique na 1ª opção (ex: <code>-10.9472, -37.0731</code>) para copiar.</li>
+                            <li><strong>No Celular:</strong> Segure o dedo sobre a loja no app do Maps até surgir o pino vermelho e toque nas coordenadas para copiar.</li>
+                            <li>Cole os números no campo do formulário.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Aba Link Direto -->
+                    <div class="tab-pane fade" id="link-tab-pane" role="tabpanel">
+                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-circle-check text-success me-1"></i> Opção 2: Link do Google Maps</strong>
+                        <ol class="ps-3 mb-0 text-secondary" style="line-height: 1.6;">
+                            <li>Pesquise sua loja no <a href="https://maps.google.com" target="_blank" rel="noopener" class="fw-bold text-primary text-decoration-underline">Google Maps</a>.</li>
+                            <li>Clique no botão <strong>Compartilhar</strong>.</li>
+                            <li>Clique em <strong>Copiar link</strong>.</li>
+                            <li>Cole o link copiado (ex: <code>https://maps.app.goo.gl/...</code>) no campo do formulário.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Aba iFrame -->
+                    <div class="tab-pane fade" id="iframe-tab-pane" role="tabpanel">
+                        <strong class="d-block text-dark mb-2"><i class="fa-solid fa-circle-check text-secondary me-1"></i> Opção 3: Código iFrame (Incorporar Mapa)</strong>
+                        <ol class="ps-3 mb-0 text-secondary" style="line-height: 1.6;">
+                            <li>No <a href="https://maps.google.com" target="_blank" rel="noopener" class="fw-bold text-primary text-decoration-underline">Google Maps</a>, clique em <strong>Compartilhar</strong>.</li>
+                            <li>Acesse a aba <strong>Incorporar um mapa</strong>.</li>
+                            <li>Clique no botão <strong>Copiar HTML</strong>.</li>
+                            <li>Cole o código gerado (ex: <code>&lt;iframe src="..."&gt;&lt;/iframe&gt;</code>) diretamente no campo do formulário.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="alert alert-success border-0 mt-3 mb-0 d-flex align-items-center gap-2 py-2 px-3 rounded-3">
+                    <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+                    <small><strong>Pronto!</strong> Qualquer um dos 3 métodos funcionará perfeitamente e exibirá o mapa na sua loja.</small>
+                </div>
+            </div>
+            <div class="modal-footer bg-light p-3 rounded-bottom-4 d-flex justify-content-end">
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" onclick="document.getElementById('coords-help-dialog').close()">
+                    Entendi!
+                </button>
+            </div>
+        </div>
+    </dialog>
 </main>
 @endsection
 

@@ -3,27 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ad;
+use App\Models\Category;
 use App\Models\Setting;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    private const SERVICE_SEARCH_CATEGORIES = [
-        ['name' => 'Eletricista', 'icon' => 'fa-bolt'],
-        ['name' => 'Encanador', 'icon' => 'fa-faucet-drip'],
-        ['name' => 'Pintor', 'icon' => 'fa-paint-roller'],
-        ['name' => 'Mecânico', 'icon' => 'fa-screwdriver-wrench'],
-        ['name' => 'Advogado', 'icon' => 'fa-scale-balanced'],
-        ['name' => 'Faxineira / Diarista', 'icon' => 'fa-broom'],
-        ['name' => 'Marcenaria', 'icon' => 'fa-hammer'],
-        ['name' => 'TI / Informática', 'icon' => 'fa-computer'],
-        ['name' => 'Frete e Mudanças', 'icon' => 'fa-truck-moving'],
-        ['name' => 'Restaurante / Pizzaria', 'icon' => 'fa-utensils'],
-        ['name' => 'Pedreiro', 'icon' => 'fa-trowel-bricks'],
-        ['name' => 'Jardineiro', 'icon' => 'fa-seedling'],
-    ];
-
     private const AD_SEARCH_CATEGORIES = [
         ['name' => 'Imóveis', 'module' => 'real_estate', 'icon' => 'fa-house'],
         ['name' => 'Produtos', 'module' => 'products', 'icon' => 'fa-bag-shopping'],
@@ -75,12 +63,7 @@ class HomeController extends Controller
             $query = Ad::with(['mainImage'])->where('status', 'active');
 
             if (! empty($q)) {
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('title', 'like', "%{$q}%")
-                        ->orWhere('description', 'like', "%{$q}%")
-                        ->orWhere('advertiser_type', 'like', "%{$q}%")
-                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', "%{$q}%"));
-                });
+                $this->applySmartSearch($query, $q);
             }
 
             if (! empty($type)) {
@@ -139,13 +122,58 @@ class HomeController extends Controller
 
         $recentAds = $recentAdsQuery->orderBy('created_at', 'desc')->take(10)->get();
         $popularAds = $popularAdsQuery->orderBy('views', 'desc')->take(10)->get();
-        $serviceProviders = Ad::with(['user', 'mainImage', 'category'])
+        $serviceProvidersQuery = Ad::with(['user', 'mainImage', 'category'])
             ->where('status', 'active')
             ->where('module', 'services')
-            ->when($city, fn ($query) => $query->where('city', $city))
-            ->latest()
+            ->when($city, fn ($query) => $query->where('city', $city));
+        $featuredProviderUserIds = $this->featuredProviderUserIds();
+        $featuredProviders = (clone $serviceProvidersQuery)
+            ->whereIn('user_id', $featuredProviderUserIds)
+            ->get()
+            ->sortBy(fn (Ad $provider): string => hash(
+                'sha256',
+                now('America/Fortaleza')->toDateString().'|'.$provider->id
+            ))
             ->take(8)
+            ->values()
+            ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', true));
+        $serviceProviders = $featuredProviders;
+
+        if ($serviceProviders->count() < 8) {
+            $fallbackProviders = (clone $serviceProvidersQuery)
+                ->whereNotIn('user_id', $featuredProviderUserIds)
+                ->latest()
+                ->take(8 - $serviceProviders->count())
+                ->get()
+                ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', false));
+            $serviceProviders = $serviceProviders->concat($fallbackProviders)->values();
+        }
+        $paidProviderHighlights = (clone $serviceProvidersQuery)
+            ->whereIn('user_id', $featuredProviderUserIds)
+            ->orderByDesc('views')
+            ->latest()
+            ->take(3)
+            ->get()
+            ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', true));
+        $providerHighlights = $paidProviderHighlights;
+
+        if ($providerHighlights->count() < 3) {
+            $popularFreeProviders = (clone $serviceProvidersQuery)
+                ->whereNotIn('user_id', $featuredProviderUserIds)
+                ->orderByDesc('views')
+                ->latest()
+                ->take(3 - $providerHighlights->count())
+                ->get()
+                ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', false));
+            $providerHighlights = $providerHighlights->concat($popularFreeProviders)->values();
+        }
+
+        $generalHighlights = (clone $popularAdsQuery)
+            ->orderByDesc('views')
+            ->latest()
+            ->take(10)
             ->get();
+        $featuredForYou = $this->interleaveHomeHighlights($generalHighlights, $providerHighlights);
         $recentStores = Store::query()
             ->with(['user'])
             ->withCount([
@@ -166,7 +194,7 @@ class HomeController extends Controller
             ->latest()
             ->take(4)
             ->get();
-        $serviceSearchCategories = self::SERVICE_SEARCH_CATEGORIES;
+        $serviceSearchCategories = $this->serviceSearchCategories();
         $adSearchCategories = self::AD_SEARCH_CATEGORIES;
         $defaultHeroBanners = [
             1 => 'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1600&auto=format&fit=crop',
@@ -198,6 +226,18 @@ class HomeController extends Controller
             $vehiclesBanners = $heroBanners;
         }
 
+        $jobsBanners = collect(range(1, 5))
+            ->map(fn (int $slot) => Setting::get("jobs_banner_{$slot}"))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($jobsBanners)) {
+            $jobsBanners = [
+                'https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1600&auto=format&fit=crop',
+            ];
+        }
+
         $hasActiveFilters = ! empty($q)
             || ! empty($type)
             || ! empty($intent)
@@ -210,7 +250,7 @@ class HomeController extends Controller
             ->where('module', 'real_estate')
             ->when($city, fn ($query) => $query->where('city', $city))
             ->latest()
-            ->take(4)
+            ->take(10)
             ->get();
 
         $vehicleAds = Ad::with(['mainImage'])
@@ -218,7 +258,7 @@ class HomeController extends Controller
             ->where('module', 'vehicles')
             ->when($city, fn ($query) => $query->where('city', $city))
             ->latest()
-            ->take(4)
+            ->take(10)
             ->get();
 
         $productAds = Ad::with(['mainImage'])
@@ -226,7 +266,7 @@ class HomeController extends Controller
             ->where('module', 'products')
             ->when($city, fn ($query) => $query->where('city', $city))
             ->latest()
-            ->take(4)
+            ->take(10)
             ->get();
 
         $jobAgroAds = Ad::with(['mainImage'])
@@ -234,7 +274,7 @@ class HomeController extends Controller
             ->whereIn('module', ['jobs', 'agro'])
             ->when($city, fn ($query) => $query->where('city', $city))
             ->latest()
-            ->take(4)
+            ->take(10)
             ->get();
 
         return view('home', compact(
@@ -247,6 +287,7 @@ class HomeController extends Controller
             'searchResults',
             'recentAds',
             'popularAds',
+            'featuredForYou',
             'serviceProviders',
             'recentStores',
             'serviceSearchCategories',
@@ -254,6 +295,7 @@ class HomeController extends Controller
             'heroBanners',
             'realEstateBanners',
             'vehiclesBanners',
+            'jobsBanners',
             'realEstateAds',
             'vehicleAds',
             'productAds',
@@ -279,7 +321,7 @@ class HomeController extends Controller
                 'label' => $category['name'],
                 'meta' => 'Serviço profissional',
                 'url' => route('module.services', ['category' => $category['name']]),
-            ], self::SERVICE_SEARCH_CATEGORIES),
+            ], $this->serviceSearchCategories()),
         ])->when(
             $term !== '',
             fn ($items) => $items->filter(
@@ -373,20 +415,9 @@ class HomeController extends Controller
         $q = trim((string) $request->input('q'));
         $city = $request->input('city');
         $category = trim((string) $request->input('category'));
-        $serviceCategories = [
-            'Eletricista',
-            'Encanador',
-            'Pintor',
-            'Mecânico',
-            'Advogado',
-            'Faxineira / Diarista',
-            'Marcenaria',
-            'TI / Informática',
-            'Frete e Mudanças',
-            'Restaurante / Pizzaria',
-            'Pedreiro',
-            'Jardineiro',
-        ];
+        $serviceCategories = collect($this->serviceSearchCategories())
+            ->pluck('name')
+            ->all();
 
         $providers = Ad::with(['user', 'mainImage', 'category'])
             ->withCount([
@@ -397,21 +428,8 @@ class HomeController extends Controller
             ], 'rating')
             ->where('status', 'active')
             ->where('module', 'services')
-            ->when($category, function ($query) use ($category) {
-                $query->where(function ($subQuery) use ($category) {
-                    $subQuery->where('title', 'like', "%{$category}%")
-                        ->orWhere('description', 'like', "%{$category}%")
-                        ->orWhere('advertiser_type', 'like', "%{$category}%")
-                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', "%{$category}%"));
-                });
-            })
-            ->when($q, function ($query) use ($q) {
-                $query->where(function ($subQuery) use ($q) {
-                    $subQuery->where('title', 'like', "%{$q}%")
-                        ->orWhere('description', 'like', "%{$q}%")
-                        ->orWhere('advertiser_type', 'like', "%{$q}%");
-                });
-            })
+            ->when($category, fn ($query) => $this->applySmartSearch($query, $category))
+            ->when($q, fn ($query) => $this->applySmartSearch($query, $q))
             ->when($city, fn ($query) => $query->where('city', $city))
             ->when($request->boolean('available'), function ($query) {
                 $query->whereHas('user', function ($uQuery) {
@@ -423,7 +441,7 @@ class HomeController extends Controller
                 });
             })
             ->orderByDesc('created_at')
-            ->paginate(10)
+            ->paginate(21)
             ->withQueryString();
 
         $profileCta = $this->professionalProfileCta($request);
@@ -442,6 +460,114 @@ class HomeController extends Controller
             'serviceBanners',
             'profileCta'
         ));
+    }
+
+    private function serviceSearchCategories(): array
+    {
+        $configuredCategories = collect(config('marketplace.service_categories', []))
+            ->map(fn (string $name): array => [
+                'name' => $name,
+                'icon' => $this->serviceCategoryIcon($name),
+            ]);
+
+        $databaseCategories = Category::query()
+            ->select(['categories.name', 'categories.icon'])
+            ->where('categories.active', true)
+            ->whereNotNull('categories.name')
+            ->where('categories.name', '!=', '')
+            ->distinct()
+            ->orderBy('categories.name')
+            ->get()
+            ->map(fn (Category $category): array => [
+                'name' => $category->name,
+                'icon' => $category->icon ?: 'fa-tag',
+            ]);
+
+        return $configuredCategories
+            ->concat($databaseCategories)
+            ->filter(fn (array $category): bool => filled($category['name'] ?? null))
+            ->unique(fn (array $category): string => mb_strtolower($category['name']))
+            ->sort(fn (array $left, array $right): int => strcasecmp($left['name'], $right['name']))
+            ->values()
+            ->all();
+    }
+
+    private function serviceCategoryIcon(string $name): string
+    {
+        return match ($name) {
+            'Eletricista' => 'fa-bolt',
+            'Encanador' => 'fa-faucet-drip',
+            'Pintor' => 'fa-paint-roller',
+            'Mecânico' => 'fa-screwdriver-wrench',
+            'Advogado' => 'fa-scale-balanced',
+            'Faxineira', 'Faxineira / Diarista', 'Diarista' => 'fa-broom',
+            'Marceneiro', 'Marcenaria', 'Montador de Móveis', 'Móveis Planejados' => 'fa-hammer',
+            'Programador', 'Técnico de Informática', 'TI / Informática' => 'fa-computer',
+            'Carro de Mudança', 'Frete e Mudanças' => 'fa-truck-moving',
+            'Pizzaria', 'Restaurante', 'Restaurante / Pizzaria' => 'fa-utensils',
+            'Pedreiro', 'Pedreiro de Acabamento' => 'fa-trowel-bricks',
+            'Jardineiro' => 'fa-seedling',
+            default => 'fa-tag',
+        };
+    }
+
+    private function featuredProviderUserIds(): Collection
+    {
+        $featureId = DB::table('plan_features')
+            ->where('key', 'provider_featured')
+            ->value('id');
+
+        if (! $featureId) {
+            return collect();
+        }
+
+        $eligiblePlanSlugs = DB::table('plans')
+            ->join('plan_feature_values', 'plan_feature_values.plan_id', '=', 'plans.id')
+            ->where('plan_feature_values.plan_feature_id', $featureId)
+            ->where(function ($query) {
+                $query->where('plan_feature_values.value', '1')
+                    ->orWhereNull('plan_feature_values.value');
+            })
+            ->pluck('plans.slug');
+        $disabledOverrideUserIds = DB::table('user_feature_overrides')
+            ->where('plan_feature_id', $featureId)
+            ->where('value', '0')
+            ->pluck('user_id');
+        $enabledOverrideUserIds = DB::table('user_feature_overrides')
+            ->where('plan_feature_id', $featureId)
+            ->where(function ($query) {
+                $query->where('value', '1')->orWhereNull('value');
+            })
+            ->pluck('user_id');
+        $planUserIds = DB::table('users')
+            ->whereIn('subscription_plan', $eligiblePlanSlugs)
+            ->whereNotIn('id', $disabledOverrideUserIds)
+            ->pluck('id');
+
+        return $planUserIds
+            ->concat($enabledOverrideUserIds)
+            ->unique()
+            ->values();
+    }
+
+    private function interleaveHomeHighlights(Collection $generalAds, Collection $providers): Collection
+    {
+        $highlights = collect();
+        $generalIndex = 0;
+        $providerIndex = 0;
+        $providerSlots = [1, 4, 7];
+
+        for ($position = 0; $position < 10; $position++) {
+            if (in_array($position, $providerSlots, true) && $providers->has($providerIndex)) {
+                $highlights->push($providers->get($providerIndex++));
+            } elseif ($generalAds->has($generalIndex)) {
+                $highlights->push($generalAds->get($generalIndex++));
+            } elseif ($providers->has($providerIndex)) {
+                $highlights->push($providers->get($providerIndex++));
+            }
+        }
+
+        return $highlights->values();
     }
 
     private function professionalProfileCta(Request $request): array
@@ -470,5 +596,225 @@ class HomeController extends Controller
         }
 
         return ['state' => 'limit'];
+    }
+
+    public function featuredPage(Request $request)
+    {
+        $q = trim((string) ($request->input('q') ?: $request->input('search')));
+        $type = $request->input('type', 'all');
+        $category = $request->input('category');
+        $locationPreferenceActive = (bool) $request->session()->get('location_filter.enabled', false);
+        $city = $request->input('city') ?: ($locationPreferenceActive ? $request->session()->get('location_filter.city') : null);
+
+        $featuredProviderUserIds = $this->featuredProviderUserIds();
+
+        // 1. Base Query Prestadores
+        $providersBaseQuery = Ad::with(['user', 'mainImage', 'category'])
+            ->where('status', 'active')
+            ->where('module', 'services')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($category, fn ($query) => $query->whereHas('category', fn ($c) => $c->where('name', $category)))
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%")
+                        ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$q}%"));
+                });
+            });
+
+        $totalProvidersCount = (clone $providersBaseQuery)->count();
+
+        // 2. Base Query Lojas
+        $storesBaseQuery = Store::query()
+            ->with(['user'])
+            ->withCount([
+                'ads as active_ads_count' => fn ($query) => $query
+                    ->where('module', 'products')
+                    ->where('status', 'active'),
+            ])
+            ->publiclyVisible()
+            ->when($city, fn ($query) => $query->where(function ($cq) use ($city) {
+                $cq->where('city', $city)
+                    ->orWhereHas('user', fn ($uq) => $uq->where('city', $city));
+            }))
+            ->when($category, fn ($query) => $query->where('category', $category))
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%")
+                        ->orWhere('category', 'like', "%{$q}%");
+                });
+            });
+
+        $totalStoresCount = (clone $storesBaseQuery)->count();
+
+        // 3. Base Query Produtos das Lojas
+        $adsBaseQuery = Ad::with(['user', 'mainImage', 'category', 'store'])
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->where('module', 'products')
+                    ->orWhereNotNull('store_id');
+            })
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($category, fn ($query) => $query->whereHas('category', fn ($c) => $c->where('name', $category)))
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%")
+                        ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$q}%"));
+                });
+            });
+
+        $totalAdsCount = (clone $adsBaseQuery)->count();
+
+        $providers = null;
+        $stores = null;
+        $ads = null;
+        $perPage = 100;
+
+        $featuredIdsArray = is_array($featuredProviderUserIds) ? $featuredProviderUserIds : $featuredProviderUserIds->toArray();
+        $featuredIdsSql = ! empty($featuredIdsArray) ? implode(',', array_map('intval', $featuredIdsArray)) : '0';
+
+        if ($type === 'services') {
+            $providers = (clone $providersBaseQuery)
+                ->orderByRaw("CASE WHEN user_id IN ({$featuredIdsSql}) THEN 0 ELSE 1 END")
+                ->latest()
+                ->paginate($perPage)
+                ->withQueryString();
+            $providers->getCollection()->each(fn (Ad $p) => $p->setAttribute('is_plan_featured', in_array($p->user_id, $featuredIdsArray)));
+        } elseif ($type === 'stores') {
+            $stores = (clone $storesBaseQuery)
+                ->latest()
+                ->paginate($perPage)
+                ->withQueryString();
+        } elseif ($type === 'ads') {
+            $ads = (clone $adsBaseQuery)
+                ->orderByDesc('views')
+                ->latest()
+                ->paginate($perPage)
+                ->withQueryString();
+        } else {
+            $type = 'all';
+
+            $providers = (clone $providersBaseQuery)
+                ->orderByRaw("CASE WHEN user_id IN ({$featuredIdsSql}) THEN 0 ELSE 1 END")
+                ->latest()
+                ->paginate(100, ['*'], 'providers_page')
+                ->withQueryString();
+            $providers->getCollection()->each(fn (Ad $p) => $p->setAttribute('is_plan_featured', in_array($p->user_id, $featuredIdsArray)));
+
+            $stores = (clone $storesBaseQuery)
+                ->latest()
+                ->paginate(100, ['*'], 'stores_page')
+                ->withQueryString();
+
+            $ads = (clone $adsBaseQuery)
+                ->orderByDesc('views')
+                ->latest()
+                ->paginate(100, ['*'], 'ads_page')
+                ->withQueryString();
+        }
+
+        $categories = Category::orderBy('name')->get();
+        $cities = Ad::whereNotNull('city')->distinct()->pluck('city')->sort()->values();
+
+        return view('pages.featured', compact(
+            'q',
+            'type',
+            'category',
+            'city',
+            'providers',
+            'stores',
+            'ads',
+            'totalProvidersCount',
+            'totalStoresCount',
+            'totalAdsCount',
+            'categories',
+            'cities'
+        ));
+    }
+
+    private function applySmartSearch($query, ?string $search)
+    {
+        $raw = trim((string) $search);
+        if ($raw === '') {
+            return $query;
+        }
+
+        $ascii = \Illuminate\Support\Str::ascii($raw);
+        $words = array_values(array_filter(explode(' ', $raw), fn ($w) => mb_strlen(trim($w)) > 0));
+
+        $synonymMap = [
+            'lab' => ['lab', 'laboratorio', 'laboratório'],
+            'laboratorio' => ['lab', 'laboratorio', 'laboratório'],
+            'laboratório' => ['lab', 'laboratorio', 'laboratório'],
+            'protese' => ['protese', 'prótese', 'protético', 'protetico'],
+            'prótese' => ['protese', 'prótese', 'protético', 'protetico'],
+            'dentaria' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
+            'dentária' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
+            'dentista' => ['dentista', 'dentaria', 'dentária', 'odontologia', 'odonto'],
+            'mecanico' => ['mecanico', 'mecânico', 'oficina', 'auto'],
+            'mecânico' => ['mecanico', 'mecânico', 'oficina', 'auto'],
+            'eletricista' => ['eletricista', 'eletrica', 'elétrica'],
+            'encanador' => ['encanador', 'hidraulica', 'hidráulica'],
+            'pedreiro' => ['pedreiro', 'obra', 'construcao', 'construção'],
+            'pintor' => ['pintor', 'pintura'],
+            'faxineira' => ['faxineira', 'diarista', 'limpeza'],
+            'advogado' => ['advogado', 'advocacia', 'juridico', 'jurídico'],
+            'frete' => ['frete', 'mudança', 'mudanca', 'transporte'],
+            'ti' => ['ti', 'tecnico', 'técnico', 'informatica', 'informática', 'programador', 'computador'],
+        ];
+
+        return $query->where(function ($groupQuery) use ($raw, $ascii, $words, $synonymMap) {
+            // 1. Exact or normalized phrase match
+            $groupQuery->where('title', 'like', "%{$raw}%")
+                ->orWhere('title', 'like', "%{$ascii}%")
+                ->orWhere('description', 'like', "%{$raw}%")
+                ->orWhere('description', 'like', "%{$ascii}%")
+                ->orWhere('advertiser_type', 'like', "%{$raw}%")
+                ->orWhere('advertiser_type', 'like', "%{$ascii}%")
+                ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$raw}%")->orWhere('name', 'like', "%{$ascii}%"))
+                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$raw}%")->orWhere('name', 'like', "%{$ascii}%"));
+
+            // 2. Multi-word search (Each word must match somewhere in title/desc/category/user)
+            if (count($words) > 1) {
+                $groupQuery->orWhere(function ($multiWordQuery) use ($words, $synonymMap) {
+                    foreach ($words as $word) {
+                        $wTrimmed = trim($word);
+                        if (mb_strlen($wTrimmed) < 2) continue;
+
+                        $wKey = mb_strtolower(\Illuminate\Support\Str::ascii($wTrimmed));
+                        $variants = array_unique(array_merge(
+                            [$wTrimmed, \Illuminate\Support\Str::ascii($wTrimmed)],
+                            $synonymMap[$wKey] ?? []
+                        ));
+
+                        $multiWordQuery->where(function ($wordSub) use ($variants) {
+                            foreach ($variants as $variant) {
+                                $wordSub->orWhere('title', 'like', "%{$variant}%")
+                                    ->orWhere('description', 'like', "%{$variant}%")
+                                    ->orWhere('advertiser_type', 'like', "%{$variant}%")
+                                    ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$variant}%"))
+                                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$variant}%"));
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 3. Single word synonym expansions
+            foreach ($words as $word) {
+                $wKey = mb_strtolower(\Illuminate\Support\Str::ascii(trim($word)));
+                if (isset($synonymMap[$wKey])) {
+                    foreach ($synonymMap[$wKey] as $variant) {
+                        $groupQuery->orWhere('title', 'like', "%{$variant}%")
+                            ->orWhere('description', 'like', "%{$variant}%")
+                            ->orWhere('advertiser_type', 'like', "%{$variant}%")
+                            ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$variant}%"))
+                            ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$variant}%"));
+                    }
+                }
+            }
+        });
     }
 }

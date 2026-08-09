@@ -93,7 +93,7 @@ class AdminController extends Controller
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:100',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:user,collaborator,admin',
         ]);
 
         User::create([
@@ -118,11 +118,14 @@ class AdminController extends Controller
             return back()->with('error', 'Você não pode alterar o seu próprio nível de acesso.');
         }
 
-        if ($user->role === 'admin' && User::where('role', 'admin')->count() <= 1) {
+        $newRole = $request->validate([
+            'role' => 'nullable|in:user,collaborator,admin',
+        ])['role'] ?? ($user->role === 'admin' ? 'user' : 'admin');
+
+        if ($user->role === 'admin' && $newRole !== 'admin' && User::where('role', 'admin')->count() <= 1) {
             return back()->with('error', 'O painel precisa manter pelo menos um administrador.');
         }
 
-        $newRole = $user->role === 'admin' ? 'user' : 'admin';
         $user->update(['role' => $newRole]);
 
         return back()->with('success', "Função do usuário {$user->name} alterada para {$newRole}.");
@@ -145,12 +148,19 @@ class AdminController extends Controller
             'price' => 'nullable|numeric|min:0',
             'city' => 'required|string|max:100',
             'description' => 'required|string',
+            'contact_phone' => 'nullable|string|max:30',
+            'contact_whatsapp' => 'nullable|string|max:30',
+            'profile_is_claimed' => 'nullable|boolean',
         ]);
 
         $slug = Str::slug($request->title).'-'.time().'-'.rand(1000, 9999);
+        $isClaimed = $request->module !== 'services' || $request->boolean('profile_is_claimed');
+        $ownerUserId = $request->module === 'services' && ! $isClaimed
+            ? $request->user()->id
+            : (int) $request->user_id;
 
         $ad = Ad::create([
-            'user_id' => $request->user_id,
+            'user_id' => $ownerUserId,
             'module' => $request->module,
             'title' => $request->title,
             'slug' => $slug,
@@ -160,6 +170,11 @@ class AdminController extends Controller
             'city' => $request->city,
             'views' => 0,
             'publication_ip' => $request->ip(),
+            'is_claimed' => $isClaimed,
+            'claiming_enabled' => false,
+            'claimed_at' => $isClaimed ? now() : null,
+            'contact_phone' => $request->input('contact_phone'),
+            'contact_whatsapp' => $request->input('contact_whatsapp'),
         ]);
 
         return back()->with('success', 'Anúncio / Prestador de Serviço cadastrado com sucesso!');
@@ -176,6 +191,38 @@ class AdminController extends Controller
         $ad->update(['status' => $status]);
 
         return back()->with('success', "Status do anúncio #{$ad->id} alterado para {$status}.");
+    }
+
+    public function toggleProviderClaiming(Ad $ad, Request $request)
+    {
+        abort_unless($ad->module === 'services', 404);
+        abort_unless(
+            $ad->user_id === $request->user()->id,
+            403,
+            'Somente perfis cadastrados pela sua conta administrativa podem ser liberados para reivindicação.'
+        );
+
+        $validated = $request->validate([
+            'enabled' => 'required|boolean',
+        ]);
+        $enabled = (bool) $validated['enabled'];
+        $changes = ['claiming_enabled' => $enabled];
+
+        if ($enabled) {
+            $changes = array_merge($changes, [
+                'is_claimed' => false,
+                'claimed_at' => null,
+            ]);
+        }
+
+        $ad->update($changes);
+
+        return back()->with(
+            'success',
+            $enabled
+                ? "A opção de reivindicar foi ativada em {$ad->title}."
+                : "A opção de reivindicar foi desativada em {$ad->title}."
+        );
     }
 
     public function categories()

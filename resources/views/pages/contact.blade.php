@@ -52,7 +52,7 @@
 
                         <div class="mb-3">
                             <label for="subject" class="form-label fw-semibold">Assunto *</label>
-                            <input type="text" class="form-control form-control-lg rounded-3 @error('subject') is-invalid @enderror" id="subject" name="subject" value="{{ old('subject') }}" required maxlength="255" placeholder="Ex: Dúvida sobre planos ou anúncio">
+                            <input type="text" class="form-control form-control-lg rounded-3 @error('subject') is-invalid @enderror" id="subject" name="subject" value="{{ old('subject', request('tipo') === 'denuncia' ? 'Denúncia enviada pela Comunidade' : '') }}" required maxlength="255" placeholder="Ex: Dúvida sobre planos ou anúncio">
                             @error('subject')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -77,4 +77,6 @@
         </div>
     </div>
 </div>
+
+@include('components.support-chat-widget')
 @endsection

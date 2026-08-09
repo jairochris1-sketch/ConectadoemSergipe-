@@ -7,12 +7,14 @@
         ->sum(fn ($item) => is_array($item) ? (int) ($item['quantity'] ?? 0) : (int) $item);
     $headerItems = [
         ['label' => 'Início', 'route' => 'home', 'icon' => 'fa-house', 'class' => 'home', 'active' => request()->is('/')],
+        ['label' => 'Lojas', 'route' => 'stores.index', 'icon' => 'fa-store', 'class' => 'stores', 'active' => request()->is('lojas*') || request()->is('loja*')],
         ['label' => 'Imóveis', 'route' => 'module.real_estate', 'icon' => 'fa-building', 'class' => 'real-estate', 'active' => request()->is('imoveis*')],
         ['label' => 'Veículos', 'route' => 'module.vehicles', 'icon' => 'fa-car', 'class' => 'vehicles', 'active' => request()->is('veiculos*')],
         ['label' => 'Produtos', 'route' => 'module.products', 'icon' => 'fa-bag-shopping', 'class' => 'products', 'active' => request()->is('produtos*')],
         ['label' => 'Serviços', 'route' => 'module.services', 'icon' => 'fa-screwdriver-wrench', 'class' => 'services', 'active' => request()->is('servicos*') || request()->is('prestadores*')],
         ['label' => 'Empregos', 'route' => 'module.jobs', 'icon' => 'fa-briefcase', 'class' => 'jobs', 'active' => request()->is('empregos*')],
         ['label' => 'Cordel & Arte', 'route' => 'culture.index', 'icon' => 'fa-feather-pointed', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
+        ['label' => 'Comunidade', 'route' => 'feed.index', 'icon' => 'fa-users', 'class' => 'community', 'active' => request()->is('comunidade*')],
     ];
 @endphp
 
@@ -53,7 +55,7 @@
 
             <span class="marketplace-brand-divider" aria-hidden="true"></span>
 
-            <nav class="marketplace-desktop-nav" aria-label="Categorias principais">
+            <nav class="marketplace-desktop-nav notranslate" translate="no" aria-label="Categorias principais">
                 @foreach($headerItems as $item)
                     <a
                         href="{{ route($item['route']) }}"
@@ -61,7 +63,7 @@
                         @if($item['active']) aria-current="page" @endif
                     >
                         <span class="marketplace-nav-icon"><i class="fa-solid {{ $item['icon'] }}"></i></span>
-                        <span class="marketplace-nav-label">{{ $item['label'] }}</span>
+                        <span class="marketplace-nav-label notranslate" translate="no">{{ $item['label'] }}</span>
                     </a>
                 @endforeach
             </nav>
@@ -81,9 +83,6 @@
                         <i class="fa-solid fa-xmark marketplace-location-close" aria-hidden="true"></i>
                     </button>
                 @endif
-                <a class="marketplace-search-button marketplace-store-header-btn" href="{{ route('stores.index') }}" aria-label="Ver Lojas" title="Lojas">
-                    <i class="fa-solid fa-store"></i>
-                </a>
 
                 @auth
                     <div class="dropdown marketplace-account-dropdown">
@@ -117,7 +116,6 @@
                             <li><a class="dropdown-item" href="{{ route('page.plans') }}"><i class="fa-solid fa-gem text-warning"></i>Planos</a></li>
                             <li><a class="dropdown-item" href="{{ route('orders.index') }}"><i class="fa-solid fa-box text-success"></i>Meus pedidos</a></li>
                             <li><a class="dropdown-item" href="{{ route('culture.my-works') }}"><i class="fa-solid fa-feather-pointed text-warning"></i>Minhas Obras (Cordel)</a></li>
-                            <li><a class="dropdown-item" href="{{ route('chat.index') }}"><i class="fa-solid fa-comments text-success"></i>Mensagens</a></li>
                             @if(auth()->user()->role === 'admin')
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-shield-halved"></i>Painel Admin</a></li>
@@ -146,7 +144,7 @@
         </div>
 
         <div class="marketplace-mobile-menu" id="marketplaceMobileMenu" aria-hidden="true">
-            <nav class="marketplace-mobile-categories" aria-label="Categorias">
+            <nav class="marketplace-mobile-categories notranslate" translate="no" aria-label="Categorias">
                 @foreach($headerItems as $item)
                     <a
                         href="{{ route($item['route']) }}"
@@ -154,7 +152,7 @@
                         @if($item['active']) aria-current="page" @endif
                     >
                         <span class="marketplace-nav-icon"><i class="fa-solid {{ $item['icon'] }}"></i></span>
-                        <span>{{ $item['label'] }}</span>
+                        <span class="notranslate" translate="no">{{ $item['label'] }}</span>
                     </a>
                 @endforeach
             </nav>

@@ -206,6 +206,7 @@ class StoreController extends Controller
                     'whatsapp' => $this->normalizePhone($validated['whatsapp']),
                     'instagram' => $validated['instagram'] ?? null,
                     'website' => $validated['website'] ?? null,
+                    'map_location' => $validated['map_location'] ?? null,
                     'logo' => $logoPath,
                     'banner' => $bannerPath,
                     'active' => true,
@@ -308,6 +309,7 @@ class StoreController extends Controller
                     'whatsapp' => $this->normalizePhone($validated['whatsapp']),
                     'instagram' => $validated['instagram'] ?? null,
                     'website' => $validated['website'] ?? null,
+                    'map_location' => $validated['map_location'] ?? null,
                     'logo' => $logo,
                     'banner' => $banner,
                     ...$this->deliveryData($validated, request(), $store),
@@ -411,6 +413,9 @@ class StoreController extends Controller
     private function managementView(Request $request, ?Store $store)
     {
         $storeProducts = collect();
+        $requestedCategory = in_array($request->query('category'), array_column(self::CATEGORIES, 'name'), true)
+            ? $request->query('category')
+            : null;
 
         if ($store) {
             $store->load(['media', 'promotions', 'businessHours']);
@@ -433,6 +438,7 @@ class StoreController extends Controller
             'storeProducts' => $storeProducts,
             'cities' => SergipeCities::getAll(),
             'categories' => self::CATEGORIES,
+            'requestedCategory' => $requestedCategory,
             'storeUsage' => $request->user()->stores()->count(),
             'storeLimit' => $request->user()->storeLimit(),
             'productLimit' => $request->user()->storeProductLimit(),
@@ -681,6 +687,7 @@ class StoreController extends Controller
             'whatsapp' => ['required', 'string', 'max:20'],
             'instagram' => ['nullable', 'string', 'max:120'],
             'website' => ['nullable', 'url:http,https', 'max:255'],
+            'map_location' => ['nullable', 'string', 'max:1000'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'banner' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:8192'],
             'additional_banners' => ['nullable', 'array', 'max:6'],

@@ -66,10 +66,13 @@
                     <h5 class="fw-bold privacy-section-title mt-4 mb-3">2. Uso das Informações</h5>
                     <p class="mb-4">As informações coletadas são utilizadas exclusivamente para exibir seus anúncios aos compradores interessados, permitir o contato entre as partes, aprimorar a experiência do usuário e garantir a segurança do marketplace.</p>
 
-                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">3. Proteção de Dados</h5>
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">3. Recomendações e personalização</h5>
+                    <p class="mb-4">Para organizar recomendações na Comunidade, podemos considerar cidade, anúncios visualizados, favoritos e cliques realizados dentro do próprio Conectado em Sergipe. Visitantes não autenticados são reconhecidos somente por uma chave pseudonimizada da sessão; este recurso não armazena endereço IP nem agente do navegador. Impressões e preferências de visitantes são mantidas por até 30 dias, e as vinculadas a uma conta por até 90 dias. O usuário pode escolher os modos “Recentes” ou “Perto de você”, ocultar recomendações específicas e utilizar o sinal de privacidade do navegador.</p>
+
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">4. Proteção de Dados</h5>
                     <p class="mb-4">Adotamos medidas técnicas e organizacionais rigorosas para proteger seus dados contra acessos não autorizados, perdas ou alterações ilícitas, em total conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).</p>
 
-                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">4. Compartilhamento de Dados</h5>
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">5. Compartilhamento de Dados</h5>
                     <p class="mb-0">Não vendemos nem alugamos suas informações pessoais a terceiros. As informações de contato fornecidas em anúncios públicos serão exibidas apenas para conectar compradores e vendedores.</p>
                 </div>
 

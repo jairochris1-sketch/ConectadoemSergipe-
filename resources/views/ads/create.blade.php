@@ -81,6 +81,7 @@
 
                     <form action="{{ route('ad.store') }}" method="POST" enctype="multipart/form-data" id="wizardForm" novalidate>
                         @csrf
+                        <input type="hidden" name="profile_kind" id="service-profile-kind" value="{{ old('profile_kind', $requestedProfileKind) }}">
 
                         <!-- ================= ETAPA 1: CATEGORIA ================= -->
                         <div class="wizard-step" id="wizard-step-1">
@@ -160,19 +161,37 @@
                                 </div>
                             </div>
 
-                            <div class="professional-motion-panel mb-3">
+                            <div class="professional-motion-panel mb-3" aria-labelledby="advertiser-type-title">
                                 <span class="professional-motion-icon" aria-hidden="true">
                                     <i class="fa-solid fa-user-tie"></i>
                                     <i class="fa-solid fa-star"></i>
                                 </span>
                                 <div class="professional-motion-copy">
-                                    <h4>Trabalha por conta própria?</h4>
-                                    <p>Crie seu perfil profissional, mostre seus serviços e conecte-se com clientes em Sergipe.</p>
+                                    <h4 id="advertiser-type-title">Qual perfil representa você?</h4>
+                                    <p>Escolha uma opção para seguir ao cadastro correto. Empresa de serviços usa o perfil profissional; restaurante usa a vitrine de loja.</p>
+                                    <div class="advertiser-type-grid" role="group" aria-label="Tipo de anunciante">
+                                        <button type="button" class="advertiser-type-option" onclick="chooseProfessionalProfile('professional')">
+                                            <i class="fa-solid fa-user-gear"></i>
+                                            <span><strong>Prestador de serviços</strong><small>Profissional autônomo.</small></span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                        <button type="button" class="advertiser-type-option" onclick="chooseProfessionalProfile('service_company')">
+                                            <i class="fa-solid fa-building"></i>
+                                            <span><strong>Empresa de serviços</strong><small>Equipe, clínica, salão ou agência.</small></span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                        <a href="{{ route('store.create') }}" class="advertiser-type-option text-decoration-none">
+                                            <i class="fa-solid fa-store"></i>
+                                            <span><strong>Loja / Comércio</strong><small>Vitrine e catálogo de produtos.</small></span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </a>
+                                        <a href="{{ route('store.create', ['category' => 'Alimentação']) }}" class="advertiser-type-option text-decoration-none">
+                                            <i class="fa-solid fa-utensils"></i>
+                                            <span><strong>Restaurante / Alimentação</strong><small>Cardápio, retirada e entrega.</small></span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn professional-motion-cta" onclick="chooseProfessionalProfile()">
-                                    Criar meu perfil profissional
-                                    <i class="fa-solid fa-arrow-right"></i>
-                                </button>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center pt-3 border-top wizard-actions">
@@ -312,6 +331,12 @@
                                     <label class="form-label fw-semibold">Atende em quais regiões?</label>
                                     <input type="text" class="form-control form-control-lg rounded-3" id="region" name="region" value="{{ old('region') }}" placeholder="Ex: Centro, Atalaia, Farolândia, Jardins">
                                 </div>
+                            </div>
+
+                            <div class="mb-3" id="public-address-field">
+                                <label for="public_address" class="form-label fw-semibold">Endereço público do local de atendimento (opcional)</label>
+                                <input type="text" class="form-control form-control-lg rounded-3" id="public_address" name="public_address" value="{{ old('public_address') }}" maxlength="255" placeholder="Ex: Rua das Flores, 120, Centro">
+                                <small class="text-muted">Preencha somente se clientes puderem ir ao local. O endereço aparecerá no perfil com o botão “Como chegar”.</small>
                             </div>
 
                             <div class="mb-4">
@@ -1155,8 +1180,10 @@
         agro: ['Animais & Pecuária', 'Tratores & Máquinas', 'Insumos & Sementes']
     };
 
-    function chooseProfessionalProfile() {
+    function chooseProfessionalProfile(profileKind = 'professional') {
+        const profileKindInput = document.getElementById('service-profile-kind');
         const serviceOption = document.getElementById('mod_services');
+        profileKindInput.value = profileKind;
         serviceOption.checked = true;
         selectModule('services');
         goToStep(2);
@@ -1227,6 +1254,7 @@
             : 'Descrição do anúncio *';
         document.getElementById('price-field').classList.toggle('d-none', isService);
         document.getElementById('region-field').classList.toggle('d-none', !isService);
+        document.getElementById('public-address-field').classList.toggle('d-none', !isService);
         document.getElementById('store-product-field').classList.toggle('d-none', !isProduct);
         document.getElementById('review-region-item').classList.toggle('d-none', !isService);
         document.getElementById('main-photo-label').textContent = isService

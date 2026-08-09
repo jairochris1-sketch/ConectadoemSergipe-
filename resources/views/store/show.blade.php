@@ -36,6 +36,15 @@
     $instagramUrl = $store->instagram
         ? (str_starts_with($store->instagram, 'http') ? $store->instagram : 'https://instagram.com/' . ltrim($store->instagram, '@'))
         : null;
+    $storePublicAddress = trim((string) $store->pickup_address);
+    $storeDirectionsUrl = $storePublicAddress !== ''
+        ? 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode(implode(', ', array_filter([
+            $storePublicAddress,
+            $storeCity,
+            $storeState,
+            'Brasil',
+        ])))
+        : null;
     $currentStoreDay = now('America/Fortaleza')->dayOfWeek;
 @endphp
 
@@ -460,7 +469,60 @@
                     <dl>
                         <div><dt>Categoria</dt><dd>{{ $storeCategory }}</dd></div>
                         <div><dt>Localização</dt><dd>{{ $storeCity }}/{{ $storeState }}</dd></div>
+                        @if($storeDirectionsUrl)
+                            <div><dt>Endereço</dt><dd>{{ $storePublicAddress }}</dd></div>
+                        @endif
                     </dl>
+                    @if($store->map_location)
+                        <div class="storefront-map-wrapper mt-4">
+                            <strong><i class="fa-solid fa-map-location-dot"></i> Localização no mapa</strong>
+                            <div class="mt-2 rounded-4 overflow-hidden border position-relative" style="height: 200px; display: flex; align-items: center; justify-content: center; background: var(--background);">
+                                @php
+                                    $mapLoc = trim($store->map_location);
+                                    $isIframe = str_starts_with($mapLoc, '<iframe');
+                                    $isLink = str_starts_with($mapLoc, 'http');
+                                    
+                                    if (!$isIframe && !$isLink && str_contains($mapLoc, ',')) {
+                                        // Assume it's coordinates: LAT,LNG
+                                        $encodedLoc = urlencode($mapLoc);
+                                        $mapIframe = '<iframe src="https://maps.google.com/maps?q=' . $encodedLoc . '&hl=pt&z=15&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+                                        $isIframe = true;
+                                    } else {
+                                        $mapIframe = $mapLoc;
+                                    }
+                                @endphp
+
+                                @if($isIframe)
+                                    <div class="map-iframe-container" style="width: 100%; height: 100%;">
+                                        {!! $mapIframe !!}
+                                    </div>
+                                    <div class="map-overlay" style="position: absolute; inset: 0; cursor: pointer; z-index: 10;" onclick="document.getElementById('storefront-map-dialog').showModal()"></div>
+                                    <div class="position-absolute d-flex gap-2" style="bottom: 10px; right: 10px; z-index: 15;">
+                                        @if($storeDirectionsUrl)
+                                            <a href="{{ $storeDirectionsUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary shadow-sm" aria-label="Iniciar rota no Google Maps">
+                                                <i class="fa-solid fa-route"></i> Traçar Rota
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-sm btn-light shadow-sm" onclick="document.getElementById('storefront-map-dialog').showModal()">
+                                            <i class="fa-solid fa-expand"></i> Ampliar mapa
+                                        </button>
+                                    </div>
+                                @else
+                                    <a href="{{ $mapLoc }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill px-4" aria-label="Abrir mapa no Google Maps">
+                                        <i class="fa-solid fa-map-location-dot"></i> Abrir Google Maps
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                        <style>
+                            .map-iframe-container iframe {
+                                width: 100% !important;
+                                height: 100% !important;
+                                border: 0 !important;
+                                border-radius: inherit;
+                            }
+                        </style>
+                    @endif
                 </section>
 
                 <section class="storefront-hours-card">
@@ -502,6 +564,11 @@
                         @if($store->website)
                             <a href="{{ $store->website }}" target="_blank" rel="noopener noreferrer" data-store-event="website_click"><i class="fa-solid fa-globe"></i> Site da loja</a>
                         @endif
+                        @if($storeDirectionsUrl)
+                            <a class="is-directions" href="{{ $storeDirectionsUrl }}" target="_blank" rel="noopener noreferrer" aria-label="Criar rota até {{ $store->name }} no Google Maps">
+                                <i class="fa-solid fa-diamond-turn-right"></i> Como chegar
+                            </a>
+                        @endif
                     </div>
                     <small><i class="fa-solid fa-circle-info"></i> Combine pagamentos e entregas com segurança.</small>
                     @if(!$isOwner)
@@ -535,10 +602,90 @@
     </dialog>
 @endif
 
+@php
+    $mapLocModal = trim($store->map_location);
+    $isIframeModal = str_starts_with($mapLocModal, '<iframe');
+    if (!$isIframeModal && !str_starts_with($mapLocModal, 'http') && str_contains($mapLocModal, ',')) {
+        $encodedLocModal = urlencode($mapLocModal);
+        $mapLocModal = '<iframe src="https://maps.google.com/maps?q=' . $encodedLocModal . '&hl=pt&z=15&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+        $isIframeModal = true;
+    }
+@endphp
+
+@if($store->map_location && $isIframeModal)
+    <dialog class="storefront-map-dialog" id="storefront-map-dialog">
+        <button type="button" class="storefront-map-close" onclick="document.getElementById('storefront-map-dialog').close()" aria-label="Fechar mapa">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="storefront-map-dialog-content">
+            {!! $mapLocModal !!}
+        </div>
+        @if($storeDirectionsUrl)
+            <div class="storefront-map-dialog-footer">
+                <a href="{{ $storeDirectionsUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill px-4">
+                    <i class="fa-solid fa-diamond-turn-right"></i> Iniciar Rota no Google Maps
+                </a>
+            </div>
+        @endif
+    </dialog>
+@endif
+
 <div class="store-share-feedback" id="store-share-feedback" role="status" aria-live="polite"></div>
 
 @push('styles')
 <style>
+    .storefront-map-dialog {
+        padding: 0;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        width: 90vw;
+        max-width: 800px;
+        height: 70vh;
+        max-height: 800px;
+        margin: auto;
+        overflow: visible;
+    }
+    .storefront-map-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+    }
+    .storefront-map-dialog-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+    .storefront-map-dialog-content iframe {
+        width: 100% !important;
+        height: 100% !important;
+        border: 0 !important;
+    }
+    .storefront-map-close {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        z-index: 20;
+        background: #fff;
+        border: 1px solid #ccc;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+    .storefront-map-dialog-footer {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 15;
+    }
     .storefront-page {
         min-height: 70vh;
         padding: 0 0 4rem;
@@ -1218,8 +1365,9 @@
     .storefront-info-card > p,
     .storefront-contact-card > p {
         margin: 10px 0 17px;
-        color: var(--muted-foreground);
-        font-size: .82rem;
+        color: var(--foreground, #1e293b);
+        font-size: .9rem;
+        font-weight: 500;
         line-height: 1.65;
         overflow-wrap: anywhere;
         white-space: pre-line;
@@ -1231,9 +1379,9 @@
         gap: 1rem;
         padding: 10px 0;
         border-top: 1px solid var(--border);
-        font-size: .78rem;
+        font-size: .8rem;
     }
-    .storefront-info-card dt { color: var(--muted-foreground); font-weight: 500; }
+    .storefront-info-card dt { color: var(--foreground, #334155); font-weight: 600; }
     .storefront-info-card dd { margin: 0; text-align: right; font-weight: 750; }
     .storefront-open-status {
         display: grid;
@@ -1299,6 +1447,11 @@
         color: #fff;
         background: #179653;
         border-color: #179653;
+    }
+    .storefront-contact-actions a.is-directions {
+        color: #fff;
+        background: #1265f5;
+        border-color: #1265f5;
     }
     .storefront-contact-card > small {
         display: flex;
@@ -1385,6 +1538,11 @@
     .storefront-quick-full { padding: 11px; border: 0; border-radius: 10px; background: #1265f5; color: #fff; font-weight: 800; text-align: center; text-decoration: none; }
     .storefront-quick-actions button:disabled { cursor: not-allowed; opacity: .55; }
     .storefront-quick-full { display: block; margin-top: 12px; background: #eef2ff; color: #1e40af; }
+    @media (max-width: 1400px) {
+        .storefront-hero { min-height: 250px !important; }
+        .storefront-logo { width: 95px !important; height: 95px !important; flex-basis: 95px !important; }
+        .storefront-identity h1 { font-size: 1.85rem !important; }
+    }
     @media (max-width: 1199.98px) {
         .storefront-layout { grid-template-columns: minmax(0, 1fr) 300px; }
         .storefront-products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

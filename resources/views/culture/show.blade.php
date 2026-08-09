@@ -29,34 +29,31 @@
         position: relative;
     }
     .cordel-flip-container {
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        column-width: calc(100% - 20px);
-        column-gap: 40px;
+        overflow: hidden;
         height: 60vh;
         min-height: 400px;
         padding-bottom: 20px;
     }
-    
-    @media (min-width: 768px) {
-        .cordel-flip-container {
-            column-width: calc(50% - 20px);
-        }
-    }
-    
-    .cordel-flip-container > p, .cordel-flip-container > div {
-        break-inside: avoid;
-    }
-    .cordel-verses-flip {
-        /* Estilos base herdados do cordel-verses */
+    .cordel-page {
+        display: none;
+        height: 100%;
+        overflow-y: auto;
+        padding: 0 0.75rem 1rem;
         font-family: 'Georgia', 'Times New Roman', serif;
         font-size: 1.18rem;
         line-height: 1.8;
         color: #2c1810;
         white-space: pre-wrap;
+    }
+    .cordel-page.is-active {
+        display: block;
+    }
+    .cordel-page-indicator {
+        color: #8b5e34;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 0.5rem;
     }
     .flip-btn {
         position: absolute;
@@ -74,6 +71,11 @@
         transition: all 0.2s;
     }
     .flip-btn:hover { background: #8b5e34; color: #fff; }
+    .flip-btn:disabled {
+        cursor: default;
+        opacity: 0.35;
+        pointer-events: none;
+    }
     .flip-prev { left: -20px; }
     .flip-next { right: -20px; }
     .cordel-top-pegador {
@@ -106,9 +108,10 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
     }
     [data-bs-theme="dark"] .cordel-verses, 
-    [data-bs-theme="dark"] .cordel-verses-flip { 
+    [data-bs-theme="dark"] .cordel-page { 
         color: #e0e0e0; 
     }
+    [data-bs-theme="dark"] .cordel-page-indicator { color: #d4a373; }
     [data-bs-theme="dark"] .flip-btn { 
         background: #333; 
         border-color: #666; 
@@ -205,16 +208,23 @@
 
                     <!-- Conteúdo Principal do Cordel / Texto -->
                     @if($work->content)
+                        @php
+                            $cordelLines = preg_split('/\R/u', trim($work->content)) ?: [];
+                            $cordelPages = array_chunk($cordelLines, 12);
+                        @endphp
                         <div class="cordel-flip-wrapper my-4">
-                            <button class="flip-btn flip-prev" onclick="document.getElementById('cordel-reader').scrollBy({left: -300, behavior: 'smooth'})">
+                            <button type="button" class="flip-btn flip-prev" data-cordel-direction="previous" aria-label="Página anterior" aria-controls="cordel-reader">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
-                            <div class="cordel-flip-container" id="cordel-reader">
-                                <div class="cordel-verses-flip">{{ $work->content }}</div>
+                            <div class="cordel-flip-container" id="cordel-reader" tabindex="0" aria-label="Leitor paginado da obra">
+                                @foreach($cordelPages as $pageIndex => $pageLines)
+                                    <div class="cordel-page {{ $pageIndex === 0 ? 'is-active' : '' }}" data-cordel-page="{{ $pageIndex }}" @if($pageIndex !== 0) hidden @endif>{{ implode("\n", $pageLines) }}</div>
+                                @endforeach
                             </div>
-                            <button class="flip-btn flip-next" onclick="document.getElementById('cordel-reader').scrollBy({left: 300, behavior: 'smooth'})">
+                            <button type="button" class="flip-btn flip-next" data-cordel-direction="next" aria-label="Próxima página" aria-controls="cordel-reader">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </button>
+                            <div class="cordel-page-indicator" id="cordel-page-indicator" aria-live="polite"></div>
                         </div>
                     @endif
 
@@ -334,6 +344,40 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const cordelReader = document.getElementById('cordel-reader');
+    const previousPageButton = document.querySelector('[data-cordel-direction="previous"]');
+    const nextPageButton = document.querySelector('[data-cordel-direction="next"]');
+
+    if (cordelReader && previousPageButton && nextPageButton) {
+        const cordelPages = Array.from(cordelReader.querySelectorAll('[data-cordel-page]'));
+        const pageIndicator = document.getElementById('cordel-page-indicator');
+        let currentCordelPage = 0;
+
+        const showCordelPage = (pageIndex) => {
+            if (pageIndex < 0 || pageIndex >= cordelPages.length) return;
+
+            cordelPages.forEach((page, index) => {
+                const isActive = index === pageIndex;
+                page.classList.toggle('is-active', isActive);
+                page.hidden = !isActive;
+                if (isActive) page.scrollTop = 0;
+            });
+
+            currentCordelPage = pageIndex;
+            previousPageButton.disabled = currentCordelPage === 0;
+            nextPageButton.disabled = currentCordelPage === cordelPages.length - 1;
+            pageIndicator.textContent = `Página ${currentCordelPage + 1} de ${cordelPages.length}`;
+        };
+
+        previousPageButton.addEventListener('click', () => showCordelPage(currentCordelPage - 1));
+        nextPageButton.addEventListener('click', () => showCordelPage(currentCordelPage + 1));
+        cordelReader.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') showCordelPage(currentCordelPage - 1);
+            if (event.key === 'ArrowRight') showCordelPage(currentCordelPage + 1);
+        });
+        showCordelPage(0);
+    }
+
     const likeBtn = document.getElementById('like-btn');
     if (likeBtn) {
         likeBtn.addEventListener('click', function() {

@@ -73,7 +73,7 @@
     }
 
     .app-splash-brand-name {
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-weight: 800;
         font-size: 1.65rem;
         line-height: 1.15;
@@ -96,7 +96,7 @@
     }
 
     .app-splash-tagline {
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 0.98rem;
         font-weight: 500;
         line-height: 1.5;

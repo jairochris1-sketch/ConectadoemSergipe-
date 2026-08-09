@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Ad;
 use App\Models\AdImage;
+use App\Models\Category;
 use App\Models\Review;
+use App\Models\Store;
 use App\Models\User;
 use App\Support\CityImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +15,57 @@ use Tests\TestCase;
 class ServiceProviderProfileTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_service_directory_lists_all_active_categories(): void
+    {
+        $owner = User::factory()->create();
+        $category = Category::create([
+            'name' => 'Técnico em Eletrônica',
+            'slug' => 'tecnico-em-eletronica',
+            'icon' => 'fa-plug',
+            'active' => true,
+        ]);
+        $categoryWithoutProvider = Category::create([
+            'name' => 'Categoria sem prestador',
+            'slug' => 'categoria-sem-prestador',
+            'icon' => 'fa-tag',
+            'active' => true,
+        ]);
+        $inactiveCategory = Category::create([
+            'name' => 'Categoria desativada',
+            'slug' => 'categoria-desativada',
+            'icon' => 'fa-tag',
+            'active' => false,
+        ]);
+
+        Ad::create([
+            'user_id' => $owner->id,
+            'category_id' => $category->id,
+            'module' => 'services',
+            'advertiser_type' => $category->name,
+            'title' => 'Conserto de eletrônicos',
+            'slug' => 'conserto-de-eletronicos',
+            'description' => 'Manutenção especializada.',
+            'city' => 'Aracaju',
+            'status' => 'active',
+        ]);
+
+        $this->get(route('module.services'))
+            ->assertOk()
+            ->assertSee('<option value="Técnico em Eletrônica"', false)
+            ->assertSee('<option value="Categoria sem prestador"', false)
+            ->assertDontSee($inactiveCategory->name);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('<option value="service:Técnico em Eletrônica">', false)
+            ->assertSee('<option value="service:Categoria sem prestador">', false)
+            ->assertDontSee($inactiveCategory->name);
+
+        $this->get(route('module.services', ['category' => $category->name]))
+            ->assertOk()
+            ->assertSee('Conserto de eletrônicos');
+    }
 
     public function test_service_provider_appears_in_directory_and_homepage(): void
     {
@@ -51,6 +104,63 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee(route('provider.show', $provider->slug));
     }
 
+    public function test_paid_provider_is_prioritized_in_home_highlights_and_free_profiles_fill_remaining_slots(): void
+    {
+        $this->seed(\Database\Seeders\PlansSeeder::class);
+        $paidOwner = User::factory()->create(['subscription_plan' => 'start']);
+        $paidProvider = $this->createAdForUser($paidOwner, 'Prestador pago em destaque');
+        $paidProvider->update(['created_at' => now()->subMonth()]);
+
+        $mostViewedFreeProvider = null;
+        foreach (range(1, 9) as $index) {
+            $freeOwner = User::factory()->create(['subscription_plan' => 'free']);
+            $freeProvider = $this->createAdForUser($freeOwner, "Prestador gratuito {$index}");
+            $freeProvider->update([
+                'created_at' => now()->subMinutes($index),
+                'views' => $index === 1 ? 500 : $index,
+            ]);
+            $mostViewedFreeProvider ??= $freeProvider;
+        }
+
+        foreach (range(1, 8) as $index) {
+            $generalAd = $this->createAd('products', "Produto procurado {$index}");
+            $generalAd->update(['views' => 100 - $index]);
+        }
+        $adminOwner = User::factory()->create([
+            'role' => 'admin',
+            'subscription_plan' => 'free',
+        ]);
+        $adminProvider = $this->createAdForUser($adminOwner, 'Perfil criado pelo administrador');
+        $adminProvider->update(['views' => 900]);
+
+        $response = $this->get(route('home'))->assertOk();
+        $providers = $response->viewData('serviceProviders');
+
+        $this->assertCount(8, $providers);
+        $this->assertSame($paidProvider->id, $providers->first()->id);
+        $this->assertTrue((bool) $providers->first()->is_plan_featured);
+        $response->assertSee('Destaque do plano pago');
+        $featuredForYou = $response->viewData('featuredForYou');
+        $this->assertTrue($featuredForYou->contains('id', $paidProvider->id));
+        $this->assertTrue($featuredForYou->contains('id', $mostViewedFreeProvider->id));
+        $this->assertLessThanOrEqual(3, $featuredForYou->where('module', 'services')->count());
+        $this->assertFalse((bool) $featuredForYou->firstWhere('id', $adminProvider->id)->is_plan_featured);
+        $response
+            ->assertSee('Prestador pago')
+            ->assertSee('Mais procurado')
+            ->assertSee(route('provider.show', $paidProvider->slug));
+        $this->assertDatabaseHas('plan_feature_values', [
+            'plan_id' => \App\Models\Plan::where('slug', 'free')->value('id'),
+            'plan_feature_id' => \App\Models\PlanFeature::where('key', 'provider_featured')->value('id'),
+            'value' => '0',
+        ]);
+        $this->assertDatabaseHas('plan_feature_values', [
+            'plan_id' => \App\Models\Plan::where('slug', 'start')->value('id'),
+            'plan_feature_id' => \App\Models\PlanFeature::where('key', 'provider_featured')->value('id'),
+            'value' => '1',
+        ]);
+    }
+
     public function test_service_provider_has_a_professional_page_and_old_url_redirects(): void
     {
         $provider = $this->createAd('services', 'Encanador de teste');
@@ -59,9 +169,10 @@ class ServiceProviderProfileTest extends TestCase
 
         $this->get(route('provider.show', $provider->slug))
             ->assertOk()
-            ->assertSee('Perfil Verificado')
+            ->assertSee('Perfil reivindicado')
             ->assertSee('provider-profile-header', false)
             ->assertSee('provider-profile-overview', false)
+            ->assertSee('max-width: 1080px !important;', false)
             ->assertSee('Mensagens')
             ->assertSee('Conheça o trabalho.')
             ->assertSee('Horários não informados')
@@ -83,6 +194,44 @@ class ServiceProviderProfileTest extends TestCase
 
         $this->get(route('ad.show', $provider->slug))
             ->assertRedirect(route('provider.show', $provider->slug));
+    }
+
+    public function test_related_professionals_are_shown_only_on_free_provider_profiles(): void
+    {
+        $this->seed(\Database\Seeders\PlansSeeder::class);
+
+        $relatedOwner = User::factory()->create(['subscription_plan' => 'free']);
+        $relatedProvider = $this->createAdForUser($relatedOwner, 'Profissional relacionado');
+
+        $freeOwner = User::factory()->create(['subscription_plan' => 'free']);
+        $freeProvider = $this->createAdForUser($freeOwner, 'Perfil gratuito');
+
+        $this->get(route('provider.show', $freeProvider->slug))
+            ->assertOk()
+            ->assertSee('Outros profissionais em Nossa Senhora da Glória')
+            ->assertSee($relatedProvider->title);
+
+        $paidOwner = User::factory()->create(['subscription_plan' => 'start']);
+        $paidProvider = $this->createAdForUser($paidOwner, 'Perfil do plano de vinte e cinco reais');
+        $paidStore = Store::create([
+            'user_id' => $paidOwner->id,
+            'name' => 'Loja exclusiva do profissional',
+            'slug' => 'loja-exclusiva-do-profissional',
+            'description' => 'Produtos do mesmo titular do perfil profissional.',
+            'category' => 'Comércio local',
+            'city' => 'Nossa Senhora da Glória',
+            'state' => 'SE',
+            'active' => true,
+            'moderation_status' => 'approved',
+        ]);
+
+        $this->get(route('provider.show', $paidProvider->slug))
+            ->assertOk()
+            ->assertDontSee('Outros profissionais em Nossa Senhora da Glória')
+            ->assertDontSee($relatedProvider->title)
+            ->assertSee('Vitrine do profissional')
+            ->assertSee($paidStore->name)
+            ->assertSee(route('store.show', $paidStore->slug), false);
     }
 
     public function test_service_provider_portfolio_uses_airbnb_gallery_without_duplicate_images(): void
@@ -169,26 +318,26 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('services-directory-filter', false);
     }
 
-    public function test_service_directory_paginates_ten_profiles_per_page(): void
+    public function test_service_directory_paginates_twenty_one_profiles_per_page(): void
     {
-        foreach (range(1, 11) as $index) {
+        foreach (range(1, 22) as $index) {
             $this->createAd('services', "Prestador paginado {$index}");
         }
 
         $this->get(route('module.services'))
             ->assertOk()
             ->assertViewHas('providers', function ($providers) {
-                return $providers->perPage() === 10
-                    && $providers->count() === 10
-                    && $providers->total() === 11;
+                return $providers->perPage() === 21
+                    && $providers->count() === 21
+                    && $providers->total() === 22;
             })
-            ->assertSee('Mostrando 1–10 de 11 resultado(s)')
+            ->assertSee('Mostrando 1–21 de 22 resultado(s)')
             ->assertSee('services-directory-pagination', false);
 
         $this->get(route('module.services', ['page' => 2]))
             ->assertOk()
             ->assertViewHas('providers', fn ($providers) => $providers->count() === 1)
-            ->assertSee('Mostrando 11–11 de 11 resultado(s)');
+            ->assertSee('Mostrando 22–22 de 22 resultado(s)');
     }
 
     public function test_professional_profile_call_to_action_changes_with_the_account_state(): void
@@ -260,6 +409,8 @@ class ServiceProviderProfileTest extends TestCase
             ->assertOk()
             ->assertSee('Capa do perfil profissional')
             ->assertSee('name="banner"', false)
+            ->assertSee('name="public_address"', false)
+            ->assertSee('Endereço público do local de atendimento')
             ->assertSee('Se não enviar, será usada uma imagem da cidade escolhida.')
             ->assertDontSee('cover-photo-preview-box');
     }
@@ -299,6 +450,52 @@ class ServiceProviderProfileTest extends TestCase
             ->assertRedirect(route('provider.show', $provider->slug));
 
         $this->assertSame('https://instagram.com/gesseiro.teste', $provider->fresh()->instagram);
+    }
+
+    public function test_provider_can_publish_update_and_remove_a_public_service_address(): void
+    {
+        $provider = $this->createAd('services', 'Profissional com local fixo');
+
+        $this->actingAs($provider->user)
+            ->get(route('ad.edit', $provider->id))
+            ->assertOk()
+            ->assertSee('name="public_address"', false)
+            ->assertSee('Endereço público do local de atendimento');
+
+        $this->actingAs($provider->user)
+            ->put(route('ad.update', $provider->id), [
+                'title' => $provider->title,
+                'category_name' => $provider->display_category,
+                'city' => $provider->city,
+                'description' => $provider->description,
+                'public_address' => 'Avenida Principal, 45, Centro',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('provider.show', $provider->slug));
+
+        $this->assertSame('Avenida Principal, 45, Centro', $provider->fresh()->public_address);
+        $this->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertSee('Local de atendimento')
+            ->assertSee('Avenida Principal, 45, Centro')
+            ->assertSee('Como chegar')
+            ->assertSee('google.com/maps/dir', false);
+
+        $this->actingAs($provider->user)
+            ->put(route('ad.update', $provider->id), [
+                'title' => $provider->title,
+                'category_name' => $provider->display_category,
+                'city' => $provider->city,
+                'description' => $provider->description,
+                'public_address' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($provider->fresh()->public_address);
+        $this->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertDontSee('Local de atendimento')
+            ->assertDontSee('Como chegar');
     }
 
     public function test_sales_ad_keeps_the_regular_ad_page(): void

@@ -13,6 +13,7 @@ class Ad extends Model
         'store_id',
         'category_id',
         'module',
+        'profile_kind',
         'display_mode',
         'sku',
         'advertiser_type',
@@ -34,6 +35,7 @@ class Ad extends Model
         'city',
         'state',
         'region',
+        'public_address',
         'business_hours',
         'instagram',
         'facebook',
@@ -42,6 +44,11 @@ class Ad extends Model
         'status',
         'views',
         'publication_ip',
+        'is_claimed',
+        'claiming_enabled',
+        'claimed_at',
+        'contact_phone',
+        'contact_whatsapp',
     ];
 
     protected $casts = [
@@ -55,6 +62,9 @@ class Ad extends Model
         'allow_backorders' => 'boolean',
         'minimum_quantity' => 'integer',
         'technical_specs' => 'array',
+        'is_claimed' => 'boolean',
+        'claiming_enabled' => 'boolean',
+        'claimed_at' => 'datetime',
     ];
 
     public function user()
@@ -121,6 +131,35 @@ class Ad extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function providerClaims()
+    {
+        return $this->hasMany(ProviderClaim::class);
+    }
+
+    public function pendingProviderClaims()
+    {
+        return $this->hasMany(ProviderClaim::class)
+            ->where('status', ProviderClaim::STATUS_PENDING);
+    }
+
+    public function publicPhone(): ?string
+    {
+        if (! $this->is_claimed) {
+            return $this->contact_phone;
+        }
+
+        return $this->user?->phone ?: $this->contact_phone;
+    }
+
+    public function publicWhatsapp(): ?string
+    {
+        if (! $this->is_claimed) {
+            return $this->contact_whatsapp ?: $this->contact_phone;
+        }
+
+        return $this->user?->whatsapp ?: $this->contact_whatsapp ?: $this->contact_phone;
     }
 
     public function getCardImageAttribute(): ?string

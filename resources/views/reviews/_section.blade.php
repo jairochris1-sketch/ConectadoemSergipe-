@@ -22,7 +22,7 @@
         <h2 class="h4 fw-bold mb-4">Avaliações dos usuários</h2>
         <div class="row g-4 align-items-center">
             <div class="col-12 col-md-4 text-center text-md-start">
-                <div class="reviews-average">{{ $reviewCount ? number_format($reviewAverage, 1, ',', '.') : '—' }}</div>
+                <div class="reviews-average">{{ number_format($reviewCount ? $reviewAverage : 0, 1, ',', '.') }}</div>
                 <div class="reviews-stars fs-4 mb-2" aria-label="{{ $reviewAverage }} de 5 estrelas">
                     @foreach(range(1, 5) as $star)
                         <i class="fa-{{ $star <= round($reviewAverage) ? 'solid' : 'regular' }} fa-star"></i>

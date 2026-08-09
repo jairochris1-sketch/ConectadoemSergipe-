@@ -25,6 +25,7 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
+        'google_id',
         'password',
         'phone',
         'whatsapp',
@@ -57,6 +58,9 @@ class User extends Authenticatable
         'smart_search_enabled',
         'last_seen_at',
         'is_available',
+        'last_login_ip',
+        'latitude',
+        'longitude',
     ];
 
     protected $hidden = [
@@ -107,6 +111,11 @@ class User extends Authenticatable
         return $this->hasMany(Ad::class)->where('module', 'services');
     }
 
+    public function providerClaims()
+    {
+        return $this->hasMany(ProviderClaim::class, 'claimant_user_id');
+    }
+
     public function professionalProfileLimit(): ?int
     {
         if ($this->role === 'admin') {
@@ -132,6 +141,16 @@ class User extends Authenticatable
     public function stores()
     {
         return $this->hasMany(Store::class);
+    }
+
+    public function cultureWorks()
+    {
+        return $this->hasMany(CultureWork::class);
+    }
+
+    public function feedPosts()
+    {
+        return $this->hasMany(FeedPost::class);
     }
 
     /**
@@ -206,6 +225,7 @@ class User extends Authenticatable
             'store_gallery'        => null,
             'promotions_limit'     => 'marketplace.store_promotion_limits',
             'store_featured'       => 'marketplace.store_featured_enabled',
+            'provider_featured'    => 'marketplace.provider_featured_enabled',
             'professional_profiles'=> 'marketplace.professional_profile_limits',
         ];
 
@@ -304,6 +324,16 @@ class User extends Authenticatable
         }
 
         $value = $this->planFeatureValue('store_featured');
+        return $value === '1' || $value === null;
+    }
+
+    public function canHaveFeaturedProvider(): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        $value = $this->planFeatureValue('provider_featured');
         return $value === '1' || $value === null;
     }
 

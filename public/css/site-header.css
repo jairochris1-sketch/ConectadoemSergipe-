@@ -99,7 +99,14 @@
     font-size: .77rem;
     font-weight: 600;
     text-decoration: none;
+    white-space: nowrap;
     transition: color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.marketplace-nav-label {
+    white-space: nowrap;
+    text-align: center;
+    line-height: 1.1;
 }
 
 .marketplace-nav-item::after {
@@ -116,7 +123,7 @@
 .marketplace-nav-icon {
     display: grid;
     place-items: center;
-    color: var(--marketplace-icon-color, #52627b);
+    color: var(--marketplace-blue, #0d6efd) !important;
     font-size: 1.0rem;
 }
 
@@ -135,17 +142,16 @@
 }
 
 .marketplace-nav-home,
+.marketplace-nav-stores,
 .marketplace-nav-real-estate,
 .marketplace-nav-vehicles,
 .marketplace-nav-products,
 .marketplace-nav-services,
 .marketplace-nav-jobs,
-.marketplace-nav-agro {
-    --marketplace-icon-color: var(--marketplace-blue);
-}
-
-[data-theme="dark"] .marketplace-nav-icon {
-    color: #adaeb0;
+.marketplace-nav-agro,
+.marketplace-nav-culture,
+.marketplace-nav-community {
+    --marketplace-icon-color: var(--marketplace-blue, #0d6efd);
 }
 
 .marketplace-header-actions {
@@ -156,29 +162,36 @@
 }
 
 .marketplace-location-active {
-    min-height: 34px;
-    max-width: 180px;
+    min-height: 28px;
+    max-width: none !important;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 6px 10px;
-    border: 1px solid #86efac;
+    gap: 5px;
+    padding: 3px 10px;
+    border: 1px solid #fca5a5;
     border-radius: 999px;
-    background: #f0fdf4;
-    color: #166534;
+    background: #fef2f2;
+    color: #b91c1c;
     font-size: .72rem;
-    font-weight: 800;
+    font-weight: 700;
     white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.marketplace-location-active i.fa-location-dot {
+    color: #dc3545 !important;
 }
 
 .marketplace-location-active span {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap;
 }
 
 .marketplace-location-active:hover {
-    border-color: #22c55e;
-    background: #dcfce7;
+    border-color: #ef4444;
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .marketplace-location-active:disabled {
@@ -186,13 +199,23 @@
 }
 
 .marketplace-location-close {
-    font-size: .68rem;
+    font-size: .65rem;
+    color: #dc3545;
 }
 
+/* Modo Escuro - Cor Verde */
+html[data-theme="dark"] .marketplace-location-active,
+[data-bs-theme="dark"] .marketplace-location-active,
 [data-theme="dark"] .marketplace-location-active {
-    border-color: #166534;
-    background: #052e16;
-    color: #bbf7d0;
+    border-color: #10b981 !important;
+    background: #064e3b !important;
+    color: #a7f3d0 !important;
+}
+
+html[data-theme="dark"] .marketplace-location-active i,
+[data-bs-theme="dark"] .marketplace-location-active i,
+[data-theme="dark"] .marketplace-location-active i {
+    color: #34d399 !important;
 }
 
 .marketplace-search-button {

@@ -25,6 +25,8 @@ class PlansSeeder extends Seeder
             ['key' => 'verified_badge',       'name' => 'Selo de verificado',            'type' => 'boolean',   'sort_order' => 9],
             ['key' => 'priority_support',     'name' => 'Suporte prioritário',           'type' => 'boolean',   'sort_order' => 10],
             ['key' => 'professional_profiles','name' => 'Perfis profissionais',          'type' => 'integer',   'sort_order' => 11],
+            ['key' => 'provider_featured',    'name' => 'Prestador em destaque',          'type' => 'boolean',   'sort_order' => 12],
+            ['key' => 'feed_sponsored',       'name' => 'Anúncios patrocinados no feed',  'type' => 'boolean',   'sort_order' => 13],
         ];
 
         foreach ($features as $feature) {
@@ -117,6 +119,8 @@ class PlansSeeder extends Seeder
             ['plan' => 'free', 'feature' => 'verified_badge',        'value' => '0',    'show' => true],
             ['plan' => 'free', 'feature' => 'priority_support',      'value' => '0',    'show' => true],
             ['plan' => 'free', 'feature' => 'professional_profiles', 'value' => '1',    'show' => false],
+            ['plan' => 'free', 'feature' => 'provider_featured',     'value' => '0',    'show' => true],
+            ['plan' => 'free', 'feature' => 'feed_sponsored',        'value' => '0',    'show' => true],
 
             // ── START ────────────────────────────────────────────────────────────
             ['plan' => 'start', 'feature' => 'store_limit',          'value' => '1',    'show' => true],
@@ -130,6 +134,8 @@ class PlansSeeder extends Seeder
             ['plan' => 'start', 'feature' => 'verified_badge',        'value' => '0',    'show' => true],
             ['plan' => 'start', 'feature' => 'priority_support',      'value' => '0',    'show' => true],
             ['plan' => 'start', 'feature' => 'professional_profiles', 'value' => '1',    'show' => false],
+            ['plan' => 'start', 'feature' => 'provider_featured',     'value' => '1',    'show' => true],
+            ['plan' => 'start', 'feature' => 'feed_sponsored',        'value' => '1',    'show' => true],
 
             // ── PRO ──────────────────────────────────────────────────────────────
             ['plan' => 'pro', 'feature' => 'store_limit',            'value' => '1',    'show' => true],
@@ -143,6 +149,8 @@ class PlansSeeder extends Seeder
             ['plan' => 'pro', 'feature' => 'verified_badge',         'value' => '1',    'show' => true],
             ['plan' => 'pro', 'feature' => 'priority_support',       'value' => '1',    'show' => true],
             ['plan' => 'pro', 'feature' => 'professional_profiles',  'value' => null,   'show' => false],
+            ['plan' => 'pro', 'feature' => 'provider_featured',      'value' => '1',    'show' => true],
+            ['plan' => 'pro', 'feature' => 'feed_sponsored',         'value' => '1',    'show' => true],
 
             // ── ENTERPRISE (Premium) ─────────────────────────────────────────────
             ['plan' => 'enterprise', 'feature' => 'store_limit',            'value' => '3',  'show' => true],
@@ -156,6 +164,8 @@ class PlansSeeder extends Seeder
             ['plan' => 'enterprise', 'feature' => 'verified_badge',         'value' => '1',  'show' => true],
             ['plan' => 'enterprise', 'feature' => 'priority_support',       'value' => '1',  'show' => true],
             ['plan' => 'enterprise', 'feature' => 'professional_profiles',  'value' => null, 'show' => false],
+            ['plan' => 'enterprise', 'feature' => 'provider_featured',      'value' => '1',  'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'feed_sponsored',         'value' => '1',  'show' => true],
         ];
 
         foreach ($values as $v) {

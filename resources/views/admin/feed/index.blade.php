@@ -1,0 +1,16 @@
+@extends('layouts.admin')
+@section('title', 'Moderação da Comunidade')
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4 admin-page-heading"><div><h1 class="h3 fw-bold mb-1">Moderação da Comunidade</h1><p class="text-muted mb-0">Aprove imagens e analise publicações denunciadas.</p></div><a href="{{ route('feed.index') }}" class="btn btn-outline-primary rounded-pill" target="_blank">Abrir comunidade</a></div>
+@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+<div class="btn-group mb-4">@foreach(['pending'=>'Pendentes','published'=>'Publicadas','hidden'=>'Ocultas','rejected'=>'Rejeitadas'] as $key=>$label)<a href="{{ route('admin.feed.index',['status'=>$key]) }}" class="btn {{ $status===$key?'btn-primary':'btn-outline-primary' }}">{{ $label }}</a>@endforeach</div>
+@forelse($posts as $post)<article class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body p-4"><div class="d-flex justify-content-between gap-3"><div><h2 class="h6 fw-bold mb-1">{{ $post->user->name }}</h2><small class="text-muted">{{ $post->city ?: 'Sergipe' }} · {{ $post->created_at->format('d/m/Y H:i') }}</small></div><span class="badge bg-{{ $post->status==='published'?'success':($post->status==='pending'?'warning':'secondary') }} align-self-start">{{ strtoupper($post->status) }}</span></div>
+@if($post->body)<p class="my-3" style="white-space:pre-wrap">{{ $post->body }}</p>@endif
+@if($post->moderation_reason)<div class="alert alert-warning py-2"><strong>Sinais:</strong> {{ $post->moderation_reason }}</div>@endif
+@if($post->images->isNotEmpty())<div class="d-flex flex-wrap gap-2 mb-3">@foreach($post->images as $image)<a href="{{ asset($image->path) }}" target="_blank"><img src="{{ asset($image->path) }}" alt="" class="rounded-3 border" style="width:140px;height:140px;object-fit:cover"></a>@endforeach</div>@endif
+<div class="small text-muted mb-3">{{ $post->likes_count }} curtidas · {{ $post->comments_count }} comentários · {{ $post->reports_count }} denúncias</div>
+@if($post->reports->isNotEmpty())<div class="border rounded-3 p-3 mb-3"><strong>Denúncias</strong>@foreach($post->reports as $report)<div class="small mt-2">{{ $report->reporter->name }}: {{ $report->reason }} {{ $report->details }}</div>@endforeach</div>@endif
+<form action="{{ route('admin.feed.action',$post) }}" method="POST" class="row g-2 align-items-end">@csrf<div class="col-md-6"><label class="form-label small fw-bold">Observação</label><input name="moderation_reason" class="form-control" maxlength="500" value="{{ $post->moderation_reason }}"></div><div class="col-md-6 d-flex flex-wrap gap-2"><button name="action" value="approve" class="btn btn-success">Aprovar</button><button name="action" value="hide" class="btn btn-warning">Ocultar</button><button name="action" value="reject" class="btn btn-danger">Rejeitar</button>@if($post->reports_count)<button name="action" value="dismiss_reports" class="btn btn-outline-secondary">Arquivar denúncias</button>@endif</div></form>
+</div></article>@empty<div class="alert alert-light border">Nenhuma publicação neste filtro.</div>@endforelse
+{{ $posts->links() }}
+@endsection

@@ -53,6 +53,22 @@
                             </div>
                         </div>
 
+                        @if($isService)
+                            <div class="mb-3">
+                                <label for="public_address" class="form-label fw-semibold">Endereço público do local de atendimento (opcional)</label>
+                                <input type="text" class="form-control form-control-lg rounded-3" id="public_address" name="public_address" value="{{ old('public_address', $ad->public_address) }}" maxlength="255" placeholder="Ex: Rua das Flores, 120, Centro">
+                                <small class="text-muted">Preencha somente se clientes puderem ir ao local. O endereço aparecerá no perfil com o botão “Como chegar”.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="profile_kind" class="form-label fw-semibold">Tipo de perfil *</label>
+                                <select class="form-select form-select-lg rounded-3" id="profile_kind" name="profile_kind" required>
+                                    <option value="professional" @selected(old('profile_kind', $ad->profile_kind ?: 'professional') === 'professional')>Prestador de serviços</option>
+                                    <option value="service_company" @selected(old('profile_kind', $ad->profile_kind) === 'service_company')>Empresa de serviços</option>
+                                </select>
+                            </div>
+                        @endif
+
                         <div class="mb-3">
                             <label for="category_name" class="form-label fw-semibold">Categoria *</label>
                             <select class="form-select form-select-lg rounded-3" id="category_name" name="category_name" required>
@@ -219,7 +235,7 @@
                                         <input type="file" class="form-control" id="banner" name="banner" accept="image/*" style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
                                         <button type="button" class="btn btn-outline-secondary" onclick="importImageByUrl('banner')" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"><i class="fa-solid fa-link"></i> Importar por Link</button>
                                     </div>
-                                    <small class="text-muted d-block mt-1">Escolha outra capa ou importe via link para substituir a atual.</small>
+                                    <small class="text-muted d-block mt-1">Escolha outra capa para substituir a atual.</small>
                                 </div>
                             </div>
 

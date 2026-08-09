@@ -23,7 +23,8 @@
         ->filter()
         ->unique()
         ->values();
-    $whatsapp = preg_replace('/\D+/', '', $provider->user->whatsapp ?? '');
+    $publicPhone = $provider->publicPhone();
+    $whatsapp = preg_replace('/\D+/', '', $provider->publicWhatsapp() ?? '');
     $whatsappNumber = $whatsapp
         ? (str_starts_with($whatsapp, '55') ? $whatsapp : '55' . $whatsapp)
         : null;
@@ -60,9 +61,25 @@
             ? $facebookValue
             : 'https://facebook.com/' . ltrim($facebookValue, '@/'))
         : null;
+    $providerPublicAddress = trim((string) $provider->public_address);
+    $providerDirectionsUrl = $providerPublicAddress !== ''
+        ? 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode(implode(', ', array_filter([
+            $providerPublicAddress,
+            $provider->city,
+            'SE',
+            'Brasil',
+        ])))
+        : null;
 @endphp
 
 <section class="provider-profile-page">
+    @if(session('claim_success'))
+        <div class="container pt-3">
+            <div class="alert alert-success rounded-3 mb-0">
+                <i class="fa-solid fa-circle-check me-2"></i>{{ session('claim_success') }}
+            </div>
+        </div>
+    @endif
     <div class="container provider-cover-frame">
         <div class="provider-cover">
             <img src="{{ asset($coverImage) }}" alt="Capa de {{ $provider->city }}">
@@ -90,9 +107,12 @@
                 <div class="provider-profile-identity">
                     <div class="provider-badges">
                         <span class="provider-category-badge">{{ $provider->display_category }}</span>
-                        <span class="provider-verified-badge">
-                            <i class="fa-solid fa-circle-check"></i>
-                            Perfil Verificado
+                        @if($provider->profile_kind === 'service_company')
+                            <span class="provider-category-badge"><i class="fa-solid fa-building me-1"></i>Empresa de serviços</span>
+                        @endif
+                        <span class="provider-verified-badge {{ $provider->is_claimed ? '' : 'provider-unclaimed-badge' }}">
+                            <i class="fa-solid {{ $provider->is_claimed ? 'fa-circle-check' : 'fa-circle-info' }}"></i>
+                            {{ $provider->is_claimed ? 'Perfil reivindicado' : 'Perfil não reivindicado' }}
                         </span>
                     </div>
 
@@ -119,10 +139,12 @@
                 </div>
 
                 <nav class="provider-action-list" aria-label="Contato com o profissional">
-                    <a href="{{ route('chat.index', ['with' => $provider->user_id]) }}" class="provider-action provider-action-primary">
-                        <i class="fa-regular fa-message"></i>
-                        <span>Mensagens</span>
-                    </a>
+                    @if($provider->is_claimed)
+                        <a href="{{ route('chat.index', ['with' => $provider->user_id]) }}" class="provider-action provider-action-primary">
+                            <i class="fa-regular fa-message"></i>
+                            <span>Mensagens</span>
+                        </a>
+                    @endif
 
                     @if($whatsappNumber)
                         <a href="https://wa.me/{{ $whatsappNumber }}?text={{ $whatsappMessage }}" target="_blank" rel="noopener" class="provider-action provider-action-primary">
@@ -131,8 +153,8 @@
                         </a>
                     @endif
 
-                    @if($provider->user->phone)
-                        <a href="tel:{{ $provider->user->phone }}" class="provider-action provider-action-secondary">
+                    @if($publicPhone)
+                        <a href="tel:{{ $publicPhone }}" class="provider-action provider-action-secondary">
                             <i class="fa-solid fa-phone"></i>
                             <span>Ligar</span>
                         </a>
@@ -153,10 +175,16 @@
 
                     <div class="provider-profile-meta-footer">
                         <div>
-                            <span>Responsável pelo perfil</span>
-                            <strong>{{ $provider->user->name }}</strong>
-                            @if($provider->user->username)
-                                <small>{{ '@' . $provider->user->username }}</small>
+                            @if($provider->is_claimed)
+                                <span>Responsável pelo perfil</span>
+                                <strong>{{ $provider->user->name }}</strong>
+                                @if($provider->user->username)
+                                    <small>{{ '@' . $provider->user->username }}</small>
+                                @endif
+                            @else
+                                <span>Origem do perfil</span>
+                                <strong>Cadastrado pela plataforma</strong>
+                                <small>Aguardando o responsável</small>
                             @endif
                         </div>
 
@@ -206,6 +234,35 @@
                         </div>
                     @endif
 
+                    @if(! $provider->is_claimed && $provider->claiming_enabled)
+                        <section class="provider-claim-card" aria-labelledby="provider-claim-title">
+                            <h2 id="provider-claim-title">Você é responsável por este perfil?</h2>
+                            <p>Reivindique-o gratuitamente para atualizar informações, adicionar fotos e responder avaliações.</p>
+                            @if($currentUserPendingClaim)
+                                <a href="{{ route('provider.claim.create', $provider) }}" class="provider-claim-button provider-claim-button-pending">
+                                    <i class="fa-regular fa-clock"></i> Solicitação em análise
+                                </a>
+                            @else
+                                <a href="{{ route('provider.claim.create', $provider) }}" class="provider-claim-button">
+                                    <i class="fa-solid fa-hand-pointer"></i> Reivindicar este perfil
+                                </a>
+                            @endif
+                        </section>
+                    @endif
+
+                    @if($providerDirectionsUrl)
+                        <section class="provider-public-address" aria-labelledby="provider-public-address-title">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <div>
+                                <strong id="provider-public-address-title">Local de atendimento</strong>
+                                <span>{{ $providerPublicAddress }}</span>
+                                <a href="{{ $providerDirectionsUrl }}" target="_blank" rel="noopener noreferrer" aria-label="Criar rota até {{ $provider->title }} no Google Maps">
+                                    <i class="fa-solid fa-diamond-turn-right" aria-hidden="true"></i> Como chegar
+                                </a>
+                            </div>
+                        </section>
+                    @endif
+
                     <div class="provider-report-button">
                         @include('reports._button-and-modal', ['reportable' => $provider])
                     </div>
@@ -223,6 +280,46 @@
         ])
 
         @include('reviews._section', ['reviewable' => $provider, 'reviewData' => $reviewData])
+
+        @if($ownerStores->isNotEmpty())
+            <section class="provider-owned-stores mt-5" aria-labelledby="provider-owned-stores-title">
+                <div class="provider-owned-stores-heading">
+                    <div>
+                        <span>Vitrine do profissional</span>
+                        <h2 id="provider-owned-stores-title">Conheça também {{ $ownerStores->count() === 1 ? 'a loja' : 'as lojas' }} de {{ $provider->title }}</h2>
+                    </div>
+                    <i class="fa-solid fa-store" aria-hidden="true"></i>
+                </div>
+
+                <div class="provider-owned-stores-grid">
+                    @foreach($ownerStores as $ownerStore)
+                        @php
+                            $ownerStoreCover = $ownerStore->banner ?: $ownerStore->logo;
+                            $ownerStoreCity = $ownerStore->city ?: $provider->city;
+                        @endphp
+                        <article class="provider-owned-store-card">
+                            <a href="{{ route('store.show', $ownerStore->slug) }}" class="provider-owned-store-cover" aria-label="Abrir a loja {{ $ownerStore->name }}">
+                                @if($ownerStoreCover)
+                                    <img src="{{ asset($ownerStoreCover) }}" alt="" loading="lazy">
+                                @else
+                                    <span><i class="fa-solid fa-store"></i></span>
+                                @endif
+                            </a>
+                            <div class="provider-owned-store-body">
+                                <span class="provider-owned-store-label"><i class="fa-solid fa-circle-check"></i> Loja do profissional</span>
+                                <h3><a href="{{ route('store.show', $ownerStore->slug) }}">{{ $ownerStore->name }}</a></h3>
+                                <p>{{ \Illuminate\Support\Str::limit($ownerStore->description ?: 'Conheça os produtos e novidades desta loja.', 110) }}</p>
+                                <div class="provider-owned-store-meta">
+                                    <span><i class="fa-solid fa-location-dot"></i> {{ $ownerStoreCity }}/SE</span>
+                                    <span><i class="fa-solid fa-cube"></i> {{ $ownerStore->active_ads_count }} {{ $ownerStore->active_ads_count === 1 ? 'item' : 'itens' }}</span>
+                                </div>
+                                <a href="{{ route('store.show', $ownerStore->slug) }}" class="provider-owned-store-open">Ver loja <i class="fa-solid fa-arrow-right"></i></a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         @if($relatedProviders->isNotEmpty())
             <section class="mt-5">
@@ -244,6 +341,53 @@
         background: var(--background);
         color: var(--foreground);
         transition: background-color .2s ease, color .2s ease;
+    }
+
+    .provider-cover-frame,
+    .provider-profile-container,
+    .provider-profile-lower-frame {
+        width: 100%;
+        max-width: 1080px !important;
+    }
+
+    .provider-public-address {
+        display: flex;
+        gap: .75rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--muted-bg);
+    }
+
+    .provider-public-address div,
+    .provider-public-address strong,
+    .provider-public-address span {
+        display: block;
+    }
+
+    .provider-owned-stores {
+        padding: 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+    }
+
+    .provider-owned-stores-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .provider-owned-store-card {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    .provider-owned-store-cover img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
     }
 
     .provider-cover {

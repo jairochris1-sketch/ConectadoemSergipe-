@@ -26,6 +26,17 @@ class StoreManagementTest extends TestCase
         $this->post(route('store.store'), [])->assertRedirect(route('login'));
     }
 
+    public function test_restaurant_onboarding_prefills_the_food_category(): void
+    {
+        $user = User::factory()->create(['subscription_plan' => 'pro']);
+
+        $this->actingAs($user)
+            ->get(route('store.create', ['category' => 'Alimentação']))
+            ->assertOk()
+            ->assertSee('Cadastre seu restaurante')
+            ->assertSee('value="Alimentação" selected', false);
+    }
+
     public function test_user_can_create_only_one_store_with_logo_and_banner(): void
     {
         $user = User::factory()->create([

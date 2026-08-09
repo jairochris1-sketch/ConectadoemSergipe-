@@ -118,4 +118,23 @@ class StoreDirectoryTest extends TestCase
             ->assertOk()
             ->assertDontSee('Loja Oculta');
     }
+
+    public function test_store_directory_uses_sized_bootstrap_pagination_controls(): void
+    {
+        $owner = User::factory()->create();
+
+        foreach (range(1, 13) as $index) {
+            Store::create([
+                'user_id' => $owner->id,
+                'name' => "Loja {$index}",
+                'slug' => "loja-{$index}",
+                'active' => true,
+            ]);
+        }
+
+        $this->get(route('stores.index'))
+            ->assertOk()
+            ->assertSee('<ul class="pagination">', false)
+            ->assertDontSee('class="w-5 h-5"', false);
+    }
 }

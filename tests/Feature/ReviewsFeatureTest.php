@@ -21,6 +21,7 @@ class ReviewsFeatureTest extends TestCase
         $this->get(route('provider.show', $ad->slug))
             ->assertOk()
             ->assertSee('Avaliações dos usuários')
+            ->assertSee('<div class="reviews-average">0,0</div>', false)
             ->assertSee('Entre para avaliar')
             ->assertDontSee('Cliente verificado');
 

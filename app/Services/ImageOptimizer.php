@@ -14,6 +14,9 @@ class ImageOptimizer
             return null;
         }
 
+        // Executar validação de conteúdo explícito / SafeSearch antes de otimizar e salvar
+        ImageModerationService::check($file);
+
         $uploadPath = public_path('uploads');
         if (! file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);

@@ -75,6 +75,35 @@
         border-color: #0d6efd !important;
         box-shadow: 0 8px 24px rgba(13, 110, 253, 0.18) !important;
     }
+    .home-clickable-name,
+    a:visited .home-clickable-name {
+        color: #174f91;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    a:hover .home-clickable-name,
+    a:focus-visible .home-clickable-name {
+        color: #0c376c;
+        text-decoration: none;
+    }
+    [data-bs-theme="dark"] .home-clickable-name,
+    [data-bs-theme="dark"] a:visited .home-clickable-name {
+        color: #7db5f1;
+    }
+    [data-bs-theme="dark"] a:hover .home-clickable-name,
+    [data-bs-theme="dark"] a:focus-visible .home-clickable-name {
+        color: #a9cefa;
+    }
+    .card-premium > button[aria-label="Favoritar"] {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 @endpush
 
@@ -102,16 +131,22 @@
                                     Produtos, serviços, imóveis, veículos, empregos e muito mais perto de você.
                                 </p>
                             </div>
-                            <!-- Badge Desktop/Tablet -->
-                            <div class="d-none d-md-flex align-items-center rounded-4 px-3 py-2 border border-secondary border-opacity-50 ms-3" style="background: rgba(20, 25, 45, 0.65); backdrop-filter: blur(8px);">
-                                <div class="bg-primary bg-opacity-25 rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                                    <i class="fa-solid fa-users text-primary fs-4"></i>
+                            @if($loop->first)
+                                <div id="home-hero-plans-card" class="home-hero-plans-card d-none d-md-flex align-items-center rounded-4 px-3 py-2 ms-3 shadow-lg" style="position: relative; padding-right: 34px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95)); border: 1px solid rgba(255, 255, 255, 0.2);">
+                                    <a href="{{ route('page.plans') }}" class="d-flex align-items-center text-decoration-none">
+                                        <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="background: rgba(255, 255, 255, 0.2);">
+                                            <i class="fa-solid fa-gem text-white fs-4"></i>
+                                        </div>
+                                        <div class="text-start text-nowrap">
+                                            <strong class="text-white d-block lh-1 mb-1">Planos Premium</strong>
+                                            <small class="text-white opacity-90">Assine agora o Conectado em Sergipe</small>
+                                        </div>
+                                    </a>
+                                    <button type="button" data-close-home-plans aria-label="Fechar card de planos" title="Fechar" style="position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; color: #fff; background: rgba(0,0,0,.28);">
+                                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                    </button>
                                 </div>
-                                <div class="text-start text-nowrap">
-                                    <strong class="text-white d-block lh-1">+ 50 mil usuários</strong>
-                                    <small class="text-light opacity-75" style="font-size: 0.75rem;">conectados em todo o estado</small>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -283,13 +318,15 @@
                 <div class="swiper swiper-featured-ads swiper-marquee-esteira rounded-3 p-1">
                     <div class="swiper-wrapper">
                         @php
-                            $loopAds = count($recentAds) < 8 ? $recentAds->concat($recentAds) : $recentAds;
+                            $loopAds = count($featuredForYou) < 8 ? $featuredForYou->concat($featuredForYou) : $featuredForYou;
                         @endphp
                         @foreach($loopAds as $ad)
                         <div class="swiper-slide">
-                            <a href="{{ route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
+                            <a href="{{ $ad->module === 'services' ? route('provider.show', $ad->slug) : route('ad.show', $ad->slug) }}" class="text-decoration-none text-dark">
                                 <div class="card card-premium h-100 border rounded-4 shadow-sm overflow-hidden position-relative" style="background: var(--card);">
-                                    <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Destaque</span>
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2 z-1 px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">
+                                        {{ $ad->module === 'services' && $ad->is_plan_featured ? 'Prestador pago' : 'Mais procurado' }}
+                                    </span>
                                     <button type="button" class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0 m-2 z-1 p-1 text-muted shadow-sm" aria-label="Favoritar" title="Salvar Anúncio">
                                         <i class="fa-regular fa-bookmark text-primary"></i>
                                     </button>
@@ -302,7 +339,7 @@
                                     @endif
                                     <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                            <h6 class="card-title home-clickable-name text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
                                             <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
@@ -329,7 +366,7 @@
         <div class="col-12 col-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
-                    <i class="fa-solid fa-briefcase text-primary"></i> Prestadores de Serviços em destaque
+                    <i class="fa-solid fa-briefcase text-primary"></i> Prestadores de Serviços — Em destaque
                 </h4>
                 <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">
                     Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -351,7 +388,12 @@
                                         </div>
                                     @endif
                                     <div class="overflow-hidden my-auto ms-1">
-                                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">{{ $provider->title }}</h6>
+                                        <h6 class="home-clickable-name mb-0 text-truncate" style="font-size: 0.85rem; line-height: 1.2;">
+                                            {{ $provider->title }}
+                                            @if($provider->is_plan_featured)
+                                                <i class="fa-solid fa-star text-warning ms-1" title="Destaque do plano pago" aria-label="Destaque do plano pago"></i>
+                                            @endif
+                                        </h6>
                                         <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $provider->display_category ?? 'Serviço profissional' }}</small>
                                         <small class="text-warning fw-bold" style="font-size: 0.7rem;">⭐ 4,9 (128) <span class="text-muted ms-1"><i class="fa-solid fa-location-dot"></i> {{ $provider->city ?? 'Aracaju, SE' }}</span></small>
                                     </div>
@@ -376,6 +418,40 @@
         </div>
     </div>
 </div>
+
+<section class="container mb-3 mb-md-4 d-lg-none" aria-labelledby="mobile-provider-highlights-title">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 id="mobile-provider-highlights-title" class="h5 fw-bold mb-0">Prestadores de Serviços — Em destaque</h2>
+        <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">Ver todos</a>
+    </div>
+    <div class="row g-3">
+        @foreach($serviceProviders->take(4) as $provider)
+            <div class="col-6 col-md-6 col-xl-3">
+                @include('services._card', ['provider' => $provider, 'hideDesktopWhatsapp' => true, 'hideDescription' => true])
+            </div>
+        @endforeach
+    </div>
+</section>
+
+@if($recentStores->isNotEmpty())
+<section class="container mb-3 mb-md-4" aria-labelledby="home-stores-title">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 id="home-stores-title" class="h4 fw-bold mb-0">Lojas perto de você</h2>
+        <a href="{{ route('stores.index') }}" class="text-primary text-decoration-none small fw-bold">Ver todas</a>
+    </div>
+    <div class="row g-3">
+        @foreach($recentStores as $recentStore)
+            <div class="col-6 col-lg-3">
+                <a href="{{ route('store.show', $recentStore->slug) }}" class="card h-100 rounded-4 p-3 text-decoration-none">
+                    <strong class="home-clickable-name">{{ $recentStore->name }}</strong>
+                    <small class="text-muted">{{ $recentStore->city ?: $recentStore->user?->city }}</small>
+                    <small class="text-muted">{{ $recentStore->active_ads_count }} {{ $recentStore->active_ads_count === 1 ? 'produto' : 'produtos' }}</small>
+                </a>
+            </div>
+        @endforeach
+    </div>
+</section>
+@endif
 
 <!-- Section 2: 🏠 Imóveis em Sergipe -->
 <div class="container mb-3 mb-md-4">
@@ -411,7 +487,7 @@
                             @endif
                             <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <h6 class="card-title home-clickable-name text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
@@ -468,7 +544,7 @@
                             @endif
                             <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <h6 class="card-title home-clickable-name text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
@@ -525,7 +601,7 @@
                             @endif
                             <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                 <div>
-                                    <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                    <h6 class="card-title home-clickable-name text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
@@ -585,7 +661,7 @@
                                     @endif
                                     <div class="card-body p-2.5 p-md-3 d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="card-title fw-bold text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
+                                            <h6 class="card-title home-clickable-name text-truncate mb-1" style="font-size: 0.82rem;">{{ $ad->title }}</h6>
                                             <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
@@ -773,7 +849,7 @@
                                         <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-2 py-1 rounded-pill small fw-semibold">
                                             {{ $moduleBadges[$item->module] ?? strtoupper($item->module) }}
                                         </span>
-                                        <h5 class="card-title fw-bold fs-6 text-truncate mb-1">{{ $item->title }}</h5>
+                                        <h5 class="card-title home-clickable-name fs-6 text-truncate mb-1">{{ $item->title }}</h5>
                                         <p class="card-text text-muted small text-truncate">{{ $item->city }}</p>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
@@ -827,14 +903,14 @@
     });
 
     const swiperFeatured = new Swiper('.swiper-featured-ads', {
-        slidesPerView: 2,
+        slidesPerView: 2.5,
         spaceBetween: 10,
         loop: true,
-        speed: 6000,
+        speed: 650,
         autoplay: {
-            delay: 0,
+            delay: 4500,
             disableOnInteraction: false,
-            pauseOnMouseEnter: false,
+            pauseOnMouseEnter: true,
         },
         navigation: {
             prevEl: '.swiper-featured-prev',
@@ -851,6 +927,7 @@
         const parent = el.parentElement;
         const prevBtn = parent ? parent.querySelector('.swiper-cat-prev') : null;
         const nextBtn = parent ? parent.querySelector('.swiper-cat-next') : null;
+        const compact = el.classList.contains('swiper-category-compact');
 
         new Swiper(el, {
             slidesPerView: 2,
@@ -865,9 +942,16 @@
             breakpoints: {
                 576: { slidesPerView: 2, spaceBetween: 12 },
                 768: { slidesPerView: 3, spaceBetween: 14 },
-                992: { slidesPerView: 4, spaceBetween: 14 },
+                992: { slidesPerView: compact ? 3 : 4, spaceBetween: 14 },
+                1200: { slidesPerView: compact ? 3 : 5, spaceBetween: 14 },
             },
         });
+    });
+
+    const heroPlansCard = document.getElementById('home-hero-plans-card');
+    const heroPlansClose = document.querySelector('[data-close-home-plans]');
+    heroPlansClose?.addEventListener('click', () => {
+        if (heroPlansCard) heroPlansCard.hidden = true;
     });
     @endif
 

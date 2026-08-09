@@ -667,7 +667,8 @@ html[data-theme="dark"] .plans-about-map-box {
 
 html[data-theme="dark"] .plans-about-map-label {
     color: #93c5fd;
-}</style>
+}
+</style>
 @endpush
 
 @section('content')
@@ -763,6 +764,7 @@ html[data-theme="dark"] .plans-about-map-label {
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas dos últimos 30 dias</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Link personalizado da loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Compartilhamento nas redes sociais</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Prestador em destaque na página inicial</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Suporte padrão</li>
                             <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Selo de verificado</li>
                             <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Destaque na vitrine</li>
@@ -811,6 +813,7 @@ html[data-theme="dark"] .plans-about-map-label {
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Até 3 banner(s) por loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas dos últimos 60 dias</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Loja em destaque na vitrine</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Prestador em destaque na página inicial</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Selo de verificado no perfil</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Loja aparece primeiro nas buscas</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Maior prioridade nos resultados</li>
@@ -860,6 +863,7 @@ html[data-theme="dark"] .plans-about-map-label {
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Até 6 banner(s) por loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Destaque permanente na vitrine</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Destaque na página inicial</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Prestador em destaque na página inicial</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Prioridade máxima nas pesquisas</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas avançadas</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Suporte VIP exclusivo</li>
@@ -971,97 +975,66 @@ html[data-theme="dark"] .plans-about-map-label {
                 </button>
                 <div id="faq3" class="collapse">
                     <div class="faq-body">
-                        A loja online é uma página dedicada exclusivamente ao seu negócio dentro do Conectado em Sergipe. Ela reúne todos os seus produtos, fotos, WhatsApp, redes sociais e banners em um só lugar — funcionando como uma vitrine digital completa para atrair clientes diretamente.
+                        A loja online é sua vitrine exclusiva dentro do Conectado em Sergipe, com seu próprio link (ex: /loja/sua-empresa), logo, banner, horário de funcionamento e catálogo organizado de produtos. É ideal para transformar visitantes em clientes fiéis.
                     </div>
                 </div>
             </div>
 
             <div class="faq-item">
                 <button class="faq-btn" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false">
-                    <span>Qual é a diferença entre o Plano Start e o Plano PRO?</span>
+                    <span>Como funciona o destaque na vitrine e o selo de verificado?</span>
                     <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
                 </button>
                 <div id="faq4" class="collapse">
                     <div class="faq-body">
-                        O Plano Start é ideal para quem está começando: você abre sua primeira loja com até 30 produtos e 20 anúncios ativos. Já o Plano PRO é para quem vende todos os dias: anúncios ilimitados, até 150 produtos, destaque nas buscas, loja em destaque na vitrine, selo de verificado e suporte prioritário. O PRO coloca você à frente da concorrência.
+                        O destaque na vitrine faz com que sua loja apareça na seção principal do site e no topo das pesquisas de empresas. O selo de verificado traz mais credibilidade ao seu perfil, sinalizando para os compradores que sua empresa é confiável.
                     </div>
                 </div>
             </div>
 
             <div class="faq-item">
                 <button class="faq-btn" data-bs-toggle="collapse" data-bs-target="#faq5" aria-expanded="false">
-                    <span>Posso cancelar meu plano a qualquer momento?</span>
+                    <span>Posso cancelar meu plano pago a qualquer momento?</span>
                     <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
                 </button>
                 <div id="faq5" class="collapse">
                     <div class="faq-body">
-                        Sim, sem burocracia. Basta entrar em contato com nossa equipe pelo WhatsApp ou e-mail. Após o cancelamento, sua conta continua ativa no Plano Gratuito e todos os seus dados são preservados.
-                    </div>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-btn" data-bs-toggle="collapse" data-bs-target="#faq6" aria-expanded="false">
-                    <span>Meu negócio aparece para pessoas de outras cidades de Sergipe?</span>
-                    <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
-                </button>
-                <div id="faq6" class="collapse">
-                    <div class="faq-body">
-                        Sim! O Conectado em Sergipe cobre todos os 75 municípios do estado. Seu anúncio pode ser encontrado por qualquer pessoa que esteja buscando na sua cidade ou em Sergipe inteiro. Nos planos pagos, você tem ainda mais visibilidade nos resultados de busca.
-                    </div>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-btn" data-bs-toggle="collapse" data-bs-target="#faq7" aria-expanded="false">
-                    <span>Preciso de conhecimento técnico para usar a plataforma?</span>
-                    <span class="faq-icon"><i class="fa-solid fa-plus"></i></span>
-                </button>
-                <div id="faq7" class="collapse">
-                    <div class="faq-body">
-                        Não! A plataforma foi criada para ser simples e intuitiva. Em poucos minutos você cria sua conta, publica seu primeiro anúncio e já está disponível para ser encontrado por clientes. Se tiver qualquer dúvida, nossa equipe de suporte humano está pronta para ajudar.
+                        Sim, sem fidelidade! Você pode solicitar o cancelamento da assinatura a qualquer momento antes da próxima renovação. Sua loja continuará ativa até o fim do período já pago.
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- ─── Sobre o Conectado em Sergipe ────────────────────────────────────── --}}
-        <div class="plans-about-section mt-5">
+        {{-- ─── Sobre o Conectado em Sergipe ───────────────────────────────────────── --}}
+        <div class="plans-about-section">
             <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <span class="plans-about-tag"><i class="fa-solid fa-map-location-dot me-1"></i> Nossa Missão</span>
-                    <h2 class="plans-about-title">O maior ecossistema digital<br>de negócios de Sergipe</h2>
+                <div class="col-12 col-lg-7">
+                    <span class="plans-about-tag">A Força do Comércio Local</span>
+                    <h2 class="plans-about-title">Conectando empresas e clientes por todo o estado de Sergipe</h2>
                     <p class="plans-about-lead">
-                        O <strong>Conectado em Sergipe</strong> nasceu com uma missão clara: fazer com que empreendedores, comerciantes, prestadores de serviço e profissionais autônomos de todo o estado possam crescer digitalmente — com facilidade, segurança e custo acessível.
+                        O Conectado em Sergipe nasceu com o propósito de valorizar o empreendedorismo regional. Nossa plataforma aproxima compradores e vendedores locais, oferecendo uma experiência moderna, segura e focada em resultados reais.
                     </p>
-                    <p class="plans-about-lead" style="margin-bottom: 0;">
-                        Cobrimos todos os <strong>75 municípios do estado</strong>, dos grandes centros como Aracaju às cidades do interior. Aqui, pequenos negócios ganham a mesma vitrine que as grandes empresas.
-                    </p>
+
                     <div class="plans-about-stats">
                         <div>
-                            <div class="plans-about-stat-number">75</div>
-                            <div class="plans-about-stat-label">municípios atendidos</div>
+                            <div class="plans-about-stat-number">75+</div>
+                            <div class="plans-about-stat-label">Municípios Alcançados</div>
                         </div>
                         <div>
                             <div class="plans-about-stat-number">100%</div>
-                            <div class="plans-about-stat-label">feito para Sergipe</div>
+                            <div class="plans-about-stat-label">Foco em Sergipe</div>
                         </div>
                         <div>
-                            <div class="plans-about-stat-number">6</div>
-                            <div class="plans-about-stat-label">categorias de negócios</div>
-                        </div>
-                        <div>
-                            <div class="plans-about-stat-number">R$0</div>
-                            <div class="plans-about-stat-label">para começar</div>
+                            <div class="plans-about-stat-number">24/7</div>
+                            <div class="plans-about-stat-label">Sua Loja Aberta</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="plans-about-image-col">
-                        <div class="plans-about-map-box">
-                            <i class="fa-solid fa-map-location-dot"></i>
-                            <div class="plans-about-map-label">Sergipe, Brasil</div>
-                        </div>
+
+                <div class="col-12 col-lg-5 plans-about-image-col">
+                    <div class="plans-about-map-box">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span class="plans-about-map-label">CONECTADO EM SERGIPE</span>
                     </div>
                 </div>
             </div>

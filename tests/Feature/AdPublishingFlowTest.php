@@ -78,8 +78,12 @@ class AdPublishingFlowTest extends TestCase
             ->assertSee('professional-motion-panel', false)
             ->assertSee('publish-step-track', false)
             ->assertSee('publish-design-design4', false)
-            ->assertSee('Trabalha por conta própria?')
-            ->assertSee('Criar meu perfil profissional')
+            ->assertSee('Qual perfil representa você?')
+            ->assertSee('Prestador de serviços')
+            ->assertSee('Empresa de serviços')
+            ->assertSee('Loja / Comércio')
+            ->assertSee('Restaurante / Alimentação')
+            ->assertSee('id="service-profile-kind"', false)
             ->assertDontSee('Seus dados protegidos')
             ->assertDontSee('moduleMotionTrail', false);
     }
@@ -95,6 +99,7 @@ class AdPublishingFlowTest extends TestCase
             'price' => '80.000',
             'city' => 'Aracaju',
             'region' => 'Centro e bairros próximos',
+            'public_address' => 'Endereço que não pertence a produto',
             'description' => 'Descrição completa do produto anunciado para venda.',
             'whatsapp' => '79999999999',
         ])->assertSessionHasNoErrors();
@@ -104,6 +109,7 @@ class AdPublishingFlowTest extends TestCase
         $this->assertSame('Celulares & Telefonia', $product->advertiser_type);
         $this->assertSame('Celulares & Telefonia', $product->display_category);
         $this->assertNull($product->region);
+        $this->assertNull($product->public_address);
 
         $this->get(route('ad.show', $product->slug))
             ->assertOk()
@@ -113,17 +119,28 @@ class AdPublishingFlowTest extends TestCase
 
         $this->actingAs($user)->post(route('ad.store'), [
             'module' => 'services',
+            'profile_kind' => 'service_company',
             'category_name' => 'Eletricista',
             'title' => 'Eletricista de teste',
             'city' => 'Aracaju',
             'region' => 'Centro e bairros próximos',
+            'public_address' => 'Rua das Flores, 120, Centro',
             'description' => 'Descrição completa dos serviços profissionais.',
             'whatsapp' => '79999999999',
         ])->assertSessionHasNoErrors();
 
         $service = Ad::where('title', 'Eletricista de teste')->firstOrFail();
         $this->assertSame('Eletricista', $service->display_category);
+        $this->assertSame('service_company', $service->profile_kind);
         $this->assertSame('Centro e bairros próximos', $service->region);
+        $this->assertSame('Rua das Flores, 120, Centro', $service->public_address);
+
+        $this->get(route('provider.show', $service->slug))
+            ->assertOk()
+            ->assertSee('Empresa de serviços')
+            ->assertSee('Local de atendimento')
+            ->assertSee('Como chegar')
+            ->assertSee('google.com/maps/dir', false);
     }
 
     public function test_user_can_replace_and_remove_published_ad_images(): void

@@ -86,6 +86,18 @@ class AdminPanelAuditTest extends TestCase
         $this->assertSame('admin', $admin->fresh()->role);
     }
 
+    public function test_administrator_can_assign_the_collaborator_role(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.toggle_role', $user), ['role' => 'collaborator'])
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'collaborator']);
+    }
+
     public function test_duplicate_category_slug_is_reported_as_a_validation_error(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

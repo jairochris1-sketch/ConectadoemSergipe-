@@ -135,6 +135,82 @@
                 </div>
             </div>
 
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-shield-halved text-primary me-2"></i> Moderação de Imagens & Anti-Pornografia (SafeSearch)</h5>
+            <div class="card border rounded-4 bg-light p-3 p-md-4 mb-4">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="image_moderation_enabled" name="image_moderation_enabled" value="1" {{ \App\Models\Setting::get('image_moderation_enabled', '0') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-bold text-dark" for="image_moderation_enabled">
+                        Ativar Moderação Automática de Conteúdo Impróprio
+                    </label>
+                    <small class="text-muted d-block mt-0.5">Quando ativado, todas as fotos enviadas nos anúncios, lojas, perfis e avaliações são verificadas automaticamente contra pornografia, nudez e violência.</small>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="google_vision_api_key" class="form-label fw-semibold">Chave da API Google Cloud Vision (SafeSearch)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-brands fa-google text-danger"></i></span>
+                            <input type="password" class="form-control rounded-end-3" id="google_vision_api_key" name="google_vision_api_key" value="{{ \App\Models\Setting::get('google_vision_api_key') }}" placeholder="Ex: AIzaSyD...">
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            Insira sua chave de API com o recurso <strong>Google Cloud Vision API</strong> ativado no console do Google Cloud. Deixe em branco se preferir utilizar variáveis de ambiente (`.env`).
+                        </small>
+                    </div>
+                </div>
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-brands fa-google text-danger me-2"></i> Autenticação Social com o Google</h5>
+            <div class="card border rounded-4 bg-light p-3 p-md-4 mb-4">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="google_login_enabled" name="google_login_enabled" value="1" {{ \App\Models\Setting::get('google_login_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-bold text-dark" for="google_login_enabled">
+                        Ativar Botão "Entrar com o Google" nas telas de login e cadastro
+                    </label>
+                    <small class="text-muted d-block mt-0.5">Quando ativado, os usuários poderão entrar ou se cadastrar com 1 clique usando a conta do Google.</small>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label for="google_client_id" class="form-label fw-semibold">Google Client ID</label>
+                        <input type="text" class="form-control rounded-3" id="google_client_id" name="google_client_id" value="{{ \App\Models\Setting::get('google_client_id') }}" placeholder="Ex: 123456789-abc.apps.googleusercontent.com">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="google_client_secret" class="form-label fw-semibold">Google Client Secret</label>
+                        <input type="password" class="form-control rounded-3" id="google_client_secret" name="google_client_secret" value="{{ \App\Models\Setting::get('google_client_secret') }}" placeholder="Ex: GOCSPX-...">
+                    </div>
+                    <div class="col-12">
+                        <div class="alert alert-info rounded-3 mb-0 py-2.5 px-3 small border-0 bg-info bg-opacity-10 text-info">
+                            <i class="fa-solid fa-circle-info me-1.5"></i>
+                            <strong>URI de Redirecionamento Autorizado (Callback):</strong> <code>{{ route('auth.google.callback') }}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-comment-dots text-primary me-2"></i> Balão de Mensagem (Login & Cadastro)</h5>
+            <div class="card border rounded-4 bg-light p-3 p-md-4 mb-4">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="auth_balloon_enabled" name="auth_balloon_enabled" value="1" {{ \App\Models\Setting::get('auth_balloon_enabled', '1') == '1' ? 'checked' : '' }}>
+                    <label class="form-check-label fw-bold text-dark" for="auth_balloon_enabled">
+                        Exibir Balão Flutuante nas telas de Login e Cadastro
+                    </label>
+                    <small class="text-muted d-block mt-0.5">Quando ativado, exibe um balão de vidro com mensagens institucionais sobre o site.</small>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="auth_balloon_msg1" class="form-label fw-semibold">Mensagem 1</label>
+                        <input type="text" class="form-control rounded-3" id="auth_balloon_msg1" name="auth_balloon_msg1" value="{{ \App\Models\Setting::get('auth_balloon_msg1', 'Conecte-se a serviços, produtos, imóveis, veículos e oportunidades em um único lugar.') }}" placeholder="Ex: Conecte-se a serviços, produtos...">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="auth_balloon_msg2" class="form-label fw-semibold">Mensagem 2 (Opcional)</label>
+                        <input type="text" class="form-control rounded-3" id="auth_balloon_msg2" name="auth_balloon_msg2" value="{{ \App\Models\Setting::get('auth_balloon_msg2') }}" placeholder="Ex: Encontre os melhores prestadores de serviço de Sergipe.">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="auth_balloon_msg3" class="form-label fw-semibold">Mensagem 3 (Opcional)</label>
+                        <input type="text" class="form-control rounded-3" id="auth_balloon_msg3" name="auth_balloon_msg3" value="{{ \App\Models\Setting::get('auth_balloon_msg3') }}" placeholder="Ex: Anuncie gratuitamente e ganhe destaque no mercado.">
+                    </div>
+                </div>
+            </div>
+
             @php
                 $bannerGroups = [
                     [

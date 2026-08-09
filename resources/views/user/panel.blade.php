@@ -147,7 +147,7 @@
                     @else
                         <a href="{{ route('page.plans') }}" class="user-store-create-button">
                             <i class="fa-solid fa-crown"></i>
-                            Fazer Upgrade
+                            Ver planos
                         </a>
                     @endif
                 </div>

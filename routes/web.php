@@ -3,8 +3,10 @@
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminPlanController;
+use App\Http\Controllers\AdminProviderClaimController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminReviewController;
+use App\Http\Controllers\AdminFeedController;
 use App\Http\Controllers\AdminUpdateController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductFavoriteController;
 use App\Http\Controllers\ProductQuestionController;
+use App\Http\Controllers\ProviderClaimController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SitemapController;
@@ -23,10 +26,18 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\StorePromotionController;
 use App\Http\Controllers\CultureWorkController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/comunidade', [FeedController::class, 'index'])->name('feed.index');
+Route::post('/comunidade/anuncios/{ad}/evento', [FeedController::class, 'trackAdEvent'])
+    ->middleware('throttle:120,1')
+    ->name('feed.ads.event');
+Route::get('/perfil/{username}', [UserController::class, 'publicProfile'])
+    ->where('username', '[A-Za-z0-9._]+')
+    ->name('profile.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/busca/sugestoes', [HomeController::class, 'suggestions'])
     ->middleware('throttle:60,1')
@@ -43,6 +54,19 @@ Route::get('/denuncia/{publicId}/obrigado', [ReportController::class, 'thankYou'
 
 // Gerenciamento de Anúncios CRUD
 Route::middleware(['auth', 'not_suspended'])->group(function () {
+    Route::post('/comunidade/publicar', [FeedController::class, 'store'])->middleware('throttle:10,60')->name('feed.store');
+    Route::post('/comunidade/{post}/curtir', [FeedController::class, 'toggleLike'])->middleware('throttle:60,1')->name('feed.like');
+    Route::post('/comunidade/{post}/comentar', [FeedController::class, 'comment'])->middleware('throttle:20,1')->name('feed.comment');
+    Route::post('/comunidade/{post}/denunciar', [FeedController::class, 'report'])->middleware('throttle:5,1')->name('feed.report');
+    Route::post('/comunidade/{post}/votar', [FeedController::class, 'vote'])->middleware('throttle:30,1')->name('feed.vote');
+    Route::patch('/comunidade/{post}', [FeedController::class, 'update'])->name('feed.update');
+    Route::patch('/comunidade/{post}/fixar', [FeedController::class, 'togglePin'])->name('feed.pin');
+    Route::delete('/comunidade/{post}', [FeedController::class, 'destroy'])->name('feed.destroy');
+    Route::get('/prestador/{ad}/reivindicar', [ProviderClaimController::class, 'create'])->name('provider.claim.create');
+    Route::post('/prestador/{ad}/reivindicar', [ProviderClaimController::class, 'store'])
+        ->middleware('throttle:3,1')
+        ->name('provider.claim.store');
+
     Route::get('/anunciar', [AdController::class, 'create'])->name('ad.create');
     Route::post('/anunciar', [AdController::class, 'store'])->name('ad.store');
     Route::get('/anuncio/{id}/editar', [AdController::class, 'edit'])->name('ad.edit');
@@ -139,12 +163,17 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/anuncios', [AdminController::class, 'ads'])->name('admin.ads');
     Route::post('/anuncios/novo', [AdminController::class, 'storeAd'])->name('admin.ads.store');
     Route::post('/anuncios/{id}/status', [AdminController::class, 'toggleAdStatus'])->name('admin.ads.toggle_status');
+    Route::post('/anuncios/{ad}/reivindicacao', [AdminController::class, 'toggleProviderClaiming'])->name('admin.ads.toggle_claiming');
+    Route::get('/reivindicacoes', [AdminProviderClaimController::class, 'index'])->name('admin.provider_claims.index');
+    Route::post('/reivindicacoes/{claim}/analisar', [AdminProviderClaimController::class, 'review'])->name('admin.provider_claims.review');
 
     Route::get('/denuncias', [AdminReportController::class, 'index'])->name('admin.reports');
     Route::get('/denuncias/{report}', [AdminReportController::class, 'show'])->name('admin.reports.show');
     Route::post('/denuncias/{report}/acao', [AdminReportController::class, 'action'])->name('admin.reports.action');
     Route::get('/avaliacoes', [AdminReviewController::class, 'index'])->name('admin.reviews');
     Route::post('/avaliacoes/{review}/acao', [AdminReviewController::class, 'action'])->name('admin.reviews.action');
+    Route::get('/comunidade', [AdminFeedController::class, 'index'])->name('admin.feed.index');
+    Route::post('/comunidade/{post}/acao', [AdminFeedController::class, 'action'])->name('admin.feed.action');
 
     Route::get('/categorias', [AdminController::class, 'categories'])->name('admin.categories');
     Route::post('/categorias/nova', [AdminController::class, 'storeCategory'])->name('admin.categories.store');
@@ -179,6 +208,9 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 // Autenticação / Registro / Recuperação de Senha
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('/cadastro', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/cadastro', [AuthController::class, 'register']);

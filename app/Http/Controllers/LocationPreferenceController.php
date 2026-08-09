@@ -13,12 +13,22 @@ class LocationPreferenceController extends Controller
     {
         $validated = $request->validate([
             'city' => ['required', 'string', Rule::in(SergipeCities::getAll())],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
         ]);
 
         $request->session()->put('location_filter', [
             'enabled' => true,
             'city' => $validated['city'],
         ]);
+
+        if ($request->user()) {
+            $request->user()->update([
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'last_login_ip' => $request->ip(),
+            ]);
+        }
 
         return response()->json([
             'active' => true,

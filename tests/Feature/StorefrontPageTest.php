@@ -39,6 +39,34 @@ class StorefrontPageTest extends TestCase
             ->assertSee('https://instagram.com/lojavitrine', false);
     }
 
+    public function test_directions_link_is_shown_only_when_the_store_has_a_public_pickup_address(): void
+    {
+        $storeWithAddress = $this->createStore(User::factory()->create(), [
+            'pickup_address' => 'Rua das Flores, 120, Centro',
+        ]);
+        $expectedDirectionsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode(
+            'Rua das Flores, 120, Centro, Aracaju, SE, Brasil'
+        );
+
+        $this->get(route('store.show', $storeWithAddress->slug))
+            ->assertOk()
+            ->assertSee('Endereço')
+            ->assertSee('Rua das Flores, 120, Centro')
+            ->assertSee('Como chegar')
+            ->assertSee($expectedDirectionsUrl)
+            ->assertSee('target="_blank" rel="noopener noreferrer"', false);
+
+        $storeWithoutAddress = $this->createStore(User::factory()->create(), [
+            'slug' => 'loja-sem-endereco-' . uniqid(),
+            'pickup_address' => null,
+        ]);
+
+        $this->get(route('store.show', $storeWithoutAddress->slug))
+            ->assertOk()
+            ->assertDontSee('Como chegar')
+            ->assertDontSee('google.com/maps/dir', false);
+    }
+
     public function test_storefront_catalog_can_search_filter_and_sort_products(): void
     {
         $owner = User::factory()->create();

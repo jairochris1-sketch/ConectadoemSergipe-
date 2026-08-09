@@ -70,16 +70,45 @@ class AdController extends Controller
 
         $provider->increment('views');
         $reviewData = app(ReviewDisplayService::class)->forAd($provider, request('reviews_sort'));
-        $relatedProviders = Ad::with(['user', 'mainImage'])
-            ->where('module', 'services')
-            ->where('status', 'active')
-            ->where('id', '!=', $provider->id)
-            ->where('city', $provider->city)
-            ->latest()
-            ->take(4)
-            ->get();
+        $isExclusiveProviderProfile = $provider->user
+            && (float) $provider->user->getPlan()->price >= 25;
+        $relatedProviders = ! $isExclusiveProviderProfile
+            ? Ad::with(['user', 'mainImage'])
+                ->where('module', 'services')
+                ->where('status', 'active')
+                ->where('id', '!=', $provider->id)
+                ->where('city', $provider->city)
+                ->latest()
+                ->take(4)
+                ->get()
+            : collect();
+        $ownerStores = $isExclusiveProviderProfile
+            ? $provider->user->stores()
+                ->publiclyVisible()
+                ->withCount([
+                    'ads as active_ads_count' => fn ($query) => $query->where('status', 'active'),
+                ])
+                ->oldest('id')
+                ->get()
+            : collect();
 
-        return view('services.show', compact('provider', 'relatedProviders', 'reviewData'));
+        $currentUserPendingClaim = auth()->check()
+            && ! $provider->is_claimed
+            && $provider->claiming_enabled
+            ? $provider->providerClaims()
+                ->where('claimant_user_id', auth()->id())
+                ->where('status', \App\Models\ProviderClaim::STATUS_PENDING)
+                ->latest()
+                ->first()
+            : null;
+
+        return view('services.show', compact(
+            'provider',
+            'relatedProviders',
+            'ownerStores',
+            'reviewData',
+            'currentUserPendingClaim'
+        ));
     }
 
     public function published($slug)
@@ -106,6 +135,9 @@ class AdController extends Controller
         $requestedModule = in_array($request->query('module'), array_keys(self::MODULE_CATEGORY_SLUGS), true)
             ? $request->query('module')
             : 'products';
+        $requestedProfileKind = in_array($request->query('profile_kind'), ['professional', 'service_company'], true)
+            ? $request->query('profile_kind')
+            : 'professional';
         $categories = Category::where('active', true)->orderBy('sort_order', 'asc')->get();
         $availableStores = Store::where('user_id', $user->id)
             ->where('active', true)
@@ -118,6 +150,7 @@ class AdController extends Controller
         return view('ads.create', compact(
             'categories',
             'requestedModule',
+            'requestedProfileKind',
             'availableStores',
             'storeProductLimit'
         ));
@@ -138,6 +171,11 @@ class AdController extends Controller
 
         $request->validate([
             'module' => 'required|in:real_estate,vehicles,products,services,jobs,agro',
+            'profile_kind' => [
+                Rule::excludeIf(fn () => $request->input('module') !== 'services'),
+                'nullable',
+                Rule::in(['professional', 'service_company']),
+            ],
             'category_name' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'price' => 'nullable|numeric|min:0',
@@ -147,10 +185,17 @@ class AdController extends Controller
             'advertiser_type' => 'nullable|string',
             'cnpj' => 'nullable|string|max:30',
             'region' => 'nullable|string|max:100',
+            'public_address' => [
+                Rule::excludeIf(fn () => $request->input('module') !== 'services'),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'whatsapp' => 'required|string|max:20',
             'phone' => 'nullable|string|max:20',
             'instagram' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
+            'profile_is_claimed' => 'nullable|boolean',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'banner' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'images' => 'nullable|array|max:'.($isFreeUser ? 5 : 20),
@@ -209,12 +254,18 @@ class AdController extends Controller
         }
 
         $storeId = $this->resolveStoreId($request, $user, $request->module);
+        $isClaimed = $request->module !== 'services'
+            || $user->role !== 'admin'
+            || $request->boolean('profile_is_claimed');
 
         $adData = [
             'user_id' => $user->id,
             'store_id' => $storeId,
             'category_id' => $categoryId,
             'module' => $request->module,
+            'profile_kind' => $request->module === 'services'
+                ? $request->input('profile_kind', 'professional')
+                : null,
             'display_mode' => $request->module === 'products'
                 ? $request->input('display_mode', 'default')
                 : 'default',
@@ -227,6 +278,9 @@ class AdController extends Controller
             'city' => $request->city,
             'state' => 'Sergipe',
             'region' => $request->module === 'services' ? $request->region : null,
+            'public_address' => $request->module === 'services'
+                ? $request->input('public_address')
+                : null,
             'business_hours' => $request->input('business_hours', []),
             'instagram' => $request->instagram,
             'facebook' => $request->facebook,
@@ -235,6 +289,17 @@ class AdController extends Controller
             'status' => 'active',
             'views' => 0,
             'publication_ip' => $request->ip(),
+            'is_claimed' => $isClaimed,
+            'claiming_enabled' => false,
+            'claimed_at' => $request->module === 'services' && $user->role === 'admin' && $isClaimed
+                ? now()
+                : null,
+            'contact_phone' => $request->module === 'services' && ! $isClaimed
+                ? $request->phone
+                : null,
+            'contact_whatsapp' => $request->module === 'services' && ! $isClaimed
+                ? $request->whatsapp
+                : null,
         ];
 
         if (Schema::hasColumn('ads', 'price_type')) {
@@ -253,10 +318,12 @@ class AdController extends Controller
             $this->syncProductOptions($ad, $request);
         }
 
-        $user->update([
-            'whatsapp' => $request->whatsapp,
-            'phone' => $request->phone ?: $user->phone,
-        ]);
+        if ($isClaimed) {
+            $user->update([
+                'whatsapp' => $request->whatsapp,
+                'phone' => $request->phone ?: $user->phone,
+            ]);
+        }
 
         $hasMainImage = false;
         if ($request->module !== 'services' && $logoPath) {
@@ -328,7 +395,18 @@ class AdController extends Controller
             'city' => 'required|string|max:100',
             'description' => 'required|string',
             'category_name' => 'nullable|string|max:100',
+            'profile_kind' => [
+                Rule::excludeIf($ad->module !== 'services'),
+                'nullable',
+                Rule::in(['professional', 'service_company']),
+            ],
             'region' => 'nullable|string|max:100',
+            'public_address' => [
+                Rule::excludeIf($ad->module !== 'services'),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'instagram' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
@@ -394,6 +472,9 @@ class AdController extends Controller
                 ? $request->input('display_mode', $ad->display_mode ?: 'default')
                 : 'default',
             'title' => $request->title,
+            'profile_kind' => $ad->module === 'services'
+                ? $request->input('profile_kind', $ad->profile_kind ?: 'professional')
+                : null,
             'price' => $priceValue,
             'city' => $request->city,
             'description' => $request->description,
@@ -402,6 +483,9 @@ class AdController extends Controller
             'cnpj' => $request->cnpj ?? $ad->cnpj,
             'region' => $ad->module === 'services'
                 ? $request->input('region', $ad->region)
+                : null,
+            'public_address' => $ad->module === 'services'
+                ? $request->input('public_address')
                 : null,
             'instagram' => $request->instagram ?? $ad->instagram,
             'facebook' => $request->facebook ?? $ad->facebook,
