@@ -1170,6 +1170,18 @@
     .wizard-submit-wrap {
         flex: 1 1 auto;
     }
+    #wizard-step-5 .wizard-actions {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    #wizard-step-5 .wizard-action,
+    #wizard-step-5 .wizard-submit-wrap,
+    #wizard-step-5 .wizard-submit-button {
+        width: 100%;
+    }
+    #wizard-step-5 .wizard-submit-wrap {
+        text-align: center !important;
+    }
 }
 @media (prefers-reduced-motion: reduce) {
     .module-motion-icon::after,
@@ -1446,6 +1458,27 @@
         });
     }
 
+    function readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error || new Error('Falha ao ler a imagem selecionada.'));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    async function snapshotFileForUpload(file) {
+        const contents = await readFileAsArrayBuffer(file);
+
+        // Mantém uma cópia em memória. No Android, arquivos vindos da galeria,
+        // WhatsApp ou editores podem apontar para URIs temporárias que mudam
+        // antes do envio e fazem o Chrome abortar com ERR_UPLOAD_FILE_CHANGED.
+        return new File([contents], file.name, {
+            type: file.type || 'application/octet-stream',
+            lastModified: file.lastModified || Date.now()
+        });
+    }
+
     function loadImage(source) {
         return new Promise((resolve, reject) => {
             const image = new Image();
@@ -1460,12 +1493,13 @@
     }
 
     async function optimizeImageForUpload(file) {
-        if (!file?.type?.startsWith('image/') || file.size <= 900 * 1024) {
-            return file;
-        }
-
         try {
-            const source = await readFileAsDataUrl(file);
+            const stableFile = await snapshotFileForUpload(file);
+            if (!stableFile.type.startsWith('image/') || stableFile.size <= 900 * 1024) {
+                return stableFile;
+            }
+
+            const source = await readFileAsDataUrl(stableFile);
             const image = await loadImage(source);
             const maxDimension = 1600;
             const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
@@ -1483,17 +1517,17 @@
             }
 
             if (!blob) {
-                return file;
+                return stableFile;
             }
 
-            const baseName = file.name.replace(/\.[^.]+$/, '');
+            const baseName = stableFile.name.replace(/\.[^.]+$/, '');
             return new File([blob], `${baseName}.webp`, {
                 type: 'image/webp',
                 lastModified: Date.now()
             });
         } catch (error) {
-            console.warn('Não foi possível otimizar a imagem.', error);
-            return file;
+            console.warn('Não foi possível preparar a imagem.', error);
+            throw new Error('Não foi possível preparar esta imagem. Selecione-a novamente ou escolha outra foto.');
         }
     }
 
@@ -1506,29 +1540,37 @@
     async function previewMainPhoto(input) {
         if (input.files && input.files[0]) {
             imageProcessingCount++;
-            const optimizedFile = await optimizeImageForUpload(input.files[0]);
-            replaceFileInput(input, [optimizedFile]);
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('main-photo-img').src = e.target.result;
+            try {
+                const optimizedFile = await optimizeImageForUpload(input.files[0]);
+                replaceFileInput(input, [optimizedFile]);
+                const source = await readFileAsDataUrl(optimizedFile);
+                document.getElementById('main-photo-img').src = source;
                 document.getElementById('main-photo-preview-box').classList.remove('d-none');
-                document.getElementById('prev-card-img').src = e.target.result;
+                document.getElementById('prev-card-img').src = source;
+            } catch (error) {
+                input.value = '';
+                alert(error.message);
+            } finally {
                 imageProcessingCount--;
             }
-            reader.onerror = () => imageProcessingCount--;
-            reader.readAsDataURL(optimizedFile);
         }
     }
 
     async function previewBannerPhoto(input) {
         if (input.files && input.files[0]) {
             imageProcessingCount++;
-            const optimizedFile = await optimizeImageForUpload(input.files[0]);
-            replaceFileInput(input, [optimizedFile]);
-            const source = await readFileAsDataUrl(optimizedFile);
-            document.getElementById('banner-photo-img').src = source;
-            document.getElementById('banner-photo-preview-box').classList.remove('d-none');
-            imageProcessingCount--;
+            try {
+                const optimizedFile = await optimizeImageForUpload(input.files[0]);
+                replaceFileInput(input, [optimizedFile]);
+                const source = await readFileAsDataUrl(optimizedFile);
+                document.getElementById('banner-photo-img').src = source;
+                document.getElementById('banner-photo-preview-box').classList.remove('d-none');
+            } catch (error) {
+                input.value = '';
+                alert(error.message);
+            } finally {
+                imageProcessingCount--;
+            }
         }
     }
 
@@ -1549,15 +1591,21 @@
             }
 
             imageProcessingCount++;
-            filesArr = await Promise.all(filesArr.map(optimizeImageForUpload));
-            imageProcessingCount--;
+            try {
+                filesArr = await Promise.all(filesArr.map(optimizeImageForUpload));
 
-            filesArr.forEach(file => {
-                selectedGalleryFiles.push(file);
-            });
+                filesArr.forEach(file => {
+                    selectedGalleryFiles.push(file);
+                });
 
-            syncGalleryInput();
-            renderGalleryPreviews();
+                syncGalleryInput();
+                renderGalleryPreviews();
+            } catch (error) {
+                input.value = '';
+                alert(error.message);
+            } finally {
+                imageProcessingCount--;
+            }
         }
     }
 
