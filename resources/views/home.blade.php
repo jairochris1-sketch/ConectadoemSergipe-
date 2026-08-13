@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ($moduleTitle ? $moduleTitle . ' em Sergipe - ' : '') . 'Conectado em Sergipe')
+@section('body-class', empty($module) ? (auth()->check() ? 'home-authenticated' : 'home-guest') : '')
 
 @php
     $homePreviewImage = \App\Models\Setting::get('home_social_preview', 'images/logo-hero.png');
@@ -26,19 +27,134 @@
 <style>
     /* Hero Carousel Responsivo - Mobile vs Desktop */
     .hero-swiper-slide-responsive {
-        min-height: 250px;
-        max-height: 300px;
+        min-height: 160px;
+        max-height: 160px;
     }
     .hero-slide-container-responsive {
-        padding-top: 10px;
-        padding-bottom: 75px;
+        padding-top: 48px;
+        padding-bottom: 5px;
+    }
+    .hero-slide-container-responsive h1 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: 2px;
+        color: #ffffff;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    .hero-slide-container-responsive p {
+        font-size: clamp(.82rem, 1.55vw, 1.08rem);
+        line-height: 1.25;
+        color: rgba(255, 255, 255, 0.92);
+        max-width: 760px;
+        margin-bottom: 0;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    }
+    .home-hero-navigation {
+        position: absolute;
+        z-index: 15;
+        top: 50%;
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        color: #fff;
+        background: rgba(5, 18, 39, .58);
+        border: 1px solid rgba(255, 255, 255, .45);
+        border-radius: 50%;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
+        backdrop-filter: blur(8px);
+        transform: translateY(-50%);
+        transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .home-hero-navigation:hover,
+    .home-hero-navigation:focus-visible {
+        color: #fff;
+        background: #0d6efd;
+        border-color: #73b0ff;
+        transform: translateY(-50%) scale(1.06);
+    }
+    .home-hero-navigation:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, .8);
+        outline-offset: 2px;
+    }
+    .home-hero-prev { left: clamp(10px, 2vw, 28px); }
+    .home-hero-next { right: clamp(10px, 2vw, 28px); }
+    .home-hero-copy {
+        min-width: 0;
+        max-width: 780px;
+    }
+    .home-hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        margin-top: 14px;
+        padding: 8px 18px;
+        color: #fff;
+        background: #0d6efd;
+        border: 1px solid rgba(255, 255, 255, .35);
+        border-radius: 10px;
+        box-shadow: 0 8px 22px rgba(13, 110, 253, .28);
+        font-size: .82rem;
+        font-weight: 800;
+        text-decoration: none;
+        transition: background-color .2s ease, transform .2s ease;
+    }
+    .home-hero-cta:hover,
+    .home-hero-cta:focus-visible {
+        color: #fff;
+        background: #0057d9;
+        transform: translateY(-2px);
     }
     .hero-search-card-container {
         z-index: 10;
-        margin-top: -105px;
-        margin-bottom: 20px;
+        margin-top: -95px;
+        margin-bottom: 10px;
+    }
+    @media (max-width: 767.98px) {
+        .home-main-hero {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        .hero-swiper-slide-responsive {
+            min-height: 200px !important;
+            max-height: 200px !important;
+        }
+        .hero-slide-container-responsive {
+            padding-top: 50px !important;
+            padding-bottom: 10px !important;
+        }
+        .hero-slide-container-responsive h1 {
+            font-size: 1.05rem !important;
+        }
+        .hero-slide-container-responsive p {
+            max-width: calc(100% - 62px);
+            font-size: .68rem;
+            line-height: 1.3;
+        }
+        .home-hero-navigation {
+            width: 34px;
+            height: 34px;
+            font-size: .8rem;
+        }
+        .home-hero-copy {
+            max-width: 100%;
+        }
+        .home-hero-cta {
+            display: none;
+        }
+        .hero-search-card-container {
+            margin-top: -105px !important;
+            margin-bottom: 12px !important;
+        }
+        #home-use-location {
+            display: none !important;
+        }
     }
     @media (min-width: 992px) {
+        .home-hero-prev { left: clamp(64px, 6vw, 112px); }
+        .home-hero-next { right: clamp(64px, 6vw, 112px); }
         .hero-swiper-slide-responsive {
             min-height: 380px;
             max-height: 480px;
@@ -52,6 +168,38 @@
             margin-bottom: 24px;
         }
     }
+    /* Fix: em monitores 1366x768 o texto fica atrás da caixa de busca */
+    @media (min-width: 992px) and (max-height: 800px) {
+        .hero-swiper-slide-responsive {
+            min-height: 320px !important;
+            max-height: 360px !important;
+        }
+        .hero-slide-container-responsive {
+            padding-top: 24px !important;
+            padding-bottom: 120px !important;
+        }
+        .hero-search-card-container {
+            margin-top: -145px !important;
+        }
+    }
+    body.home-guest .hero-search-card-container {
+        margin-top: -103px;
+    }
+    @media (max-width: 767.98px) {
+        body.home-guest .hero-search-card-container {
+            margin-top: -113px !important;
+        }
+    }
+    @media (min-width: 992px) {
+        body.home-guest .hero-search-card-container {
+            margin-top: -165px;
+        }
+    }
+    @media (min-width: 992px) and (max-height: 800px) {
+        body.home-guest .hero-search-card-container {
+            margin-top: -155px !important;
+        }
+    }
     .hero-search-input-box {
         min-height: 38px;
     }
@@ -60,16 +208,16 @@
             min-height: 42px;
         }
     }
-    /* Bordas visualmente marcantes e destacadas para todos os cards */
+    /* Bordas suaves e elegantes para todos os cards */
     .card, .card-premium {
-        border: 1px solid var(--border, rgba(200, 210, 225, 0.85)) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid var(--border, rgba(226, 232, 240, 0.8)) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
     html[data-theme="dark"] .card,
     html[data-theme="dark"] .card-premium {
-        border: 1px solid rgba(255, 255, 255, 0.18) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
     }
     .card:hover, .card-premium:hover {
         border-color: #0d6efd !important;
@@ -104,32 +252,726 @@
         align-items: center;
         justify-content: center;
     }
+    .home-auth-mobile-bottom-nav,
+    .home-auth-mobile-providers {
+        display: none;
+    }
+    .home-city-groups {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(16px, 2vw, 24px);
+        border: 1px solid rgba(34, 128, 255, .28);
+        border-radius: 18px;
+        color: #10213a;
+        background:
+            radial-gradient(circle at 50% 0, rgba(13, 110, 253, .12), transparent 40%),
+            linear-gradient(145deg, #f8fbff, #edf5ff 72%);
+        box-shadow: 0 16px 38px rgba(29, 78, 216, .1);
+    }
+    .home-city-groups-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .home-city-groups-pin {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #00c8ff;
+        border-radius: 50%;
+        color: #8bdcff;
+        background: rgba(10, 61, 133, .34);
+        box-shadow: 0 0 28px rgba(0, 160, 255, .18);
+        font-size: 1.1rem;
+    }
+    .home-city-groups-title { margin: 0 0 3px; color: #10213a; font-size: clamp(1.05rem, 1.7vw, 1.4rem); font-weight: 800; }
+    .home-city-groups-subtitle { margin: 0; color: #60718a; font-size: clamp(.72rem, 1vw, .84rem); }
+    .home-city-groups-rail {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x proximity;
+        scrollbar-color: #56708d rgba(255, 255, 255, .1);
+        scrollbar-width: thin;
+    }
+    .home-city-groups-rail::-webkit-scrollbar { height: 7px; }
+    .home-city-groups-rail::-webkit-scrollbar-track { border-radius: 999px; background: rgba(255, 255, 255, .1); }
+    .home-city-groups-rail::-webkit-scrollbar-thumb { border-radius: 999px; background: #56708d; }
+    .home-city-group-card {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        width: 152px;
+        min-width: 152px;
+        padding: 12px 10px 10px;
+        scroll-snap-align: start;
+        text-align: center;
+        border: 1px solid rgba(39, 132, 255, .38);
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, .08);
+    }
+    .home-city-group-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-image: linear-gradient(rgba(255, 255, 255, .8), rgba(247, 251, 255, .94)), var(--city-group-background);
+        background-position: center;
+        background-size: cover;
+    }
+    .home-city-group-card > * { position: relative; z-index: 1; }
+    .home-city-group-cover {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 8px;
+        padding: 2px;
+        overflow: hidden;
+        border: 1px solid #51e493;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #25d366, #087f5b);
+        box-shadow: 0 0 22px rgba(37, 211, 102, .22);
+    }
+    .home-city-group-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .home-city-group-name { min-height: 2.35em; margin: 0 0 2px; color: #10213a; font-size: .82rem; font-weight: 800; line-height: 1.17; }
+    .home-city-group-type { margin: 0 0 6px; color: #53657e; font-size: .68rem; }
+    .home-city-group-status { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 8px; color: #53657e; font-size: .64rem; }
+    .home-city-group-status i { color: #18a957; }
+    .home-city-group-enter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 32px;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        font-size: .7rem;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 9px 20px rgba(37, 211, 102, .2);
+        transition: transform .2s ease, filter .2s ease;
+    }
+    .home-city-group-enter:hover,
+    .home-city-group-enter:focus-visible { color: #fff; filter: brightness(1.1); transform: translateY(-2px); }
+    .home-city-group-card.is-inactive { opacity: .42; border-color: rgba(125, 145, 174, .24); filter: saturate(.25); }
+    .home-city-group-card.is-inactive .home-city-group-cover img { filter: grayscale(1); }
+    .home-city-group-enter.is-disabled { color: #7c8ba0; background: #dce5f0; box-shadow: none; cursor: not-allowed; }
+    .home-city-groups-note { display: flex; justify-content: center; align-items: flex-start; gap: 9px; margin: 14px auto 0; color: #60718a; font-size: .7rem; line-height: 1.4; }
+    .home-city-groups-note i { margin-top: 2px; color: #38bdf8; }
+    html[data-theme="dark"] .home-city-groups,
+    [data-bs-theme="dark"] .home-city-groups {
+        color: #fff;
+        background: radial-gradient(circle at 50% 0, rgba(0, 111, 255, .16), transparent 38%), linear-gradient(145deg, #061326, #020b1b 72%);
+        box-shadow: 0 22px 55px rgba(2, 11, 27, .25);
+    }
+    html[data-theme="dark"] .home-city-groups-title,
+    [data-bs-theme="dark"] .home-city-groups-title,
+    html[data-theme="dark"] .home-city-group-name,
+    [data-bs-theme="dark"] .home-city-group-name { color: #fff; }
+    html[data-theme="dark"] .home-city-groups-subtitle,
+    [data-bs-theme="dark"] .home-city-groups-subtitle,
+    html[data-theme="dark"] .home-city-groups-note,
+    [data-bs-theme="dark"] .home-city-groups-note { color: #aebed7; }
+    html[data-theme="dark"] .home-city-group-card,
+    [data-bs-theme="dark"] .home-city-group-card { background: #07172e; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
+    html[data-theme="dark"] .home-city-group-card::before,
+    [data-bs-theme="dark"] .home-city-group-card::before {
+        background-image: linear-gradient(rgba(3, 16, 36, .7), rgba(3, 13, 31, .94)), var(--city-group-background);
+    }
+    html[data-theme="dark"] .home-city-group-type,
+    [data-bs-theme="dark"] .home-city-group-type { color: #d5deec; }
+    html[data-theme="dark"] .home-city-group-status,
+    [data-bs-theme="dark"] .home-city-group-status { color: #9fb3d0; }
+    html[data-theme="dark"] .home-city-group-enter.is-disabled,
+    [data-bs-theme="dark"] .home-city-group-enter.is-disabled { color: #8b9bb2; background: #17243a; }
+    .home-city-group-confirmation {
+        position: fixed;
+        z-index: 1090;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(2, 10, 24, .68);
+        backdrop-filter: blur(6px);
+    }
+    .home-city-group-confirmation[hidden] { display: none !important; }
+    .home-city-group-confirmation-dialog {
+        width: min(100%, 440px);
+        padding: 22px;
+        border: 1px solid #d9e5f3;
+        border-radius: 18px;
+        color: #17243a;
+        background: #fff;
+        box-shadow: 0 28px 80px rgba(0, 0, 0, .28);
+    }
+    .home-city-group-confirmation-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 13px;
+        border-radius: 50%;
+        color: #fff;
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        font-size: 1.15rem;
+    }
+    .home-city-group-confirmation-title { margin: 0 0 10px; font-size: 1.2rem; font-weight: 800; }
+    .home-city-group-confirmation-text { margin: 0 0 10px; color: #52627a; font-size: .84rem; line-height: 1.55; }
+    .home-city-group-confirmation-actions { display: flex; gap: 9px; margin-top: 18px; }
+    .home-city-group-confirmation-actions > * {
+        flex: 1;
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 10px;
+        font: inherit;
+        font-size: .82rem;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .home-city-group-confirmation-join { color: #fff; background: linear-gradient(135deg, #25d366, #128c7e); }
+    .home-city-group-confirmation-join:hover { color: #fff; filter: brightness(1.06); }
+    .home-city-group-confirmation-close { color: #334155; background: #e9eef5; }
+    html[data-theme="dark"] .home-city-group-confirmation-dialog,
+    [data-bs-theme="dark"] .home-city-group-confirmation-dialog { color: #f8fafc; border-color: #2b3d57; background: #0d192b; }
+    html[data-theme="dark"] .home-city-group-confirmation-text,
+    [data-bs-theme="dark"] .home-city-group-confirmation-text { color: #aebed7; }
+    html[data-theme="dark"] .home-city-group-confirmation-close,
+    [data-bs-theme="dark"] .home-city-group-confirmation-close { color: #e2e8f0; background: #25334a; }
+    @media (max-width: 575.98px) {
+        .home-city-groups { margin-inline: -4px; padding: 14px 10px; border-radius: 14px; }
+        .home-city-groups-header { align-items: flex-start; gap: 9px; margin-bottom: 13px; }
+        .home-city-groups-pin { width: 38px; height: 38px; flex-basis: 38px; font-size: .9rem; }
+        .home-city-group-card { width: 136px; min-width: 136px; padding-inline: 8px; }
+        .home-city-group-cover { width: 62px; height: 62px; }
+        .home-city-groups-note { justify-content: flex-start; }
+    }
+    @auth
+    @media (max-width: 767.98px) {
+        body.home-authenticated {
+            padding-bottom: 70px;
+            background: var(--background);
+        }
+        body.home-authenticated .marketplace-header {
+            position: absolute !important;
+            z-index: 1040;
+            top: 0;
+            right: 0;
+            left: 0;
+            padding: 8px 12px 0;
+            background: transparent !important;
+            border: 0 !important;
+        }
+        body.home-authenticated .marketplace-header-shell {
+            background: transparent;
+            box-shadow: none;
+        }
+        body.home-authenticated .marketplace-header-row {
+            min-height: 48px;
+            gap: 8px;
+            padding: 0;
+        }
+        body.home-authenticated .marketplace-brand {
+            order: 0;
+            margin-right: auto;
+            color: #fff;
+        }
+        body.home-authenticated .marketplace-brand-logo,
+        body.home-authenticated .marketplace-brand-divider,
+        body.home-authenticated .marketplace-top-announce,
+        body.home-authenticated .marketplace-location-active {
+            display: none !important;
+        }
+        body.home-authenticated .marketplace-brand-name {
+            display: flex;
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: -.02em;
+            line-height: 1.05;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+        }
+        body.home-authenticated .marketplace-brand-name span:last-child {
+            position: relative;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+        body.home-authenticated .marketplace-brand-name span:last-child::after {
+            display: none !important;
+        }
+        body.home-authenticated .marketplace-header-actions {
+            order: 1;
+            margin-left: 0;
+        }
+        body.home-authenticated .marketplace-account-button:not(.marketplace-guest-login) {
+            width: 40px;
+            height: 40px;
+            min-height: 40px;
+            flex-basis: 40px;
+            color: #fff;
+            background: rgba(15, 30, 55, .85);
+            border: 1px solid rgba(255, 255, 255, .2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+            border-radius: 50%;
+        }
+        body.home-authenticated .marketplace-account-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        body.home-authenticated .marketplace-account-fallback {
+            color: #ffffff;
+            font-size: .95rem;
+        }
+        body.home-authenticated .marketplace-mobile-toggle {
+            order: 2;
+            width: 40px;
+            height: 40px;
+            flex-basis: 40px;
+            color: #fff;
+            background: rgba(15, 30, 55, .85);
+            border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 50%;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+        }
+        body.home-authenticated .marketplace-header.mobile-menu-open .marketplace-header-shell {
+            padding-bottom: 10px;
+            background: rgba(10, 20, 38, .98);
+            border-radius: 18px;
+        }
+        body.home-authenticated .marketplace-mobile-menu {
+            color: var(--foreground);
+            background: var(--card);
+            border-radius: 0 0 16px 16px;
+        }
+        body.home-authenticated .home-main-hero {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        body.home-authenticated .hero-swiper-slide-responsive {
+            min-height: 200px !important;
+            max-height: 200px !important;
+        }
+        body.home-authenticated .hero-slide-container-responsive {
+            justify-content: flex-start !important;
+            padding: 50px 14px 10px !important;
+        }
+        body.home-authenticated .hero-slide-container-responsive h1 {
+            display: block !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 2px !important;
+            color: #ffffff !important;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+        }
+        body.home-authenticated .hero-slide-container-responsive p {
+            display: block !important;
+            font-size: 0.75rem !important;
+            line-height: 1.25 !important;
+            color: rgba(255, 255, 255, 0.92) !important;
+            max-width: 290px !important;
+            margin-bottom: 0 !important;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7) !important;
+        }
+        body.home-authenticated .hero-search-card-container {
+            width: 100%;
+            margin-top: -105px !important;
+            margin-bottom: 12px !important;
+            padding: 0 8px;
+        }
+        body.home-authenticated .home-search-panel {
+            padding: 8px !important;
+            background: rgba(8, 20, 39, .97) !important;
+            border: 1px solid rgba(255, 255, 255, .22) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 6px 20px rgba(5, 14, 29, .24) !important;
+        }
+        body.home-authenticated #home-search-form {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px 0 !important;
+            margin-bottom: 8px !important;
+        }
+        body.home-authenticated #home-search-form > .home-search-query-field {
+            min-width: 0;
+            min-height: 42px;
+            padding-left: 12px !important;
+            border-radius: 12px 0 0 12px !important;
+        }
+        body.home-authenticated #home-search-query {
+            min-width: 0;
+            font-size: .84rem;
+        }
+        body.home-authenticated #home-search-microphone {
+            padding: 0 8px !important;
+            border-right: 1px solid #d7dfeb;
+            border-radius: 0;
+            font-size: .9rem;
+        }
+        body.home-authenticated .home-search-filter-row {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            gap: 6px !important;
+        }
+        body.home-authenticated .home-search-filter-row > div {
+            min-height: 38px;
+            padding: 4px 8px !important;
+            border-radius: 10px !important;
+        }
+        body.home-authenticated .home-search-filter-row select {
+            font-size: .78rem !important;
+            padding-right: 4px !important;
+        }
+        body.home-authenticated #home-use-location {
+            display: none !important;
+        }
+        body.home-authenticated .home-search-submit {
+            min-height: 42px;
+            width: auto !important;
+            padding: 0 14px !important;
+            border-radius: 0 12px 12px 0 !important;
+            font-size: .84rem;
+            background-color: #0d6efd !important;
+            background: #0d6efd !important;
+            border: none !important;
+            color: #ffffff !important;
+        }
+        body.home-authenticated .home-search-submit i {
+            display: none;
+        }
+        body.home-authenticated .home-search-submit-label-desktop {
+            display: none;
+        }
+        body.home-authenticated .home-search-submit-label-mobile {
+            display: inline !important;
+        }
+        body.home-authenticated .home-search-status-row {
+            margin-bottom: 4px !important;
+        }
+        body.home-authenticated .home-search-shortcuts {
+            gap: 4px !important;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 6px 2px 2px !important;
+            border-top: 1px solid rgba(255, 255, 255, .14) !important;
+            border-radius: 0;
+            scrollbar-width: none;
+        }
+        body.home-authenticated .home-search-shortcuts::-webkit-scrollbar {
+            display: none;
+        }
+        body.home-authenticated .home-search-shortcuts a {
+            flex: 0 0 auto;
+            padding: 4px 8px;
+            font-size: .74rem !important;
+        }
+        body.home-authenticated .home-search-shortcuts a:nth-of-type(n+5):not(:last-child) {
+            display: inline-flex !important;
+        }
+        body.home-authenticated .home-highlights-layout {
+            padding-right: 12px;
+            padding-left: 12px;
+        }
+        body.home-authenticated .home-highlights-layout > .row {
+            --bs-gutter-x: 0;
+        }
+        body.home-authenticated .home-featured-column h4 {
+            font-size: 1.05rem !important;
+            white-space: nowrap;
+        }
+        body.home-authenticated .home-featured-column .d-flex.justify-content-between a {
+            font-size: .76rem !important;
+            white-space: nowrap;
+        }
+        body.home-authenticated .home-featured-column .swiper-featured-ads {
+            overflow: visible;
+        }
+        body.home-authenticated .home-featured-column .card,
+        body.home-authenticated .home-featured-column .card-premium {
+            height: 155px !important;
+        }
+        body.home-authenticated .home-featured-column .card-img-top,
+        body.home-authenticated .home-featured-column .card-img-placeholder {
+            height: 75px !important;
+        }
+        body.home-authenticated .home-featured-column .card-body {
+            padding: 4px 6px !important;
+        }
+        body.home-authenticated .home-featured-column .card-body small.text-muted.d-block {
+            display: none !important;
+        }
+        body.home-authenticated .home-featured-column .card-title {
+            font-size: .76rem !important;
+            margin-bottom: 2px !important;
+            line-height: 1.15 !important;
+        }
+        body.home-authenticated .home-featured-column strong.text-primary {
+            font-size: .78rem !important;
+        }
+        body.home-authenticated .home-provider-desktop-column {
+            display: none !important;
+        }
+        body.home-authenticated .home-auth-mobile-providers {
+            display: block;
+            margin-top: 24px;
+            padding-right: 12px;
+            padding-left: 12px;
+        }
+        .home-auth-provider-list {
+            display: grid;
+            gap: 6px;
+        }
+        .home-auth-provider-card {
+            display: grid;
+            grid-template-columns: 60px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            min-height: 85px;
+            padding: 8px;
+            color: var(--foreground);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
+        }
+        .home-auth-provider-photo,
+        .home-auth-provider-photo-placeholder {
+            width: 60px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .home-auth-provider-photo-placeholder {
+            display: grid;
+            place-items: center;
+            color: #0d6efd;
+            background: #eaf2ff;
+            font-size: 1.2rem;
+        }
+        .home-auth-provider-copy {
+            min-width: 0;
+        }
+        .home-auth-provider-copy strong,
+        .home-auth-provider-copy span,
+        .home-auth-provider-copy small {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .home-auth-provider-copy strong {
+            color: #174f91;
+            font-size: .88rem;
+        }
+        .home-auth-provider-copy span {
+            margin: 2px 0 6px;
+            color: var(--muted-foreground);
+            font-size: .75rem;
+        }
+        .home-auth-provider-copy small {
+            color: #f59f00;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+        .home-auth-provider-copy small em {
+            margin-left: 4px;
+            color: var(--muted-foreground);
+            font-style: normal;
+        }
+        .home-auth-provider-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .home-auth-provider-actions a {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            border-radius: 50%;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, .12);
+            font-size: .85rem;
+        }
+        .home-auth-provider-actions .is-whatsapp { background: #079455; }
+        .home-auth-provider-actions .is-profile { background: #0d6efd; }
+        body.home-authenticated .home-auth-mobile-bottom-nav {
+            position: fixed;
+            z-index: 1060;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            min-height: 58px;
+            padding: 4px max(8px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+            background: rgba(255, 255, 255, .97);
+            border-top: 1px solid #dbe3ef;
+            border-radius: 18px 18px 0 0;
+            box-shadow: 0 -6px 20px rgba(15, 23, 42, .1);
+            backdrop-filter: blur(14px);
+        }
+        .home-auth-mobile-bottom-nav a {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 2px;
+            color: #52627a;
+            font-size: .62rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .home-auth-mobile-bottom-nav i {
+            font-size: 1.1rem;
+        }
+        .home-auth-mobile-bottom-nav a.is-active {
+            color: #0d6efd;
+        }
+        .home-auth-mobile-bottom-nav a.is-primary i {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            margin-top: -12px;
+            color: #fff;
+            background: #0d6efd;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 14px rgba(13, 110, 253, .34);
+            font-size: 1.02rem;
+        }
+        body.home-authenticated .theme-toggle-wrapper,
+        body.home-authenticated .theme-toggle-container {
+            bottom: 68px !important;
+            right: 12px !important;
+            z-index: 1070 !important;
+        }
+        .theme-toggle-btn {
+            width: 34px !important;
+            height: 34px !important;
+        }
+        [vw] [vw-access-button] {
+            transform: scale(0.72) !important;
+            transform-origin: right center !important;
+        }
+        body.home-authenticated .swiper-featured-prev,
+        body.home-authenticated .swiper-featured-next {
+            display: none !important;
+        }
+        body.home-authenticated footer {
+            padding-bottom: 75px !important;
+        }
+    }
+    @endauth
 </style>
 @endpush
 
 @section('content')
 <!-- Hero Carousel -->
 @if(empty($module))
-<div class="row mx-0 mb-3">
+<div class="row mx-0 mb-3 home-main-hero">
     <div class="col-12 px-0">
         <div class="swiper swiper-hero overflow-hidden position-relative">
             <div class="swiper-wrapper">
+                @php
+                    $bannerBrightness = (int) \App\Models\Setting::get('home_banner_brightness', 62);
+                    $bannerBlur = (int) \App\Models\Setting::get('home_banner_blur', 0);
+                    $overlayOpacityLeft = number_format($bannerBrightness / 100, 2, '.', '');
+                    $overlayOpacityRight = number_format(max(0, ($bannerBrightness - 22) / 100), 2, '.', '');
+                    $blurStyle = $bannerBlur > 0 ? "filter: blur({$bannerBlur}px);" : "";
+                    $heroMessages = [
+                        [
+                            'title' => 'Encontre tudo em Sergipe.',
+                            'description' => 'O maior ecossistema digital de Sergipe, conectando prestadores de serviços, lojas, produtos, veículos, imóveis e oportunidades nos 75 municípios do estado.',
+                        ],
+                        [
+                            'title' => 'Tudo o que você procura em Sergipe, em um só lugar.',
+                            'description' => 'Serviços, lojas, produtos, veículos, imóveis, empregos, agro e oportunidades nos 75 municípios.',
+                        ],
+                        [
+                            'title' => 'Sergipe inteiro mais perto de você.',
+                            'description' => 'Encontre serviços, lojas, produtos, imóveis, veículos e oportunidades em um só lugar.',
+                        ],
+                        [
+                            'title' => 'Valorize quem é daqui.',
+                            'description' => 'Descubra profissionais, lojas e negócios que fazem Sergipe acontecer todos os dias.',
+                        ],
+                        [
+                            'title' => 'Assine agora nossos planos e saia na frente.',
+                            'description' => 'Dê mais visibilidade aos seus anúncios, serviços e produtos e aumente suas oportunidades.',
+                            'cta_label' => 'Conhecer planos',
+                            'cta_url' => route('page.plans'),
+                        ],
+                        [
+                            'title' => 'Encontre. Conecte. Resolva.',
+                            'description' => 'Pesquise, encontre e fale diretamente com quem oferece o que você precisa perto de você.',
+                        ],
+                        [
+                            'title' => 'Da capital ao sertão.',
+                            'description' => 'Encontre pessoas, serviços e oportunidades nos 75 municípios de Sergipe.',
+                        ],
+                        [
+                            'title' => 'Profissionais perto de você, em poucos cliques.',
+                            'description' => 'Encontre eletricistas, pintores, mecânicos, diaristas e outros profissionais da sua região.',
+                        ],
+                        [
+                            'title' => 'Descubra lojas e negócios locais.',
+                            'description' => 'Veja produtos, conheça novas opções e compre de quem movimenta a economia de Sergipe.',
+                        ],
+                        [
+                            'title' => 'Faça parte dessa conexão.',
+                            'description' => 'Crie sua conta gratuitamente e descubra tudo o que Sergipe tem para oferecer.',
+                        ],
+                        [
+                            'title' => 'Faça seu negócio ser encontrado.',
+                            'description' => 'Seu cliente pode estar procurando exatamente o que você oferece neste momento.',
+                        ],
+                        [
+                            'title' => 'Seu próximo cliente pode estar a uma busca de distância.',
+                            'description' => 'Mais do que anunciar: esteja presente onde seus clientes procuram.',
+                        ],
+                        [
+                            'title' => 'Mais destaque. Mais presença. Mais oportunidades.',
+                            'description' => 'Escolha um plano e aumente suas chances de ser encontrado por quem realmente procura.',
+                            'cta_label' => 'Ver planos',
+                            'cta_url' => route('page.plans'),
+                        ],
+                        [
+                            'title' => 'Conecte-se. Divulgue. Venda. Cresça em Sergipe.',
+                            'description' => 'Conectamos pessoas, profissionais e negócios para movimentar oportunidades em todo o estado.',
+                        ],
+                    ];
+                @endphp
                 @foreach($heroBanners as $index => $banner)
                 @php
                     $bannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
+                    $heroMessage = $heroMessages[$index % count($heroMessages)];
                 @endphp
                 <div class="swiper-slide hero-swiper-slide-responsive d-flex flex-column justify-content-center align-items-center px-3 px-md-5" 
-                     style="background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.65) 100%), url('{{ $bannerUrl }}') center/cover no-repeat;">
+                     style="background-color: #0b172a; background-image: linear-gradient(to right, rgba(10, 15, 30, {{ $overlayOpacityLeft }}) 0%, rgba(10, 15, 30, {{ $overlayOpacityRight }}) 100%), url('{{ $bannerUrl }}'); background-size: cover; background-position: center; {{ $blurStyle }}">
                     
                     <div class="container hero-slide-container-responsive position-relative h-100 d-flex flex-column justify-content-center text-start">
                         <div class="d-flex justify-content-between align-items-start w-100">
-                            <div>
+                            <div class="home-hero-copy">
                                 <h1 class="text-white fw-bold mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: clamp(1.8rem, 4vw, 2.8rem);">
-                                    Encontre tudo em Sergipe.
+                                    {{ $heroMessage['title'] }}
                                 </h1>
-                                <p class="text-light opacity-75 mb-0" style="max-width: 650px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); font-size: clamp(0.9rem, 2vw, 1.25rem);">
-                                    Produtos, serviços, imóveis, veículos, empregos e muito mais perto de você.
+                                <p class="text-light opacity-90 mb-0">
+                                    {{ $heroMessage['description'] }}
                                 </p>
+                                @if(!empty($heroMessage['cta_url']))
+                                    <a href="{{ $heroMessage['cta_url'] }}" class="home-hero-cta">
+                                        {{ $heroMessage['cta_label'] }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                @endif
                             </div>
                             @if($loop->first)
                                 <div id="home-hero-plans-card" class="home-hero-plans-card d-none d-md-flex align-items-center rounded-4 px-3 py-2 ms-3 shadow-lg" style="position: relative; padding-right: 34px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95)); border: 1px solid rgba(255, 255, 255, 0.2);">
@@ -153,6 +995,14 @@
                 </div>
                 @endforeach
             </div>
+            @if(count($heroBanners) > 1)
+                <button type="button" class="home-hero-navigation home-hero-prev" aria-label="Ver banner anterior" title="Banner anterior">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="home-hero-navigation home-hero-next" aria-label="Ver próximo banner" title="Próximo banner">
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            @endif
         </div>
     </div>
 </div>
@@ -160,18 +1010,20 @@
 
 @if($module === 'real_estate')
     @include('partials.real_estate_hero')
-@endif
-
-@if($module === 'vehicles')
+@elseif($module === 'vehicles')
     @include('partials.vehicles_hero')
+@elseif($module === 'products')
+    @include('partials.products_hero')
+@elseif($module === 'jobs')
+    @include('partials.jobs_hero')
 @endif
 
 <!-- Container Busca Rápida Responsiva -->
-@if($module !== 'real_estate' && $module !== 'vehicles')
+@if(empty($module) || ($module !== 'real_estate' && $module !== 'vehicles' && $module !== 'products' && $module !== 'jobs'))
 <div class="container position-relative hero-search-card-container">
     <div class="row justify-content-center">
         <div class="col-12">
-            <div class="rounded-4 shadow-lg p-2 p-md-2.5 px-xl-3 py-xl-2.5 mx-auto" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
+            <div class="rounded-4 shadow-lg p-2 p-md-2.5 px-xl-3 py-xl-2.5 mx-auto home-search-panel" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15);">
                 <form
                     id="home-search-form"
                     action="{{ route('home') }}"
@@ -183,7 +1035,7 @@
                     <input type="hidden" id="home-search-service-category-value" name="service_category" value="">
 
                     <!-- Campo Pesquisa -->
-                    <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-1 py-md-2 w-100 hero-search-input-box" style="flex: 2.5;">
+                    <div class="position-relative d-flex align-items-center bg-white rounded-3 px-3 py-1 py-md-2 w-100 hero-search-input-box home-search-query-field" style="flex: 2.5;">
                         <i class="fa-solid fa-magnifying-glass text-muted me-2"></i>
                         <input
                             id="home-search-query"
@@ -191,7 +1043,7 @@
                             type="search"
                             name="q"
                             value="{{ $q }}"
-                            placeholder="O que você procura?"
+                            placeholder="O que você procura em {{ !empty($city) ? $city : 'Sergipe' }}?"
                             autocomplete="off"
                         >
                         <button type="button" id="home-search-microphone" class="btn btn-link text-muted p-0 ms-2 text-decoration-none" title="Buscar por voz">
@@ -201,11 +1053,11 @@
                     </div>
 
                     <!-- Linha Mobile: Cidade & Categoria -->
-                    <div class="d-flex gap-2 w-100" style="flex: 3;">
+                    <div class="d-flex gap-2 w-100 home-search-filter-row" style="flex: 3;">
                         <!-- Cidade com botão GPS -->
-                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box overflow-hidden">
                             <i class="fa-solid fa-location-dot text-danger me-1 flex-shrink-0"></i>
-                            <select id="home-search-city" name="city" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold text-truncate me-1" style="font-size: 0.84rem; max-width: calc(100% - 36px);">
+                            <select id="home-search-city" name="city" class="form-select bg-transparent border-0 shadow-none py-0 ps-0 pe-4 text-dark fw-semibold text-truncate me-1" style="font-size: 0.84rem; max-width: calc(100% - 36px); width: 100%; min-width: 0;">
                                 <option value="" {{ empty($city) ? 'selected' : '' }}>Todas as cidades</option>
                                 @foreach(\App\Core\SergipeCities::getAll() as $cityName)
                                     <option value="{{ $cityName }}" {{ $city === $cityName ? 'selected' : '' }}>{{ $cityName }}</option>
@@ -218,9 +1070,9 @@
                         </div>
 
                         <!-- Categoria -->
-                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box">
-                            <i class="fa-solid fa-table-cells-large text-muted me-2"></i>
-                            <select id="home-search-category-filter" name="category" class="form-select bg-transparent border-0 shadow-none p-0 text-dark fw-semibold" style="font-size: 0.88rem;">
+                        <div class="position-relative d-flex align-items-center bg-white rounded-3 px-2 px-md-3 py-1 py-md-2 w-50 hero-search-input-box overflow-hidden">
+                            <i class="fa-solid fa-table-cells-large text-muted me-2 flex-shrink-0"></i>
+                            <select id="home-search-category-filter" name="category" class="form-select bg-transparent border-0 shadow-none py-0 ps-0 pe-4 text-dark fw-semibold text-truncate" style="font-size: 0.88rem; width: 100%; min-width: 0;">
                                 <option value="">Todas categorias</option>
                                 <optgroup label="Anúncios">
                                     <option value="real_estate" {{ $module === 'real_estate' ? 'selected' : '' }}>Imóveis</option>
@@ -238,14 +1090,14 @@
                         </div>
                     </div>
 
-                    <!-- Botão Buscar -->
-                    <button type="submit" class="btn btn-primary fw-bold rounded-3 px-4 w-100 hero-search-input-box" style="flex: 1; background-color: #0d6efd; border: none;">
-                        <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
+                    <!-- Botão Consultar -->
+                    <button type="submit" class="btn btn-primary fw-bold rounded-3 px-4 w-100 hero-search-input-box home-search-submit" style="flex: 1; background-color: #0d6efd; border: none;">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i><span class="home-search-submit-label-desktop">Consultar</span><span class="home-search-submit-label-mobile d-none">Consultar</span>
                     </button>
                 </form>
 
                 <!-- Status de Localização e Voz -->
-                <div class="d-flex flex-wrap gap-2 px-1 mb-2">
+                <div class="d-flex flex-wrap gap-2 px-1 mb-2 home-search-status-row">
                     <div id="home-location-status" class="quick-search-location-status small text-light opacity-90">
                         @if(!empty($city))
                             <i class="fa-solid fa-location-dot text-success me-1"></i> Cidade ativa: <strong>{{ $city }}</strong>
@@ -255,7 +1107,7 @@
                 </div>
 
                 <!-- Chips de Categoria Horizontal (Rolagem Suave no Mobile) -->
-                <div class="d-flex align-items-center gap-3 gap-md-4 pt-2 px-1 border-top border-secondary border-opacity-25 overflow-x-auto text-nowrap scrollbar-none" style="scrollbar-width: none;">
+                <div class="d-flex align-items-center gap-3 gap-md-4 pt-2 px-1 border-top border-secondary border-opacity-25 overflow-x-auto text-nowrap scrollbar-none home-search-shortcuts" style="scrollbar-width: none;">
                     <a href="{{ route('module.products') }}" class="text-decoration-none text-light opacity-90 fw-medium d-inline-flex align-items-center gap-2" style="font-size: 0.9rem;">
                         <i class="fa-solid fa-tag text-primary"></i> Produtos
                     </a>
@@ -274,6 +1126,9 @@
                     <a href="{{ route('module.agro') }}" class="text-decoration-none text-light opacity-90 fw-medium d-inline-flex align-items-center gap-2" style="font-size: 0.9rem;">
                         <i class="fa-solid fa-leaf text-primary"></i> Agro
                     </a>
+                    <a href="{{ route('culture.index') }}" class="text-decoration-none text-light opacity-90 fw-medium d-inline-flex align-items-center gap-2" style="font-size: 0.9rem;">
+                        <i class="fa-solid fa-palette text-primary"></i> Arte e Cultura
+                    </a>
                     <a href="{{ route('stores.index') }}" class="text-decoration-none text-light opacity-90 fw-medium d-inline-flex align-items-center gap-2" style="font-size: 0.9rem;">
                         <i class="fa-solid fa-ellipsis text-primary"></i> Ver todas
                     </a>
@@ -286,10 +1141,10 @@
 
 <!-- Section Destaques para você (Carrossel em movimento) + Profissionais em destaque -->
 @if(!$isSearch && empty($module))
-<div class="container mb-3 mb-md-4">
+<div class="container mb-3 mb-md-4 home-highlights-layout">
     <div class="row g-3 g-md-4">
         <!-- Coluna Esquerda: Destaques para você (Swiper Slider em Movimento) -->
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-lg-8 home-featured-column">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
                     Destaques para você
@@ -309,9 +1164,51 @@
                     touch-action: auto !important;
                 }
                 .swiper-providers-container {
-                    height: 315px; /* 4 * 68 + 3 * 8 = 296, plus some padding */
-                    padding-top: 10px;
-                    padding-bottom: 10px;
+                    height: 312px;
+                    padding-top: 14px;
+                    padding-bottom: 14px;
+                    overflow: visible !important;
+                }
+                body.home-guest .swiper-providers-container {
+                    height: 300px;
+                }
+                .swiper-providers {
+                    height: 100%;
+                    overflow: hidden !important;
+                    border-radius: 16px;
+                }
+                /* Swiper Destaques: altura uniforme e sem sobreposição horizontal */
+                .swiper-featured-ads .swiper-wrapper {
+                    align-items: stretch !important;
+                }
+                .swiper-featured-ads .swiper-slide {
+                    height: auto !important;
+                    box-sizing: border-box !important;
+                    min-width: 0 !important;
+                }
+                .swiper-featured-ads .swiper-slide > a {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    height: 100% !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-width: 0 !important;
+                }
+                .swiper-featured-ads .card-premium {
+                    height: 100% !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-width: 0 !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    box-sizing: border-box !important;
+                }
+                .swiper-featured-ads .card-body {
+                    flex: 1 1 auto !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: space-between !important;
+                    min-width: 0 !important;
                 }
             </style>
             <div class="position-relative overflow-hidden px-md-3">
@@ -343,8 +1240,8 @@
                                             <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
-                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
-                                            <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
+                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->formatted_price }}</strong>
+                                            <small class="text-muted text-truncate d-block" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -363,7 +1260,7 @@
         </div>
 
         <!-- Coluna Direita: Profissionais em destaque -->
-        <div class="col-12 col-lg-4">
+        <div class="col-12 col-lg-4 home-provider-desktop-column">
             <div class="d-flex justify-content-between align-items-center mb-2.5">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
                     <i class="fa-solid fa-briefcase text-primary"></i> Prestadores de Serviços — Em destaque
@@ -373,7 +1270,7 @@
                 </a>
             </div>
 
-            <div class="position-relative overflow-hidden swiper-providers-container pt-1 pb-1">
+            <div class="position-relative swiper-providers-container pt-1 pb-1" style="overflow: visible;">
                 <div class="swiper swiper-providers h-100">
                     <div class="swiper-wrapper">
                         @foreach($serviceProviders as $provider)
@@ -381,9 +1278,9 @@
                             <div class="p-1.5 pe-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between border" style="background: var(--card); height: 68px;">
                                 <a href="{{ route('provider.show', $provider->slug) }}" class="d-flex align-items-center gap-3 text-decoration-none text-dark flex-grow-1 overflow-hidden me-2 h-100">
                                     @if($provider->card_image)
-                                        <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border border-2 border-white" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
+                                        <img src="{{ asset($provider->card_image) }}" class="rounded-3 flex-shrink-0 shadow-sm border-0" width="56" height="56" style="width: 56px; height: 56px; object-fit: cover; border-radius: 12px !important;" alt="{{ $provider->title }}">
                                     @else
-                                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border border-2 border-white" style="width: 56px; height: 56px; border-radius: 12px !important;">
+                                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm fw-bold flex-shrink-0 border-0" style="width: 56px; height: 56px; border-radius: 12px !important;">
                                             <i class="fa-solid fa-user fs-3"></i>
                                         </div>
                                     @endif
@@ -408,30 +1305,60 @@
                     </div>
                 </div>
                 <!-- Navigation Arrows -->
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -8px;" aria-label="Anterior">
-                    <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.85rem;"></i>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute top-0 start-50 translate-middle-x z-3 swiper-providers-prev d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-top: -10px;" aria-label="Subir">
+                    <i class="fa-solid fa-chevron-up text-dark" style="font-size: 0.72rem;"></i>
                 </button>
-                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -8px;" aria-label="Próximo">
-                    <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.85rem;"></i>
+                <button type="button" class="btn btn-white btn-sm rounded-circle shadow position-absolute bottom-0 start-50 translate-middle-x z-3 swiper-providers-next d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fff; border: 1px solid rgba(0,0,0,0.12); margin-bottom: -10px;" aria-label="Descer">
+                    <i class="fa-solid fa-chevron-down text-dark" style="font-size: 0.72rem;"></i>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<section class="container mb-3 mb-md-4 d-lg-none" aria-labelledby="mobile-provider-highlights-title">
+@auth
+<section class="home-auth-mobile-providers" aria-labelledby="mobile-provider-highlights-title">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 id="mobile-provider-highlights-title" class="h5 fw-bold mb-0">Prestadores de Serviços — Em destaque</h2>
-        <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold">Ver todos</a>
+        <h2 id="mobile-provider-highlights-title" class="h5 fw-bold mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-toolbox text-primary"></i>
+            Prestadores de Serviços em destaque
+        </h2>
+        <a href="{{ route('module.services') }}" class="text-primary text-decoration-none small fw-bold text-nowrap">
+            Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
     </div>
-    <div class="row g-3">
+    <div class="home-auth-provider-list">
         @foreach($serviceProviders->take(4) as $provider)
-            <div class="col-6 col-md-6 col-xl-3">
-                @include('services._card', ['provider' => $provider, 'hideDesktopWhatsapp' => true, 'hideDescription' => true])
-            </div>
+            @php
+                $providerPhone = preg_replace('/\D+/', '', $provider->publicWhatsapp() ?? '');
+                $providerPhone = $providerPhone && !str_starts_with($providerPhone, '55') ? '55'.$providerPhone : $providerPhone;
+                $providerMessage = urlencode("Olá, encontrei seu perfil profissional no Conectado em Sergipe: {$provider->title}");
+            @endphp
+            <article class="home-auth-provider-card">
+                <a href="{{ route('provider.show', $provider->slug) }}" class="text-decoration-none">
+                    @if($provider->card_image)
+                        <img src="{{ asset($provider->card_image) }}" class="home-auth-provider-photo" alt="{{ $provider->title }}">
+                    @else
+                        <span class="home-auth-provider-photo-placeholder" aria-hidden="true"><i class="fa-solid fa-user-tie"></i></span>
+                    @endif
+                </a>
+                <a href="{{ route('provider.show', $provider->slug) }}" class="home-auth-provider-copy text-decoration-none">
+                    <strong>{{ $provider->title }}</strong>
+                    <span>{{ $provider->display_category ?? 'Serviço profissional' }}</span>
+                    <small><i class="fa-solid fa-star"></i> 4,9 (128) <em><i class="fa-solid fa-location-dot text-danger"></i> {{ $provider->city ?? 'Aracaju' }}</em></small>
+                </a>
+                <div class="home-auth-provider-actions" aria-label="Ações de {{ $provider->title }}">
+                    @if($providerPhone)
+                        <a href="https://wa.me/{{ $providerPhone }}?text={{ $providerMessage }}" target="_blank" rel="noopener" class="is-whatsapp" title="Conversar pelo WhatsApp" aria-label="WhatsApp de {{ $provider->title }}"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="tel:+{{ $providerPhone }}" class="is-profile" title="Ligar" aria-label="Ligar para {{ $provider->title }}"><i class="fa-solid fa-phone"></i></a>
+                    @endif
+                    <a href="{{ route('provider.show', $provider->slug) }}" class="is-profile" title="Ver perfil" aria-label="Ver perfil de {{ $provider->title }}"><i class="fa-solid fa-circle-info"></i></a>
+                </div>
+            </article>
         @endforeach
     </div>
 </section>
+@endauth
 
 @if($recentStores->isNotEmpty())
 <section class="container mb-3 mb-md-4" aria-labelledby="home-stores-title">
@@ -491,7 +1418,7 @@
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->formatted_price }}</strong>
                                     <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
@@ -548,7 +1475,7 @@
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->formatted_price }}</strong>
                                     <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
@@ -605,7 +1532,7 @@
                                     <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                 </div>
                                 <div>
-                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                    <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->formatted_price }}</strong>
                                     <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                 </div>
                             </div>
@@ -665,7 +1592,7 @@
                                             <small class="text-muted d-block text-truncate mb-2" style="font-size: 0.7rem;">{{ \Illuminate\Support\Str::limit($ad->description, 28) }}</small>
                                         </div>
                                         <div>
-                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->price ? 'R$ ' . number_format($ad->price, 2, ',', '.') : 'Sob consulta' }}</strong>
+                                            <strong class="text-primary fs-6 d-block" style="font-size: 0.9rem !important;">{{ $ad->formatted_price }}</strong>
                                             <small class="text-muted" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot me-1"></i>{{ $ad->city ?? 'Aracaju, SE' }}</small>
                                         </div>
                                     </div>
@@ -722,28 +1649,62 @@
     </div>
 </div>
 
-<!-- Section Explore anúncios por cidade -->
-<div class="container mb-3 mb-md-4">
-    <div class="d-flex justify-content-between align-items-center mb-2.5">
-        <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Explore anúncios por cidade</h4>
-        <a href="{{ route('home') }}" class="text-primary text-decoration-none small fw-bold">
-            Ver todas as cidades <i class="fa-solid fa-arrow-right ms-1"></i>
-        </a>
-    </div>
-
-    <div class="d-flex align-items-center gap-3 overflow-x-auto text-nowrap pb-2 scrollbar-none">
-        @foreach(\App\Core\SergipeCities::getAll() as $cityName)
-        <a href="{{ route('home', ['city' => $cityName]) }}" class="text-decoration-none text-dark text-center d-flex flex-column align-items-center" style="width: 80px;">
-            <div class="rounded-circle shadow-sm mb-2 overflow-hidden border border-2 border-white" style="width: 64px; height: 64px; background: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);">
-                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white fw-bold fs-5">
-                    {{ strtoupper(substr($cityName, 0, 1)) }}
-                </div>
+<!-- Grupos locais por cidade -->
+@auth
+@if($homeCityGroups->isNotEmpty())
+<section class="container mb-3 mb-md-4" aria-labelledby="home-city-groups-title">
+    <div class="home-city-groups">
+        <header class="home-city-groups-header">
+            <div class="home-city-groups-pin" aria-hidden="true"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div>
+                <h2 class="home-city-groups-title" id="home-city-groups-title">Nossos grupos em Sergipe por cidade</h2>
+                <p class="home-city-groups-subtitle">Entre no grupo da sua cidade e fique conectado com oportunidades locais.</p>
             </div>
-            <small class="fw-semibold text-truncate w-100" style="font-size: 0.75rem;">{{ $cityName }}</small>
-        </a>
-        @endforeach
+        </header>
+
+        <div class="home-city-groups-rail" aria-label="Grupos disponíveis por cidade">
+            @foreach($homeCityGroups as $group)
+                @php
+                    $groupCover = str_starts_with($group['cover'], 'http') ? $group['cover'] : asset($group['cover']);
+                    $externalGroupLink = str_starts_with($group['link'], 'http');
+                @endphp
+                <article class="home-city-group-card {{ $group['enabled'] ? 'is-active' : 'is-inactive' }}" data-city-group-slot="{{ $group['slot'] }}" data-city-group-active="{{ $group['enabled'] ? 'true' : 'false' }}" style="--city-group-background: url('{{ $groupCover }}');">
+                    <div class="home-city-group-cover">
+                        <img src="{{ $groupCover }}" alt="Capa do grupo de {{ $group['city'] }}" loading="lazy">
+                    </div>
+                    <h3 class="home-city-group-name">{{ $group['city'] }}</h3>
+                    <p class="home-city-group-type">Grupo local</p>
+                    <div class="home-city-group-status"><i class="fa-solid {{ $group['enabled'] ? 'fa-user-group' : 'fa-circle-pause' }}" aria-hidden="true"></i> {{ $group['enabled'] ? 'Grupo disponível' : 'Não ativo' }}</div>
+                    @if($group['enabled'])
+                        <a class="home-city-group-enter" href="{{ $group['link'] }}" data-city-group-enter data-group-city="{{ $group['city'] }}" data-group-gentilic="{{ $group['gentilic'] }}" @if($externalGroupLink) target="_blank" rel="noopener noreferrer" @endif>Entrar no grupo</a>
+                    @else
+                        <span class="home-city-group-enter is-disabled" aria-disabled="true">Indisponível</span>
+                    @endif
+                </article>
+            @endforeach
+        </div>
+
+        <p class="home-city-groups-note">
+            <i class="fa-regular fa-bell" aria-hidden="true"></i>
+            <span>Grupos disponíveis no momento. O site atende todo o estado; os grupos são comunidades locais complementares.</span>
+        </p>
     </div>
+</section>
+
+<div class="home-city-group-confirmation" data-city-group-confirmation hidden>
+    <section class="home-city-group-confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="city-group-confirmation-title">
+        <div class="home-city-group-confirmation-icon" aria-hidden="true"><i class="fa-brands fa-whatsapp"></i></div>
+        <h3 class="home-city-group-confirmation-title" id="city-group-confirmation-title">Você realmente é <span data-group-confirmation-gentilic></span>?</h3>
+        <p class="home-city-group-confirmation-text">Este grupo é destinado às pessoas de <strong data-group-confirmation-city></strong>.</p>
+        <p class="home-city-group-confirmation-text">Caso não more nessa cidade, não entre apenas por curiosidade. Se ainda quiser participar, informe no grupo o seu intuito: acompanhar novidades, visitar parentes ou porque está de mudança para a cidade.</p>
+        <div class="home-city-group-confirmation-actions">
+            <a class="home-city-group-confirmation-join" href="#" data-group-confirmation-join>Participar</a>
+            <button class="home-city-group-confirmation-close" type="button" data-group-confirmation-close>Fechar</button>
+        </div>
+    </section>
 </div>
+@endif
+@endauth
 
 <!-- Section Banner do Aplicativo -->
 <div class="container mb-3 mb-md-4">
@@ -856,7 +1817,7 @@
                                         @if($item->module === 'services')
                                             <span class="fw-bold text-primary small">Ver perfil profissional</span>
                                         @else
-                                            <span class="fw-bold text-primary fs-5">R$ {{ number_format($item->price, 2, ',', '.') }}</span>
+                                            <span class="fw-bold text-primary fs-5">{{ $item->formatted_price }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -871,6 +1832,18 @@
 </div>
 @endif
 
+@auth
+    @if(empty($module))
+        <nav class="home-auth-mobile-bottom-nav" aria-label="Navegação principal mobile">
+            <a href="{{ route('home') }}" class="is-active" aria-current="page"><i class="fa-solid fa-house"></i><span>Início</span></a>
+            <a href="{{ route('module.services') }}"><i class="fa-solid fa-screwdriver-wrench"></i><span>Serviços</span></a>
+            <a href="{{ route('ad.create') }}" class="is-primary"><i class="fa-solid fa-plus"></i><span>Anunciar</span></a>
+            <a href="{{ route('stores.index') }}"><i class="fa-solid fa-store"></i><span>Lojas</span></a>
+            <a href="{{ route('user.panel') }}"><i class="fa-regular fa-user"></i><span>Conta</span></a>
+        </nav>
+    @endif
+@endauth
+
 </div>
 @endsection
 
@@ -879,28 +1852,76 @@
     @if(empty($module))
     const swiperHero = new Swiper('.swiper-hero', {
         loop: true,
-        autoplay: { delay: 5000 },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+        speed: 1400,
+        effect: 'fade',
+        fadeEffect: {
+            crossFade: true
+        },
+        autoplay: {
+            delay: 8000,
+            disableOnInteraction: false,
+        },
+        allowTouchMove: true,
+        navigation: { nextEl: '.home-hero-next', prevEl: '.home-hero-prev' },
+        on: {
+            init: function () {
+                // Sinaliza para a splash screen que o Swiper Hero está pronto
+                window.dispatchEvent(new CustomEvent('swiper-hero-ready'));
+            }
+        }
     });
 
     const swiperProviders = new Swiper('.swiper-providers', {
         direction: 'vertical',
         slidesPerView: 4,
-        spaceBetween: 8,
-        speed: 800,
+        spaceBetween: document.body.classList.contains('home-guest') ? 3 : 4,
+        speed: 400,
         loop: true,
         autoplay: {
             delay: 7500,
             disableOnInteraction: false,
+            pauseOnMouseEnter: true,
         },
-        allowTouchMove: false,
-        noSwiping: true,
-        noSwipingClass: 'swiper-no-swiping',
+        mousewheel: {
+            forceToAxis: true,
+            releaseOnEdges: true,
+        },
+        allowTouchMove: true,
         navigation: {
             prevEl: '.swiper-providers-prev',
             nextEl: '.swiper-providers-next',
         }
     });
+
+    const prevBtn = document.querySelector('.swiper-providers-prev');
+    const nextBtn = document.querySelector('.swiper-providers-next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            swiperProviders.slidePrev();
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            swiperProviders.slideNext();
+        });
+    }
+
+    const providersContainer = document.querySelector('.swiper-providers-container');
+    if (providersContainer) {
+        providersContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) {
+                swiperProviders.slideNext();
+            } else if (e.deltaY < 0) {
+                swiperProviders.slidePrev();
+            }
+        }, { passive: false });
+    }
 
     const swiperFeatured = new Swiper('.swiper-featured-ads', {
         slidesPerView: 2.5,
@@ -919,7 +1940,8 @@
         breakpoints: {
             576: { slidesPerView: 2, spaceBetween: 12 },
             768: { slidesPerView: 3, spaceBetween: 14 },
-            992: { slidesPerView: 4, spaceBetween: 14 },
+            992: { slidesPerView: 3, spaceBetween: 14 },
+            1200: { slidesPerView: 4, spaceBetween: 14 },
         },
     });
 
@@ -968,6 +1990,22 @@
         loop: true,
         autoplay: { delay: 5000 },
         navigation: { nextEl: '.vehicles-swiper-next', prevEl: '.vehicles-swiper-prev' }
+    });
+    @endif
+
+    @if($module === 'products')
+    const swiperProductsHero = new Swiper('.swiper-products-hero', {
+        loop: true,
+        autoplay: { delay: 5000 },
+        navigation: { nextEl: '.products-swiper-next', prevEl: '.products-swiper-prev' }
+    });
+    @endif
+
+    @if($module === 'jobs')
+    const swiperJobsHero = new Swiper('.swiper-jobs-hero', {
+        loop: true,
+        autoplay: { delay: 5000 },
+        navigation: { nextEl: '.jobs-swiper-next', prevEl: '.jobs-swiper-prev' }
     });
     @endif
 
@@ -1086,7 +2124,16 @@
 
         let applyingDetectedCity = false;
 
+        const updateSearchPlaceholder = () => {
+            const selectedCity = citySelect.value.trim();
+            queryInput.placeholder = `O que você procura em ${selectedCity || 'Sergipe'}?`;
+        };
+
+        updateSearchPlaceholder();
+
         citySelect.addEventListener('change', () => {
+            updateSearchPlaceholder();
+
             if (!applyingDetectedCity) {
                 if (locationPreferenceEnabled) {
                     fetch(locationDestroyEndpoint, {
@@ -1562,6 +2609,7 @@
 
                     applyingDetectedCity = true;
                     citySelect.value = nearestMunicipality.name;
+                    updateSearchPlaceholder();
                     applyingDetectedCity = false;
 
                     try {
@@ -1661,4 +2709,58 @@
         }
     })();
 </script>
+@auth
+<script>
+    (() => {
+        const confirmation = document.querySelector('[data-city-group-confirmation]');
+        if (!confirmation) return;
+
+        const gentilic = confirmation.querySelector('[data-group-confirmation-gentilic]');
+        const city = confirmation.querySelector('[data-group-confirmation-city]');
+        const join = confirmation.querySelector('[data-group-confirmation-join]');
+        const close = confirmation.querySelector('[data-group-confirmation-close]');
+        let trigger = null;
+
+        const closeConfirmation = () => {
+            confirmation.hidden = true;
+            document.body.style.overflow = '';
+            trigger?.focus();
+        };
+
+        document.querySelectorAll('[data-city-group-enter]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                trigger = button;
+                gentilic.textContent = button.dataset.groupGentilic || `morador(a) de ${button.dataset.groupCity}`;
+                city.textContent = button.dataset.groupCity || 'sua cidade';
+                join.href = button.href;
+
+                if (button.target === '_blank') {
+                    join.target = '_blank';
+                    join.rel = 'noopener noreferrer';
+                } else {
+                    join.removeAttribute('target');
+                    join.removeAttribute('rel');
+                }
+
+                confirmation.hidden = false;
+                document.body.style.overflow = 'hidden';
+                close.focus();
+            });
+        });
+
+        close.addEventListener('click', closeConfirmation);
+        join.addEventListener('click', () => {
+            confirmation.hidden = true;
+            document.body.style.overflow = '';
+        });
+        confirmation.addEventListener('click', (event) => {
+            if (event.target === confirmation) closeConfirmation();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !confirmation.hidden) closeConfirmation();
+        });
+    })();
+</script>
+@endauth
 @endpush

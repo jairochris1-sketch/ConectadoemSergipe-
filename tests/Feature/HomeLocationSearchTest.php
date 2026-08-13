@@ -15,6 +15,9 @@ class HomeLocationSearchTest extends TestCase
     {
         $this->get(route('home'))
             ->assertOk()
+            ->assertSee('placeholder="O que você procura em Sergipe?"', false)
+            ->assertSee("queryInput.placeholder = `O que você procura em \${selectedCity || 'Sergipe'}?`", false)
+            ->assertSee('updateSearchPlaceholder()', false)
             ->assertSee("categoryFilter.value = ''", false)
             ->assertSee("moduleValue.value = ''", false)
             ->assertSee("serviceCategoryValue.value = ''", false)
@@ -39,10 +42,23 @@ class HomeLocationSearchTest extends TestCase
     {
         $this->get(route('home', ['city' => 'Nossa Senhora da Glória']))
             ->assertOk()
+            ->assertSee('placeholder="O que você procura em Nossa Senhora da Glória?"', false)
             ->assertSee('value="Nossa Senhora da Glória" selected', false)
             ->assertSee('name="module" value=""', false)
             ->assertSee('name="category"', false)
             ->assertDontSee('name="category" value="Marcenaria"', false);
+    }
+
+    public function test_active_gps_location_uses_the_city_in_the_search_placeholder(): void
+    {
+        $this->withSession([
+            'location_filter' => [
+                'enabled' => true,
+                'city' => 'Nossa Senhora da Glória',
+            ],
+        ])->get(route('home'))
+            ->assertOk()
+            ->assertSee('placeholder="O que você procura em Nossa Senhora da Glória?"', false);
     }
 
     public function test_text_search_also_matches_professional_type(): void
