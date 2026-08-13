@@ -70,6 +70,11 @@
             'Brasil',
         ])))
         : null;
+
+    $currentUser = auth()->user();
+    $isOwnerOrAdmin = $currentUser && ($currentUser->id === $provider->user_id || $currentUser->role === 'admin');
+    $ownerHasPaidPlan = $provider->user?->hasPaidPlan() ?? false;
+    $canEditCover = $isOwnerOrAdmin && $ownerHasPaidPlan;
 @endphp
 
 <section class="provider-profile-page">
@@ -80,15 +85,35 @@
             </div>
         </div>
     @endif
+    @if(session('warning'))
+        <div class="container pt-3">
+            <div class="alert alert-warning rounded-3 mb-0 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ session('warning') }}
+            </div>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="container pt-3">
+            <div class="alert alert-danger rounded-3 mb-0 shadow-sm">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>{{ session('error') }}
+            </div>
+        </div>
+    @endif
     <div class="container provider-cover-frame">
-        <div class="provider-cover">
-            <img src="{{ asset($coverImage) }}" alt="Capa de {{ $provider->city }}">
+        <div class="provider-cover" id="providerCoverContainer">
+            <img src="{{ asset($coverImage) }}" id="providerCoverImg" alt="Capa de {{ $provider->city }}" style="object-position: center {{ $provider->cover_position_y ?? 50 }}%;">
             <div class="provider-cover-shade"></div>
             <div class="provider-cover-content">
                 <a href="{{ route('module.services') }}" class="provider-back-button">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Voltar</span>
                 </a>
+
+                <div class="provider-cover-actions">
+                    <button type="button" class="btn-edit-cover shadow-sm" onclick="handleEditCoverBtnClick()" title="Editar ou ajustar foto de capa">
+                        <i class="fa-solid fa-camera me-1"></i> Editar capa
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -110,10 +135,11 @@
                         @if($provider->profile_kind === 'service_company')
                             <span class="provider-category-badge"><i class="fa-solid fa-building me-1"></i>Empresa de serviços</span>
                         @endif
-                        <span class="provider-verified-badge {{ $provider->is_claimed ? '' : 'provider-unclaimed-badge' }}">
-                            <i class="fa-solid {{ $provider->is_claimed ? 'fa-circle-check' : 'fa-circle-info' }}"></i>
-                            {{ $provider->is_claimed ? 'Perfil reivindicado' : 'Perfil não reivindicado' }}
-                        </span>
+                        @if(! $provider->is_claimed && $provider->claiming_enabled)
+                            <span class="provider-category-badge" style="background: var(--warning-bg, #fff3cd); color: var(--warning-text, #856404); border-color: var(--warning-border, #ffeeba);">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i>Perfil não reivindicado
+                            </span>
+                        @endif
                     </div>
 
                     <h1>{{ $provider->title }}</h1>
@@ -139,6 +165,12 @@
                 </div>
 
                 <nav class="provider-action-list" aria-label="Contato com o profissional">
+                    @if($provider->booking_enabled && \App\Support\ServiceBookingCatalog::eligible($provider))
+                        <a href="{{ auth()->check() ? route('service-booking.book', $provider) : route('login', ['redirect' => route('service-booking.book', $provider)]) }}" class="provider-action provider-action-primary">
+                            <i class="fa-regular fa-calendar-check"></i>
+                            <span>Agendar horário</span>
+                        </a>
+                    @endif
                     @if($provider->is_claimed)
                         <a href="{{ route('chat.index', ['with' => $provider->user_id]) }}" class="provider-action provider-action-primary">
                             <i class="fa-regular fa-message"></i>
@@ -174,19 +206,15 @@
                     <p>{{ $provider->description }}</p>
 
                     <div class="provider-profile-meta-footer">
-                        <div>
-                            @if($provider->is_claimed)
+                        @if($provider->is_claimed)
+                            <div>
                                 <span>Responsável pelo perfil</span>
                                 <strong>{{ $provider->user->name }}</strong>
-                                @if($provider->user->username)
+                                @if($provider->user->username && !str_contains($provider->user->email, '@cliente.conectadoemsergipe.com.br'))
                                     <small>{{ '@' . $provider->user->username }}</small>
                                 @endif
-                            @else
-                                <span>Origem do perfil</span>
-                                <strong>Cadastrado pela plataforma</strong>
-                                <small>Aguardando o responsável</small>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
 
                         @if($instagramUrl || $facebookUrl)
                             <div class="provider-social-links" aria-label="Redes sociais">
@@ -392,7 +420,7 @@
 
     .provider-cover {
         position: relative;
-        height: clamp(125px, 11vw, 175px);
+        height: clamp(240px, 20vw, 320px);
         overflow: hidden;
         border-radius: 0;
     }
@@ -440,7 +468,7 @@
 
     .provider-profile-container {
         position: relative;
-        margin-top: -28px;
+        margin-top: -140px;
         padding-bottom: 0;
         z-index: 2;
     }
@@ -472,11 +500,39 @@
         overflow: hidden;
         color: var(--primary);
         background: var(--muted-bg);
-        border: 5px solid var(--card);
-        border-radius: 25px;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, .16);
+        border: 2px solid var(--card);
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, .12);
         font-size: 4rem;
         font-weight: 800;
+    }
+
+    .provider-cover-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-edit-cover {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: rgba(15, 23, 42, 0.78);
+        backdrop-filter: blur(8px);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 99px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit-cover:hover {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: translateY(-1px);
     }
 
     .provider-avatar img {
@@ -851,7 +907,7 @@
 
     @media (max-width: 767.98px) {
         .provider-cover {
-            height: 112px;
+            height: 220px;
         }
 
         .provider-cover-content {
@@ -869,6 +925,7 @@
         }
 
         .provider-profile-container {
+            margin-top: -105px;
             padding-right: .75rem;
             padding-left: .75rem;
         }
@@ -887,8 +944,8 @@
         .provider-avatar {
             width: 132px;
             margin: -58px auto 0;
-            border-width: 4px;
-            border-radius: 20px;
+            border-width: 2px;
+            border-radius: 16px;
         }
 
         .provider-badges,
@@ -975,5 +1032,210 @@
 {!! json_encode($providerReviewSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endif
+@endpush
+
+<!-- Modal Alerta de Upgrade de Plano (Edição de Capa) -->
+<div class="modal fade" id="coverUpgradeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-primary bg-opacity-10 py-3">
+                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-crown me-2"></i> Recurso do Plano Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                    <i class="fa-solid fa-camera fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Personalização da Capa do Perfil</h4>
+                <p class="text-muted small mb-4">
+                    A alteração da foto de capa e o <strong>ajuste de posição vertical (estilo Facebook)</strong> estão disponíveis a partir do <strong>Plano Pago (Start, PRO ou Ouro)</strong>.
+                </p>
+                <div class="alert alert-light border rounded-3 text-start mb-4 small">
+                    <div class="mb-1"><i class="fa-solid fa-circle-check text-success me-2"></i> Adicione foto de capa personalizada em alta resolução</div>
+                    <div class="mb-1"><i class="fa-solid fa-circle-check text-success me-2"></i> Ajuste livremente a posição (mover para cima e para baixo)</div>
+                    <div><i class="fa-solid fa-circle-check text-success me-2"></i> Ganhe mais visibilidade e destaque na busca e página inicial</div>
+                </div>
+                <a href="{{ route('page.plans') }}" class="btn btn-primary btn-lg rounded-pill w-100 fw-bold shadow-sm">
+                    <i class="fa-solid fa-rocket me-2"></i> Conhecer Planos Pagos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar e Reposicionar Capa -->
+<div class="modal fade" id="editCoverModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-sliders text-primary me-2"></i> Ajustar Posição da Capa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <label class="form-label fw-semibold mb-2">Mover imagem para cima ou para baixo (estilo Facebook)</label>
+                <div class="cover-reposition-box rounded-3 overflow-hidden border mb-3 position-relative" style="height: 220px; background: #000; cursor: ns-resize;">
+                    <img id="coverPreviewImg" src="{{ asset($coverImage) }}" alt="Prévia da capa" style="width: 100%; height: 100%; object-fit: cover; object-position: center {{ $provider->cover_position_y ?? 50 }}%;">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-2 text-center text-white bg-dark bg-opacity-75 small">
+                        <i class="fa-solid fa-arrows-up-down me-1"></i> Posição Vertical Atual: <strong id="positionYLabel">{{ $provider->cover_position_y ?? 50 }}</strong>%
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <input type="range" class="form-range" id="coverRangeY" min="0" max="100" value="{{ $provider->cover_position_y ?? 50 }}" oninput="updateCoverPositionY(this.value)">
+                    <div class="d-flex justify-content-between text-muted small fw-semibold">
+                        <span><i class="fa-solid fa-arrow-up"></i> Topo (0%)</span>
+                        <span>Centro (50%)</span>
+                        <span>Base (100%) <i class="fa-solid fa-arrow-down"></i></span>
+                    </div>
+                </div>
+
+                @if($isOwnerOrAdmin)
+                <div class="border-top pt-3 mt-3">
+                    @php
+                        $ownerPlan = $provider->user?->normalizedSubscriptionPlan() ?? 'free';
+                        $monthlyChanges = $provider->monthly_cover_changes;
+                    @endphp
+                    @if($ownerPlan === 'start')
+                        <div class="alert {{ $monthlyChanges >= 2 ? 'alert-warning' : 'alert-info' }} rounded-3 small mb-3">
+                            <div class="fw-bold mb-1">
+                                <i class="fa-solid fa-crown text-warning me-1"></i> Plano Start — Limite Mensal de Capas
+                            </div>
+                            @if($monthlyChanges >= 2)
+                                <div>⚠️ <strong>Atenção:</strong> Você realizou <strong>{{ $monthlyChanges }} de 3</strong> alterações de capa permitidas para este mês. Resta apenas <strong>{{ max(0, 3 - $monthlyChanges) }}</strong> alteração até a renovação no próximo mês.</div>
+                            @else
+                                <div>No Plano Start é permitida a alteração de foto de capa até <strong>3 vezes por mês</strong>. (Realizadas este mês: {{ $monthlyChanges }} de 3).</div>
+                            @endif
+                        </div>
+                    @endif
+                    <label for="coverUploadInput" class="form-label fw-semibold">Trocar Foto de Capa (Envie um novo arquivo se desejar)</label>
+                    <form action="{{ route('ad.update', $provider->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="title" value="{{ $provider->title }}">
+                        <input type="hidden" name="description" value="{{ $provider->description }}">
+                        <input type="hidden" name="city" value="{{ $provider->city }}">
+                        <input type="hidden" name="module" value="services">
+                        <div class="input-group">
+                            <input type="file" class="form-control rounded-start-3" id="coverUploadInput" name="banner" accept="image/*">
+                            <button type="submit" class="btn btn-outline-primary rounded-end-3 fw-bold">
+                                <i class="fa-solid fa-upload me-1"></i> Enviar Nova Imagem
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                @endif
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" onclick="saveCoverPositionAjax()">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Salvar Posição
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    const canEditCover = @json($canEditCover);
+
+    function handleEditCoverBtnClick() {
+        if (!canEditCover) {
+            const modal = new bootstrap.Modal(document.getElementById('coverUpgradeModal'));
+            modal.show();
+        } else {
+            const modal = new bootstrap.Modal(document.getElementById('editCoverModal'));
+            modal.show();
+        }
+    }
+
+    function updateCoverPositionY(val) {
+        const preview = document.getElementById('coverPreviewImg');
+        const mainImg = document.getElementById('providerCoverImg');
+        const label = document.getElementById('positionYLabel');
+        if (preview) preview.style.objectPosition = `center ${val}%`;
+        if (mainImg) mainImg.style.objectPosition = `center ${val}%`;
+        if (label) label.textContent = val;
+    }
+
+    function saveCoverPositionAjax() {
+        const val = document.getElementById('coverRangeY')?.value || 50;
+        fetch("{{ route('ad.cover_position', $provider->id) }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ cover_position_y: parseInt(val) })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const modalEl = document.getElementById('editCoverModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+                alert(data.message || 'Posição da capa salva com sucesso!');
+            } else {
+                alert(data.message || 'Ocorreu um erro ao salvar a posição.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Não foi possível salvar a posição da capa.');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const box = document.querySelector('.cover-reposition-box');
+        const range = document.getElementById('coverRangeY');
+        if (!box || !range) return;
+
+        let isDragging = false;
+        let startY = 0;
+        let startVal = 50;
+
+        box.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startY = e.clientY;
+            startVal = parseInt(range.value, 10);
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaY = e.clientY - startY;
+            let newVal = startVal + Math.round((deltaY / box.clientHeight) * 100);
+            newVal = Math.max(0, Math.min(100, newVal));
+            range.value = newVal;
+            updateCoverPositionY(newVal);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        box.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                startVal = parseInt(range.value, 10);
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            const deltaY = e.touches[0].clientY - startY;
+            let newVal = startVal + Math.round((deltaY / box.clientHeight) * 100);
+            newVal = Math.max(0, Math.min(100, newVal));
+            range.value = newVal;
+            updateCoverPositionY(newVal);
+        });
+
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    });
+</script>
 @endpush
 @endsection

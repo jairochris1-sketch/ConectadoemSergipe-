@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminCommunityHelpController;
+use App\Http\Controllers\AdminCultureController;
+use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminPlanController;
 use App\Http\Controllers\AdminProviderClaimController;
 use App\Http\Controllers\AdminReportController;
@@ -13,12 +16,17 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationPreferenceController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductFavoriteController;
 use App\Http\Controllers\ProductQuestionController;
 use App\Http\Controllers\ProviderClaimController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ServiceBookingController;
+use App\Http\Controllers\ServicePaymentSettingsController;
+use App\Http\Controllers\ServiceSubscriptionController;
+use App\Http\Controllers\AsaasWebhookController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StoreBusinessHoursController;
@@ -27,11 +35,47 @@ use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\StorePromotionController;
 use App\Http\Controllers\CultureWorkController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\CommunityHelpRequestController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', LandingPageController::class)->name('landing');
+Route::get('/plataforma', [HomeController::class, 'index'])->name('home');
 Route::get('/comunidade', [FeedController::class, 'index'])->name('feed.index');
+Route::get('/comunidade/pedidos', [CommunityHelpRequestController::class, 'index'])
+    ->name('community-help.index');
+Route::get('/comunidade/pedidos/novo', [CommunityHelpRequestController::class, 'create'])
+    ->middleware(['auth', 'not_suspended'])
+    ->name('community-help.create');
+Route::get('/comunidade/pedidos/{helpRequest}/editar', [CommunityHelpRequestController::class, 'edit'])
+    ->middleware(['auth', 'not_suspended'])
+    ->name('community-help.edit');
+Route::post('/comunidade/pedidos', [CommunityHelpRequestController::class, 'store'])
+    ->middleware(['auth', 'not_suspended', 'throttle:5,60'])
+    ->name('community-help.store');
+Route::put('/comunidade/pedidos/{helpRequest}', [CommunityHelpRequestController::class, 'update'])
+    ->middleware(['auth', 'not_suspended', 'throttle:10,60'])
+    ->name('community-help.update');
+Route::post('/comunidade/pedidos/{helpRequest}/responder', [CommunityHelpRequestController::class, 'respond'])
+    ->middleware(['auth', 'not_suspended', 'throttle:10,1'])
+    ->name('community-help.respond');
+Route::post('/comunidade/pedidos/{helpRequest}/respostas/{response}/denunciar', [CommunityHelpRequestController::class, 'reportResponse'])
+    ->middleware(['auth', 'not_suspended', 'throttle:5,1'])
+    ->name('community-help.responses.report');
+Route::patch('/comunidade/pedidos/{helpRequest}/status', [CommunityHelpRequestController::class, 'updateStatus'])
+    ->middleware(['auth', 'not_suspended', 'throttle:20,1'])
+    ->name('community-help.status');
+Route::patch('/comunidade/pedidos/{helpRequest}/respostas/{response}/confirmar', [CommunityHelpRequestController::class, 'selectResponse'])
+    ->middleware(['auth', 'not_suspended', 'throttle:20,1'])
+    ->name('community-help.responses.select');
+Route::patch('/comunidade/pedidos/{helpRequest}/respostas/{response}/moderacao', [CommunityHelpRequestController::class, 'moderateResponse'])
+    ->middleware(['auth', 'not_suspended', 'throttle:20,1'])
+    ->name('community-help.responses.moderate');
+Route::patch('/comunidade/pedidos/{helpRequest}/moderacao', [CommunityHelpRequestController::class, 'moderate'])
+    ->middleware(['auth', 'not_suspended', 'throttle:20,1'])
+    ->name('community-help.moderate');
+Route::get('/comunidade/pedidos/{helpRequest}', [CommunityHelpRequestController::class, 'show'])
+    ->name('community-help.show');
 Route::post('/comunidade/anuncios/{ad}/evento', [FeedController::class, 'trackAdEvent'])
     ->middleware('throttle:120,1')
     ->name('feed.ads.event');
@@ -48,12 +92,33 @@ Route::get('/home/sugestoes', [HomeController::class, 'suggestions'])
 Route::get('/anuncio/{slug}', [AdController::class, 'show'])->name('ad.show');
 Route::get('/anuncio/{slug}/publicado', [AdController::class, 'published'])->name('ad.published');
 Route::get('/prestador/{slug}', [AdController::class, 'provider'])->name('provider.show');
+Route::get('/prestador/{ad}/agendar', [ServiceBookingController::class, 'booking'])->name('service-booking.book');
+Route::post('/webhooks/asaas/{paymentSetting}', AsaasWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('service-payments.asaas-webhook');
 Route::post('/anuncio/{ad}/denunciar', [ReportController::class, 'store'])->middleware('throttle:5,1')->name('reports.store');
 Route::post('/loja/{store}/denunciar', [ReportController::class, 'storeReport'])->middleware('throttle:5,1')->name('store.reports.store');
 Route::get('/denuncia/{publicId}/obrigado', [ReportController::class, 'thankYou'])->name('reports.thank_you');
 
 // Gerenciamento de Anúncios CRUD
 Route::middleware(['auth', 'not_suspended'])->group(function () {
+    Route::post('/prestador/{ad}/agendar', [ServiceBookingController::class, 'storeAppointment'])->name('service-booking.store');
+    Route::get('/meus-servicos/{ad}/agenda', [ServiceBookingController::class, 'manage'])->name('service-booking.manage');
+    Route::patch('/meus-servicos/{ad}/agenda/status', [ServiceBookingController::class, 'toggle'])->name('service-booking.toggle');
+    Route::patch('/meus-servicos/{ad}/vitrine', [ServiceBookingController::class, 'linkStore'])->name('service-booking.store-link');
+    Route::post('/meus-servicos/{ad}/procedimentos', [ServiceBookingController::class, 'storeProcedure'])->name('service-booking.procedures.store');
+    Route::delete('/meus-servicos/{ad}/procedimentos/{procedure}', [ServiceBookingController::class, 'destroyProcedure'])->name('service-booking.procedures.destroy');
+    Route::post('/meus-servicos/{ad}/profissionais', [ServiceBookingController::class, 'storeStaff'])->name('service-booking.staff.store');
+    Route::put('/meus-servicos/{ad}/profissionais/{staff}', [ServiceBookingController::class, 'updateStaff'])->name('service-booking.staff.update');
+    Route::patch('/meus-servicos/{ad}/agendamentos/{appointment}', [ServiceBookingController::class, 'updateAppointment'])->name('service-booking.appointments.update');
+    Route::post('/meus-servicos/{ad}/financeiro', [ServiceBookingController::class, 'storeFinancialEntry'])->name('service-booking.financial.store');
+    Route::put('/meus-servicos/{ad}/pagamentos', [ServicePaymentSettingsController::class, 'update'])->name('service-payments.settings.update');
+    Route::post('/meus-servicos/{ad}/pagamentos/verificar', [ServicePaymentSettingsController::class, 'verify'])->name('service-payments.settings.verify');
+    Route::post('/meus-servicos/{ad}/pagamentos/webhook', [ServicePaymentSettingsController::class, 'registerWebhook'])->name('service-payments.settings.webhook');
+    Route::post('/meus-servicos/{ad}/planos-clientes', [ServicePaymentSettingsController::class, 'storePlan'])->name('service-subscription-plans.store');
+    Route::put('/meus-servicos/{ad}/planos-clientes/{plan}', [ServicePaymentSettingsController::class, 'updatePlan'])->name('service-subscription-plans.update');
+    Route::post('/prestador/{ad}/planos/{plan}/assinar', [ServiceSubscriptionController::class, 'store'])->name('service-subscriptions.store');
+    Route::delete('/minhas-assinaturas/{subscription}', [ServiceSubscriptionController::class, 'cancel'])->name('service-subscriptions.cancel');
     Route::post('/comunidade/publicar', [FeedController::class, 'store'])->middleware('throttle:10,60')->name('feed.store');
     Route::post('/comunidade/{post}/curtir', [FeedController::class, 'toggleLike'])->middleware('throttle:60,1')->name('feed.like');
     Route::post('/comunidade/{post}/comentar', [FeedController::class, 'comment'])->middleware('throttle:20,1')->name('feed.comment');
@@ -70,6 +135,7 @@ Route::middleware(['auth', 'not_suspended'])->group(function () {
     Route::get('/anunciar', [AdController::class, 'create'])->name('ad.create');
     Route::post('/anunciar', [AdController::class, 'store'])->name('ad.store');
     Route::get('/anuncio/{id}/editar', [AdController::class, 'edit'])->name('ad.edit');
+    Route::post('/anuncio/{ad}/posicao-capa', [AdController::class, 'updateCoverPosition'])->name('ad.cover_position');
     Route::put('/anuncio/{id}/atualizar', [AdController::class, 'update'])->name('ad.update');
     Route::delete('/anuncio/{id}/excluir', [AdController::class, 'destroy'])->name('ad.destroy');
     Route::post('/produtos/{product}/favorito', [ProductFavoriteController::class, 'toggle'])->middleware('throttle:20,1')->name('products.favorite.toggle');
@@ -158,11 +224,16 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 
     Route::get('/usuarios', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/usuarios/novo', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::post('/usuarios/{id}/editar', [AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::post('/usuarios/{id}/role', [AdminController::class, 'toggleUserRole'])->name('admin.users.toggle_role');
+    Route::post('/usuarios/{user}/status', [AdminController::class, 'updateUserStatus'])->name('admin.users.status');
+    Route::delete('/usuarios/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
 
     Route::get('/anuncios', [AdminController::class, 'ads'])->name('admin.ads');
     Route::post('/anuncios/novo', [AdminController::class, 'storeAd'])->name('admin.ads.store');
+    Route::post('/anuncios/{id}/editar', [AdminController::class, 'updateAd'])->name('admin.ads.update');
     Route::post('/anuncios/{id}/status', [AdminController::class, 'toggleAdStatus'])->name('admin.ads.toggle_status');
+    Route::delete('/anuncios/{id}', [AdminController::class, 'destroyAd'])->name('admin.ads.destroy');
     Route::post('/anuncios/{ad}/reivindicacao', [AdminController::class, 'toggleProviderClaiming'])->name('admin.ads.toggle_claiming');
     Route::get('/reivindicacoes', [AdminProviderClaimController::class, 'index'])->name('admin.provider_claims.index');
     Route::post('/reivindicacoes/{claim}/analisar', [AdminProviderClaimController::class, 'review'])->name('admin.provider_claims.review');
@@ -174,13 +245,23 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('/avaliacoes/{review}/acao', [AdminReviewController::class, 'action'])->name('admin.reviews.action');
     Route::get('/comunidade', [AdminFeedController::class, 'index'])->name('admin.feed.index');
     Route::post('/comunidade/{post}/acao', [AdminFeedController::class, 'action'])->name('admin.feed.action');
+    Route::get('/cultura', [AdminCultureController::class, 'index'])->name('admin.culture.index');
+    Route::post('/cultura/{work}/acao', [AdminCultureController::class, 'action'])->name('admin.culture.action');
+    Route::get('/ajuda-comunitaria', [AdminCommunityHelpController::class, 'index'])->name('admin.community-help.index');
+    Route::get('/ajuda-comunitaria/{helpRequest}', [AdminCommunityHelpController::class, 'show'])->name('admin.community-help.show');
 
     Route::get('/categorias', [AdminController::class, 'categories'])->name('admin.categories');
     Route::post('/categorias/nova', [AdminController::class, 'storeCategory'])->name('admin.categories.store');
+    Route::put('/categorias/{category}', [AdminController::class, 'updateCategory'])->name('admin.categories.update');
+    Route::post('/categorias/{category}/status', [AdminController::class, 'toggleCategoryStatus'])->name('admin.categories.toggle');
+    Route::delete('/categorias/{category}', [AdminController::class, 'deleteCategory'])->name('admin.categories.destroy');
 
     Route::get('/lojas', [AdminController::class, 'stores'])->name('admin.stores');
     Route::get('/lojas/{store}', [AdminController::class, 'showStore'])->name('admin.stores.show');
     Route::post('/lojas/{store}/acao', [AdminController::class, 'storeAction'])->name('admin.stores.action');
+    Route::get('/pedidos', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('/pedidos/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+    Route::patch('/pedidos/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
     Route::get('/configuracoes', [AdminController::class, 'settings'])->name('admin.settings');
     Route::post('/configuracoes', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
     Route::post('/configuracoes/modelo-anunciar', [AdminController::class, 'updatePublishPageDesign'])->name('admin.settings.publish_design');

@@ -11,14 +11,15 @@
             <div class="w-100 mx-auto" style="max-width: 400px;">
                 
                 <!-- Logo -->
-                <div class="mb-3 text-start">
-                    <a href="{{ route('home') }}">
-                        <img src="{{ asset('images/logo.png') }}" height="40" alt="Conectado em Sergipe">
+                <div class="mb-4 text-center">
+                    <a href="{{ route('home') }}" class="d-inline-block" aria-label="Ir para a página inicial">
+                        <img src="{{ asset('images/2mapa-sergipe-conectado-azul.png') }}" class="auth-login-brand-logo auth-login-brand-logo-light" alt="Conectado em Sergipe">
+                        <img src="{{ asset('images/1mapa-sergipe-conectado.png') }}" class="auth-login-brand-logo auth-login-brand-logo-dark" alt="Conectado em Sergipe">
                     </a>
                 </div>
 
                 <!-- Título e Subtítulo -->
-                <div class="mb-3">
+                <div class="mb-3 text-center">
                     <h3 class="fw-bold text-dark mb-1">Acesse <span class="text-primary">sua conta</span></h3>
                     <p class="text-muted small mb-0">Use seu celular, e-mail ou @usuário para entrar.</p>
                 </div>
@@ -50,55 +51,69 @@
                 <form action="{{ route('login') }}" method="POST">
                     @csrf
                     
-                    <div class="mb-2.5">
-                        <label for="login" class="form-label fw-semibold text-dark small mb-1">Celular, e-mail ou @usuário</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-regular fa-user"></i></span>
-                            <input type="text" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.9rem;" id="login" name="login" value="{{ old('login') }}" required autocomplete="username" placeholder="(79) 99999-9999, email@exemplo.com ou @usuario">
+                    <div class="mb-3">
+                        <label for="login" class="visually-hidden">Número de celular, nome de usuário ou email</label>
+                        <div class="auth-access-control" data-access-copy-control>
+                            <input type="text" class="form-control auth-login-field" id="login" name="login" value="{{ old('login') }}" required autocomplete="username" placeholder="Número de celular, nome de usuário ou email" data-access-copy-field>
+                            <div class="auth-password-actions">
+                                <button type="button" class="auth-password-action" data-access-copy aria-label="Copiar acesso" title="Copiar acesso">
+                                    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-2">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-solid fa-lock"></i></span>
-                            <input type="password" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.9rem;" id="password" name="password" required autocomplete="current-password" placeholder="••••••••••••">
+                    <div class="mb-4">
+                        <label for="password" class="visually-hidden">Senha</label>
+                        <div class="auth-password-control" data-password-control>
+                            <input type="password" class="form-control auth-login-field" id="password" name="password" required autocomplete="current-password" placeholder="Senha" data-password-field>
+                            <div class="auth-password-actions">
+                                <button type="button" class="auth-password-action" data-password-toggle aria-label="Mostrar senha" title="Mostrar senha">
+                                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="auth-password-action" data-password-copy aria-label="Copiar senha" title="Copiar senha">
+                                    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                            <label class="form-check-label text-muted" style="font-size: 0.82rem;" for="remember">Lembrar de mim</label>
-                        </div>
-                        <a href="{{ route('password.request') }}" class="text-primary text-decoration-none fw-semibold" style="font-size: 0.82rem;">Esqueci minha senha</a>
-                    </div>
-
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2.5 fw-bold shadow-sm" style="font-size: 0.95rem;">
-                            <i class="fa-solid fa-user me-2"></i> Entrar
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-primary auth-login-submit fw-bold shadow-sm">
+                            Entrar
                         </button>
                     </div>
 
-                    <div class="text-center position-relative my-3">
-                        <hr class="text-muted opacity-25 my-0">
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted" style="font-size: 0.75rem;">ou continue com</span>
+                    <div class="text-center mb-4">
+                        <a href="{{ route('password.request') }}" class="auth-login-forgot-link text-decoration-none fw-bold">Esqueceu a senha?</a>
                     </div>
 
-                    <div class="d-grid mb-3">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill py-2 fw-semibold border text-dark" style="font-size: 0.85rem;">
-                            <i class="fa-brands fa-google text-danger me-2"></i> Continuar com Google
-                        </button>
-                    </div>
+                    @if(\App\Models\Setting::get('google_login_enabled', '1') === '1')
+                        @include('auth._google_button')
+                    @endif
                 </form>
 
                 <!-- Seção de Cadastro Próxima e Proporcionada -->
                 <div class="text-center pt-2">
                     <span class="text-muted small">Não tem uma conta? </span>
                     <a href="{{ route('register') }}" class="text-primary fw-bold text-decoration-none small">Criar conta</a>
-                    <div class="mt-2">
-                        <a href="{{ route('register') }}" class="btn btn-success btn-sm rounded-pill w-100 py-2 fw-bold shadow-sm text-white" style="font-size: 0.85rem;">
-                            <i class="fa-solid fa-user-plus me-1.5"></i> Criar conta gratuita agora
-                        </a>
+                </div>
+
+                <div class="auth-login-benefits" aria-label="Vantagens do Conectado em Sergipe">
+                    <div class="auth-login-benefit">
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                        <strong>Seguro</strong>
+                        <small>Seus dados<br>protegidos</small>
+                    </div>
+                    <div class="auth-login-benefit">
+                        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+                        <strong>Prático</strong>
+                        <small>Tudo que você<br>precisa em um só lugar</small>
+                    </div>
+                    <div class="auth-login-benefit">
+                        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                        <strong>Rápido</strong>
+                        <small>Acesso fácil e<br>experiência leve</small>
                     </div>
                 </div>
 
@@ -176,21 +191,135 @@
                 </div>
             </div>
 
-            <!-- Banner Flutuante Central de Vidro (Glassmorphism) -->
-            <div class="position-absolute top-50 start-50 translate-middle p-4 p-xl-5 text-white rounded-4 border border-white border-opacity-20 shadow-2xl" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); width: 80%; max-width: 520px; z-index: 10;">
-                <h3 class="fw-bold lh-base text-white mb-0 fs-3">
-                    Conecte-se a <span class="text-info fw-bold">serviços</span>, <span class="text-info fw-bold">produtos</span>, <span class="text-info fw-bold">imóveis</span>, <span class="text-info fw-bold">veículos</span> e <span class="text-info fw-bold">oportunidades</span> em um único lugar.
-                </h3>
-            </div>
+            @include('auth._message_balloon')
 
         </div>
     </div>
 </div>
 
 <style>
+.auth-login-brand-logo {
+    display: block;
+    width: 156px;
+    height: auto;
+}
+
+.auth-login-brand-logo-dark {
+    display: none;
+}
+
+.auth-login-field {
+    min-height: 66px;
+    padding: 0 18px;
+    color: var(--foreground);
+    background: transparent;
+    border: 1px solid #8a94a3;
+    border-radius: 18px !important;
+    box-shadow: none;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.auth-login-field::placeholder {
+    color: #667085;
+    opacity: 1;
+}
+
+.auth-login-field:focus {
+    color: var(--foreground);
+    background: transparent;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, .16);
+}
+
+.auth-login-submit {
+    min-height: 50px;
+    border: 0;
+    border-radius: 999px;
+    font-size: 1rem;
+}
+
+.auth-login-forgot-link {
+    color: var(--foreground);
+    font-size: .95rem;
+}
+
+.auth-login-forgot-link:hover,
+.auth-login-forgot-link:focus-visible {
+    color: #0d6efd;
+}
+
+.auth-login-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.auth-login-benefit {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-direction: column;
+}
+
+.auth-login-benefit > i {
+    margin-bottom: 8px;
+    color: #0d6efd;
+    font-size: 1.45rem;
+}
+
+.auth-login-benefit > strong {
+    color: var(--foreground);
+    font-size: .78rem;
+}
+
+.auth-login-benefit > small {
+    margin-top: 3px;
+    color: #667085;
+    font-size: .61rem;
+    line-height: 1.35;
+}
+
+html[data-theme="dark"] .auth-login-field {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, .015);
+    border-color: #565b65;
+}
+
+html[data-theme="dark"] .auth-login-field::placeholder {
+    color: #aeb8c8;
+}
+
+html[data-theme="dark"] .auth-login-benefit > small {
+    color: #aeb8c8;
+}
+
+html[data-theme="dark"] .auth-login-brand-logo-light {
+    display: none;
+}
+
+html[data-theme="dark"] .auth-login-brand-logo-dark {
+    display: block;
+}
+
+@media (max-width: 380px) {
+    .auth-login-benefits {
+        gap: 6px;
+    }
+
+    .auth-login-benefit > small {
+        font-size: .56rem;
+    }
+}
+
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
 }
 </style>
+@include('auth._password_controls')
 @endsection

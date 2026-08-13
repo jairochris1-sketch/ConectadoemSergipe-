@@ -164,7 +164,7 @@
             padding-bottom: 100px;
         }
         .hero-search-card-container {
-            margin-top: -155px;
+            margin-top: -145px;
             margin-bottom: 24px;
         }
     }
@@ -192,12 +192,31 @@
     }
     @media (min-width: 992px) {
         body.home-guest .hero-search-card-container {
-            margin-top: -165px;
+            margin-top: -145px;
         }
     }
     @media (min-width: 992px) and (max-height: 800px) {
         body.home-guest .hero-search-card-container {
-            margin-top: -155px !important;
+            margin-top: -135px !important;
+        }
+    }
+    @media (min-width: 1400px) {
+        .home-provider-heading-row {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: start !important;
+            column-gap: 12px;
+        }
+        .home-provider-heading-row h4 {
+            min-width: 0;
+            line-height: 1.25;
+            white-space: normal;
+            font-size: 1rem !important;
+        }
+        .home-provider-heading-row > a {
+            grid-column: 2;
+            margin-top: 2px;
+            white-space: nowrap;
         }
     }
     .hero-search-input-box {
@@ -1261,7 +1280,7 @@
 
         <!-- Coluna Direita: Profissionais em destaque -->
         <div class="col-12 col-lg-4 home-provider-desktop-column">
-            <div class="d-flex justify-content-between align-items-center mb-2.5">
+            <div class="d-flex justify-content-between align-items-center mb-2.5 home-provider-heading-row">
                 <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1.2rem;">
                     <i class="fa-solid fa-briefcase text-primary"></i> Prestadores de Serviços — Em destaque
                 </h4>

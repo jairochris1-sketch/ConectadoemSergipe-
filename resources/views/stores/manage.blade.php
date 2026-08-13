@@ -313,7 +313,7 @@
                         </div>
                         <label for="store-banner-input" class="store-media-label">
                             <strong>Banner da loja</strong>
-                            <span>Imagem horizontal, JPG, PNG ou WEBP. Até 8 MB.</span>
+                            <span>Recomendado: 1200 × 400 px (Proporção 3:1), JPG, PNG ou WEBP. Até 5 MB.</span>
                         </label>
                         <input id="store-banner-input" type="file" name="banner" accept=".jpg,.jpeg,.png,.webp">
                         @if($store?->banner)

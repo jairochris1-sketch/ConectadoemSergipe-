@@ -33,12 +33,88 @@
 </div>
 @endif
 
+@push('styles')
+<style>
+    /* Breadcrumb Hierárquico de Categorias — Estilo Conectado em Sergipe */
+    .cs-breadcrumb-wrapper .breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 2px 4px;
+        padding: 10px 16px;
+        background: var(--card, #ffffff);
+        border: 1px solid var(--border, rgba(226, 232, 240, 0.8));
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        font-size: 0.82rem;
+    }
+    .cs-breadcrumb-wrapper .breadcrumb-item + .breadcrumb-item::before {
+        content: "\f054";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        font-size: 0.6rem;
+        color: #94a3b8;
+        padding-right: 6px;
+        padding-left: 2px;
+    }
+    .cs-breadcrumb-wrapper .breadcrumb-item a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+    .cs-breadcrumb-wrapper .breadcrumb-item a:hover {
+        color: #0b5ed7;
+        text-decoration: underline;
+    }
+    .cs-breadcrumb-wrapper .breadcrumb-item.active {
+        color: var(--foreground, #334155);
+        font-weight: 500;
+    }
+    html[data-theme="dark"] .cs-breadcrumb-wrapper .breadcrumb {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    html[data-theme="dark"] .cs-breadcrumb-wrapper .breadcrumb-item a {
+        color: #60a5fa;
+    }
+    html[data-theme="dark"] .cs-breadcrumb-wrapper .breadcrumb-item.active {
+        color: #94a3b8;
+    }
+</style>
+@endpush
+
 <div class="container py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Início</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $ad->title }}</li>
+    <!-- Breadcrumb Hierárquico de Categorias -->
+    <nav aria-label="breadcrumb" class="mb-4 cs-breadcrumb-wrapper">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('home') }}"><i class="fa-solid fa-house me-1"></i>Início</a></li>
+
+            @if($ad->module)
+                @php
+                    $moduleLabels = [
+                        'products' => 'Produtos',
+                        'services' => 'Serviços',
+                        'real_estate' => 'Imóveis',
+                        'vehicles' => 'Veículos',
+                        'jobs' => 'Empregos',
+                        'agro' => 'Agro',
+                        'culture' => 'Arte & Cultura',
+                    ];
+                    $moduleRoute = route('home', ['module' => $ad->module]);
+                @endphp
+                <li class="breadcrumb-item"><a href="{{ $moduleRoute }}">{{ $moduleLabels[$ad->module] ?? ucfirst($ad->module) }}</a></li>
+            @endif
+
+            @if($ad->category)
+                @foreach($ad->category->category_trail as $catBranch)
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('home', ['module' => $ad->module, 'type' => $catBranch->name]) }}">{{ $catBranch->name }}</a>
+                    </li>
+                @endforeach
+            @endif
+
+            <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 320px;">{{ $ad->title }}</li>
         </ol>
     </nav>
 
@@ -74,7 +150,7 @@
 
                 <div class="d-flex align-items-center gap-3 mb-4">
                     @if($ad->price > 0)
-                        <span class="fs-2 fw-bold text-primary">R$ {{ number_format($ad->price, 2, ',', '.') }}</span>
+                        <span class="fs-2 fw-bold text-primary">{{ $ad->formatted_price }}</span>
                     @else
                         <span class="fs-4 fw-bold text-success">A Combinar</span>
                     @endif

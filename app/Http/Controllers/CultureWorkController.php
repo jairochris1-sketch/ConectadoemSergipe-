@@ -58,7 +58,13 @@ class CultureWorkController extends Controller
 
         $themes = CultureWork::published()->whereNotNull('theme')->pluck('theme')->unique()->filter();
 
-        return view('culture.index', compact('works', 'themes'));
+        $cultureBanners = collect(range(1, 4))
+            ->map(fn (int $slot) => \App\Models\Setting::get("culture_banner_{$slot}"))
+            ->filter()
+            ->values()
+            ->all();
+
+        return view('culture.index', compact('works', 'themes', 'cultureBanners'));
     }
 
     /**
@@ -68,8 +74,10 @@ class CultureWorkController extends Controller
     {
         $work = CultureWork::with('user', 'ad')->where('slug', $slug)->firstOrFail();
         
-        // Se a obra for rascunho, apenas o autor pode ver
-        if ($work->status === 'draft' && auth()->id() !== $work->user_id) {
+        // Obras fora da estante pública ficam visíveis apenas ao autor e à administração.
+        if ($work->status !== 'published'
+            && auth()->id() !== $work->user_id
+            && auth()->user()?->role !== 'admin') {
             abort(404);
         }
 
@@ -107,6 +115,7 @@ class CultureWorkController extends Controller
     public function toggleLike(Request $request, $id)
     {
         $work = CultureWork::findOrFail($id);
+        abort_unless($work->status === 'published', 404);
         $user = auth()->user();
 
         if ($work->likes()->where('user_id', $user->id)->exists()) {
@@ -241,7 +250,8 @@ class CultureWorkController extends Controller
         $work->theme = $request->theme;
         $work->external_url = $request->external_url;
         $work->embed_media_url = $request->embed_media_url;
-        $work->status = $request->status;
+        // O autor pode editar uma obra ocultada, mas somente a administração pode republicá-la.
+        $work->status = $work->status === 'hidden' ? 'hidden' : $request->status;
         $work->ad_id = $request->ad_id;
 
         if ($request->boolean('bump_version')) {

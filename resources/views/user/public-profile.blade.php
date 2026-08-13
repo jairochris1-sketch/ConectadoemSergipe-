@@ -4,7 +4,7 @@
 
 @push('styles')
 <style>
-.public-profile-page{background:#f4f6f8;min-height:80vh}.public-profile-hero{background:linear-gradient(135deg,#174f91,#0c376c);color:#fff;border-radius:22px}.public-profile-avatar{width:112px;height:112px;object-fit:cover;border:4px solid rgba(255,255,255,.9)}.public-profile-card{border:0;border-radius:18px}.public-profile-official{color:#bfe0ff}.public-profile-link,.public-profile-link:visited{color:#174f91;font-weight:700;text-decoration:none}.public-profile-link:hover,.public-profile-link:focus{color:#0c376c;text-decoration:underline}
+.public-profile-page{background:#f4f6f8;min-height:80vh}.public-profile-hero{background:linear-gradient(135deg,#174f91,#0c376c);color:#fff;border-radius:22px}.public-profile-avatar{width:112px;height:112px;object-fit:cover;border:1px solid rgba(255,255,255,.9);border-radius:18px}.public-profile-card{border:0;border-radius:18px}.public-profile-official{color:#bfe0ff}.public-profile-link,.public-profile-link:visited{color:#174f91;font-weight:700;text-decoration:none}.public-profile-link:hover,.public-profile-link:focus{color:#0c376c;text-decoration:underline}
 </style>
 @endpush
 
@@ -14,13 +14,13 @@
         <section class="public-profile-hero shadow-sm p-4 p-lg-5 mb-4">
             <div class="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
                 @if($user->avatar)
-                    <img src="{{ asset($user->avatar) }}" class="public-profile-avatar rounded-circle" alt="Foto de {{ $user->name }}">
+                    <img src="{{ asset($user->avatar) }}" class="public-profile-avatar" alt="Foto de {{ $user->name }}">
                 @else
-                    <div class="public-profile-avatar rounded-circle bg-white text-primary d-flex align-items-center justify-content-center display-5 fw-bold">{{ mb_strtoupper(mb_substr($user->name,0,1)) }}</div>
+                    <div class="public-profile-avatar bg-white text-primary d-flex align-items-center justify-content-center display-5 fw-bold">{{ mb_strtoupper(mb_substr($user->name,0,1)) }}</div>
                 @endif
                 <div>
                     <h1 class="h2 fw-bold mb-1">{{ $user->name }} @if($user->role==='admin')<span class="public-profile-official" title="Conta oficial" aria-label="Conta oficial"><i class="fa-solid fa-circle-check"></i></span>@endif</h1>
-                    <div class="mb-2">{{ '@'.$user->username }}</div>
+                    <div class="mb-2">{{ $user->role === 'admin' ? 'conectadoemsergipe.com' : '@'.$user->username }}</div>
                     <p class="mb-0 opacity-75">
                         @if($user->role === 'admin')
                             Equipe oficial do Conectado em Sergipe
@@ -36,7 +36,7 @@
         </section>
 
         @if($posts->isNotEmpty())
-            <section class="card public-profile-card shadow-sm mb-4"><div class="card-body p-4"><h2 class="h5 fw-bold mb-3">Publicações na comunidade</h2>@foreach($posts as $post)<article class="border-bottom py-3"><a href="{{ route('feed.index').'#publicacao-'.$post->id }}" class="public-profile-link">{{ $post->title ?: \Illuminate\Support\Str::limit($post->body, 90) }}</a><div class="small text-muted mt-1">{{ $post->published_at?->diffForHumans() }}</div></article>@endforeach</div></section>
+            <section class="card public-profile-card shadow-sm mb-4"><div class="card-body p-4"><h2 class="h5 fw-bold mb-3">Publicações na comunidade</h2>@foreach($posts as $post)<article class="border-bottom py-3"><a href="{{ route('feed.index').'#publicacao-'.$post->id }}" class="public-profile-link">{{ $post->title ?: \Illuminate\Support\Str::limit($post->body, 90) }}</a><div class="small text-muted mt-1">{{ $post->published_at?->locale('pt_BR')->diffForHumans() }}</div></article>@endforeach</div></section>
         @endif
 
         @if($ads->isNotEmpty() || $stores->isNotEmpty() || $works->isNotEmpty())

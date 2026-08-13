@@ -73,24 +73,25 @@ class StorePlanLimitsTest extends TestCase
         $this->assertSame(3, $user->stores()->count());
     }
 
-    public function test_free_store_blocks_the_fourth_product_but_allows_it_outside_the_store(): void
+    public function test_free_store_blocks_the_sixth_product_but_allows_it_outside_the_store(): void
     {
         $user = User::factory()->create(['subscription_plan' => 'free']);
         $store = $this->createStore($user, 1);
 
-        foreach (range(1, 3) as $number) {
+        // Plano free: product_limit = 5 (seeder linha 112)
+        foreach (range(1, 5) as $number) {
             $this->createProduct($user, $store, $number);
         }
 
         $this->actingAs($user)
             ->post(route('ad.store'), $this->validProductData([
-                'title' => 'Quarto produto bloqueado',
+                'title' => 'Sexto produto bloqueado',
                 'include_in_store' => '1',
                 'store_id' => $store->id,
             ]))
             ->assertSessionHasErrors('store_id');
 
-        $this->assertDatabaseMissing('ads', ['title' => 'Quarto produto bloqueado']);
+        $this->assertDatabaseMissing('ads', ['title' => 'Sexto produto bloqueado']);
 
         $this->actingAs($user)
             ->post(route('ad.store'), $this->validProductData([

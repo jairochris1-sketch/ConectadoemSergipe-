@@ -65,6 +65,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:6|confirmed',
                 'phone' => 'required|digits_between:10,11|unique:users,phone',
                 'city' => 'nullable|string|max:100',
+                'terms_accepted' => 'accepted',
             ],
             [
                 'username.required' => 'Escolha um @usuário para sua conta.',
@@ -72,6 +73,7 @@ class AuthController extends Controller
                 'username.max' => 'O @usuário pode ter no máximo 30 caracteres.',
                 'username.regex' => 'O @usuário pode conter apenas letras, números, ponto ou sublinhado.',
                 'username.unique' => 'O @usuário informado já está em uso. Escolha outro nome de usuário.',
+                'terms_accepted.accepted' => 'Você precisa aceitar os Termos de Uso para criar sua conta.',
             ]
         );
 
@@ -85,6 +87,24 @@ class AuthController extends Controller
             'city' => $request->city ?? 'Aracaju',
             'role' => 'user',
         ]);
+
+        // Cruzamento automático de dados: Associa anúncios/prestadores previamente cadastrados pelo admin com o mesmo e-mail, telefone ou WhatsApp
+        $cleanPhone = preg_replace('/[^\d]/', '', (string) $request->phone);
+        if ($cleanPhone && strlen($cleanPhone) >= 8) {
+            \App\Models\Ad::where(function ($query) use ($request, $cleanPhone) {
+                $query->where('contact_phone', 'like', "%{$cleanPhone}%")
+                      ->orWhere('contact_whatsapp', 'like', "%{$cleanPhone}%");
+                if ($request->email) {
+                    $query->orWhereHas('user', function ($q) use ($request) {
+                        $q->where('email', $request->email);
+                    });
+                }
+            })->update([
+                'user_id' => $user->id,
+                'is_claimed' => true,
+                'claimed_at' => now(),
+            ]);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

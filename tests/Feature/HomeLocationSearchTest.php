@@ -61,6 +61,28 @@ class HomeLocationSearchTest extends TestCase
             ->assertSee('placeholder="O que você procura em Nossa Senhora da Glória?"', false);
     }
 
+    public function test_desktop_hero_spacing_and_provider_heading_apply_to_guests_and_users(): void
+    {
+        $layoutAssertions = static function ($response): void {
+            $response
+                ->assertOk()
+                ->assertSee('.hero-search-card-container {', false)
+                ->assertSee('margin-top: -145px;', false)
+                ->assertSee('.home-provider-heading-row {', false)
+                ->assertSee('grid-template-columns: minmax(0, 1fr) auto;', false)
+                ->assertSee('white-space: normal;', false)
+                ->assertSee('home-provider-heading-row', false);
+        };
+
+        $guestResponse = $this->get(route('home'));
+        $layoutAssertions($guestResponse);
+        $guestResponse->assertSee('home-guest', false);
+
+        $userResponse = $this->actingAs(User::factory()->create())->get(route('home'));
+        $layoutAssertions($userResponse);
+        $userResponse->assertSee('home-authenticated', false);
+    }
+
     public function test_text_search_also_matches_professional_type(): void
     {
         $owner = User::factory()->create();

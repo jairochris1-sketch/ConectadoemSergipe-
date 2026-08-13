@@ -36,6 +36,7 @@ class StoreMediaLimitsTest extends TestCase
 
     public function test_free_plan_blocks_store_creation(): void
     {
+        // Plano free: sem direito a lojas (store_limit = 0)
         $user = User::factory()->create(['subscription_plan' => 'free']);
 
         $this->actingAs($user)
@@ -47,6 +48,21 @@ class StoreMediaLimitsTest extends TestCase
 
         $this->assertDatabaseCount('stores', 0);
         $this->assertDatabaseCount('store_media', 0);
+    }
+
+    public function test_start_plan_blocks_second_store_creation(): void
+    {
+        // Plano start: permite 1 loja — a segunda deve ser bloqueada com erro 'store'
+        $user = User::factory()->create(['subscription_plan' => 'start']);
+
+        // Cria a primeira loja diretamente no banco
+        $this->createStore($user);
+
+        $this->actingAs($user)
+            ->post(route('store.store'), $this->validStoreData())
+            ->assertSessionHasErrors('store');
+
+        $this->assertDatabaseCount('stores', 1);
     }
 
     public function test_pro_plan_can_save_three_banners_and_gallery_images(): void

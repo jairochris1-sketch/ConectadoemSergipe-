@@ -26,19 +26,37 @@
     <!-- Bootstrap 5 CSS & Swiper -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     
+
     @include('components.theme-head')
 
     <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=7.7">
-    <link rel="stylesheet" href="{{ asset('css/site-header.css') }}?v=2.3">
-    <link rel="stylesheet" href="{{ asset('css/theme-toggle.css') }}?v=2.3">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=9.1">
+    <link rel="stylesheet" href="{{ asset('css/site-header.css') }}?v=3.6">
+    <link rel="stylesheet" href="{{ asset('css/theme-toggle.css') }}?v=3.6">
+    <link rel="stylesheet" href="{{ asset('css/cookie-consent.css') }}?v=1.0">
+
+    <!-- Proteção contra FOUC e inicialização lenta do Swiper -->
+    <style>
+        .swiper:not(.swiper-initialized) {
+            overflow: hidden !important;
+        }
+        .swiper:not(.swiper-initialized) > .swiper-wrapper {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow: hidden !important;
+        }
+        .swiper:not(.swiper-initialized) > .swiper-wrapper > .swiper-slide:not(:first-child) {
+            display: none !important;
+        }
+    </style>
     @stack('styles')
 </head>
-<body class="{{ $showPublicHeader ? 'site-header-layout-'.$userHeaderLayout : '' }}">
-    <!-- Splash Screen -->
-    @include('components.splash-screen')
+<body class="{{ $showPublicHeader ? 'site-header-layout-'.$userHeaderLayout : '' }} @yield('body-class')">
+    <!-- Splash Screen (Exibida apenas na Página Inicial) -->
+    @if(request()->routeIs('home'))
+        @include('components.splash-screen')
+    @endif
 
     @if($showPublicHeader)
     <!-- Navbar Pública -->
@@ -154,16 +172,17 @@
                     <ul class="list-unstyled text-secondary small space-y-2 mb-0">
                         <li class="mb-2"><a href="{{ route('page.privacy') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Política de Privacidade</a></li>
                         <li class="mb-2"><a href="{{ route('page.terms') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Termos de Uso</a></li>
+                        <li class="mb-2"><button type="button" class="site-footer-cookie-button" data-cookie-settings><i class="fa-solid fa-cookie-bite me-1" aria-hidden="true"></i> Redefinir Cookies</button></li>
                     </ul>
                 </div>
                 <div class="col-12 col-md-3">
                     <h6 class="fw-bold mb-3">Siga-nos nas Redes</h6>
                     <p class="text-secondary small mb-3">Acompanhe novidades, ofertas e destaques das cidades de Sergipe:</p>
                     <div class="d-flex justify-content-center justify-content-md-start gap-2">
-                        <a href="{{ \App\Models\Setting::get('instagram_url', 'https://instagram.com') }}" target="_blank" rel="noopener" class="btn site-footer-social rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="https://facebook.com" target="_blank" rel="noopener" class="btn site-footer-social rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="https://wa.me/{{ preg_replace('/\D+/', '', \App\Models\Setting::get('whatsapp_number', '5579999999999')) }}" target="_blank" rel="noopener" class="btn site-footer-social rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="https://youtube.com" target="_blank" rel="noopener" class="btn site-footer-social rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="{{ \App\Models\Setting::get('instagram_url', 'https://instagram.com') }}" target="_blank" rel="noopener" class="site-footer-social d-flex align-items-center justify-content-center" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://facebook.com" target="_blank" rel="noopener" class="site-footer-social d-flex align-items-center justify-content-center" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://wa.me/{{ preg_replace('/\D+/', '', \App\Models\Setting::get('whatsapp_number', '5579999999999')) }}" target="_blank" rel="noopener" class="site-footer-social d-flex align-items-center justify-content-center" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener" class="site-footer-social d-flex align-items-center justify-content-center" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
                     </div>
                 </div>
             </div>
@@ -180,16 +199,14 @@
 
     @include('components.theme-toggle')
     @include('components.vlibras-widget')
+    @include('components.cookie-consent')
 
     <!-- Scripts JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({ disable: true });
-    </script>
     <script src="{{ asset('js/main.js') }}?v=1.4"></script>
     <script src="{{ asset('js/site-header.js') }}?v=1.3"></script>
+    <script src="{{ asset('js/cookie-consent.js') }}?v=1.0"></script>
     @stack('scripts')
 </body>
 </html>

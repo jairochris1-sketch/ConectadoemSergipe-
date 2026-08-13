@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Services\CartService;
 use App\Services\DeliveryService;
 use App\Services\OrderCommunicationService;
+use App\Services\OrderStatusService;
 use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -243,8 +244,7 @@ class OrderController extends Controller
         Request $request,
         Store $store,
         Order $order,
-        StockService $stock,
-        OrderCommunicationService $communication
+        OrderStatusService $statusService
     ) {
         $this->authorizeStoreOwner($request, $store);
         abort_unless($order->store_id === $store->id, 404);
@@ -252,28 +252,7 @@ class OrderController extends Controller
             'status' => ['required', Rule::in(array_keys(Order::STATUSES))],
         ]);
 
-        $allowed = [
-            'pending' => ['confirmed', 'cancelled'],
-            'confirmed' => ['preparing', 'cancelled'],
-            'preparing' => ['ready', 'cancelled'],
-            'ready' => ['completed'],
-            'completed' => [],
-            'cancelled' => [],
-        ];
-        if (! in_array($validated['status'], $allowed[$order->status] ?? [], true)) {
-            throw ValidationException::withMessages(['status' => 'Esta alteração de status não é permitida.']);
-        }
-
-        DB::transaction(function () use ($order, $validated, $stock) {
-            if ($validated['status'] === 'confirmed') {
-                $stock->deductForOrder($order);
-            }
-            if ($validated['status'] === 'cancelled') {
-                $stock->restoreForOrder($order);
-            }
-            $order->update(['status' => $validated['status']]);
-        });
-        $communication->statusChanged($order);
+        $statusService->transition($order, $validated['status']);
 
         return back()->with('success', 'Status do pedido atualizado.');
     }

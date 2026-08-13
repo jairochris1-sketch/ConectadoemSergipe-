@@ -45,12 +45,7 @@
 
                         <div class="mb-3">
                             <label for="title" class="form-label fw-semibold">{{ $isService ? 'Nome do perfil profissional' : 'Título do anúncio' }} *</label>
-                            <div class="input-group input-group-lg shadow-sm">
-                                <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $ad->title) }}" required style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
-                                <button class="btn btn-white border d-flex align-items-center" type="button" id="btn-search-google" title="Pesquisar dados deste produto no Google" onclick="searchOnGoogle()" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background: #fff;">
-                                    <i class="fa-brands fa-google me-2" style="color: #4285F4;"></i> <span class="d-none d-sm-inline fw-semibold text-dark" style="font-size: 0.9rem;">Buscar infos</span>
-                                </button>
-                            </div>
+                            <input type="text" class="form-control form-control-lg rounded-3 shadow-sm" id="title" name="title" value="{{ old('title', $ad->title) }}" required>
                         </div>
 
                         @if($isService)
@@ -280,16 +275,6 @@
 
 @push('scripts')
 <script>
-    function searchOnGoogle() {
-        const titleInput = document.getElementById('title');
-        const titleValue = titleInput.value.trim();
-        if (titleValue.length > 0) {
-            window.open('https://www.google.com/search?q=' + encodeURIComponent(titleValue), '_blank');
-        } else {
-            alert('Por favor, digite o nome do produto antes de buscar no Google.');
-            titleInput.focus();
-        }
-    }
     async function importImageByUrl(inputId) {
         let url = prompt("Cole o link (URL) da imagem que você copiou do Google ou de outro site:");
         if (!url || !url.trim()) return;

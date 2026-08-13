@@ -111,6 +111,16 @@ class User extends Authenticatable
         return $this->hasMany(Ad::class)->where('module', 'services');
     }
 
+    public function servicePaymentSetting()
+    {
+        return $this->hasOne(ServicePaymentSetting::class);
+    }
+
+    public function serviceClientSubscriptions()
+    {
+        return $this->hasMany(ServiceClientSubscription::class, 'customer_user_id');
+    }
+
     public function providerClaims()
     {
         return $this->hasMany(ProviderClaim::class, 'claimant_user_id');
@@ -151,6 +161,16 @@ class User extends Authenticatable
     public function feedPosts()
     {
         return $this->hasMany(FeedPost::class);
+    }
+
+    public function communityHelpRequests()
+    {
+        return $this->hasMany(CommunityHelpRequest::class);
+    }
+
+    public function communityHelpResponses()
+    {
+        return $this->hasMany(CommunityHelpResponse::class);
     }
 
     /**
@@ -236,6 +256,15 @@ class User extends Authenticatable
         $value = config($configMap[$key] . '.' . $plan);
         if ($value === null) return null; // ilimitado
         return (string) $value;
+    }
+
+    public function hasPaidPlan(): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        return $this->normalizedSubscriptionPlan() !== 'free';
     }
 
     public function normalizedSubscriptionPlan(): string

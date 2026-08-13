@@ -5,17 +5,21 @@
         : 0;
     $headerCartCount = collect(session('store_cart.items', []))
         ->sum(fn ($item) => is_array($item) ? (int) ($item['quantity'] ?? 0) : (int) $item);
-    $headerItems = [
+    $mainHeaderItems = [
         ['label' => 'Início', 'route' => 'home', 'icon' => 'fa-house', 'class' => 'home', 'active' => request()->is('/')],
         ['label' => 'Lojas', 'route' => 'stores.index', 'icon' => 'fa-store', 'class' => 'stores', 'active' => request()->is('lojas*') || request()->is('loja*')],
         ['label' => 'Imóveis', 'route' => 'module.real_estate', 'icon' => 'fa-building', 'class' => 'real-estate', 'active' => request()->is('imoveis*')],
         ['label' => 'Veículos', 'route' => 'module.vehicles', 'icon' => 'fa-car', 'class' => 'vehicles', 'active' => request()->is('veiculos*')],
         ['label' => 'Produtos', 'route' => 'module.products', 'icon' => 'fa-bag-shopping', 'class' => 'products', 'active' => request()->is('produtos*')],
         ['label' => 'Serviços', 'route' => 'module.services', 'icon' => 'fa-screwdriver-wrench', 'class' => 'services', 'active' => request()->is('servicos*') || request()->is('prestadores*')],
+    ];
+    $moreHeaderItems = [
         ['label' => 'Empregos', 'route' => 'module.jobs', 'icon' => 'fa-briefcase', 'class' => 'jobs', 'active' => request()->is('empregos*')],
-        ['label' => 'Cordel & Arte', 'route' => 'culture.index', 'icon' => 'fa-feather-pointed', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
+        ['label' => 'Arte & Cultura', 'route' => 'culture.index', 'icon' => 'fa-palette', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
         ['label' => 'Comunidade', 'route' => 'feed.index', 'icon' => 'fa-users', 'class' => 'community', 'active' => request()->is('comunidade*')],
     ];
+    $headerItems = array_merge($mainHeaderItems, $moreHeaderItems);
+    $isMoreActive = collect($moreHeaderItems)->contains('active', true);
 @endphp
 
 <header class="marketplace-header marketplace-header-layout-{{ $headerLayout ?? 'horizontal' }} {{ auth()->guest() ? 'marketplace-header-guest' : '' }}" id="marketplaceHeader">
@@ -56,7 +60,7 @@
             <span class="marketplace-brand-divider" aria-hidden="true"></span>
 
             <nav class="marketplace-desktop-nav notranslate" translate="no" aria-label="Categorias principais">
-                @foreach($headerItems as $item)
+                @foreach($mainHeaderItems as $item)
                     <a
                         href="{{ route($item['route']) }}"
                         class="marketplace-nav-item marketplace-nav-{{ $item['class'] }} {{ $item['active'] ? 'active' : '' }}"
@@ -66,6 +70,33 @@
                         <span class="marketplace-nav-label notranslate" translate="no">{{ $item['label'] }}</span>
                     </a>
                 @endforeach
+
+                <!-- Menu Dropdown "Mais" -->
+                <div class="dropdown d-inline-block">
+                    <button
+                        class="marketplace-nav-item dropdown-toggle border-0 bg-transparent {{ $isMoreActive ? 'active' : '' }}"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        <span class="marketplace-nav-icon"><i class="fa-solid fa-ellipsis"></i></span>
+                        <span class="marketplace-nav-label notranslate" translate="no">Mais <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.65rem;"></i></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" style="min-width: 190px; transform: translateX(20%);" data-bs-popper="static">
+                        @foreach($moreHeaderItems as $item)
+                            <li>
+                                <a
+                                    href="{{ route($item['route']) }}"
+                                    class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2.5 fw-semibold {{ $item['active'] ? 'active bg-primary text-white' : '' }}"
+                                    style="font-size: 0.85rem;"
+                                >
+                                    <i class="fa-solid {{ $item['icon'] }} {{ $item['active'] ? 'text-white' : 'text-primary' }}" style="width: 18px;"></i>
+                                    <span>{{ $item['label'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </nav>
 
             <div class="marketplace-header-actions">

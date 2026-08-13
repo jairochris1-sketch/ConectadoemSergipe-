@@ -334,6 +334,10 @@
     .admin-store-last-action { display: grid; gap: 3px; margin-top: 15px; padding-top: 14px; color: var(--muted-foreground); border-top: 1px solid var(--border); font-size: .62rem; }
     .admin-store-last-action strong { color: var(--foreground); }
     .admin-store-last-action p { margin: 6px 0 0; padding: 8px; background: var(--muted-bg); border-radius: 8px; white-space: pre-line; }
+    @media (max-width: 1399.98px) {
+        .admin-store-review-layout { grid-template-columns: minmax(0, 1fr) 290px; gap: 12px; }
+        .admin-store-review-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
     @media (max-width: 991.98px) {
         .admin-store-review-layout { grid-template-columns: 1fr; }
         .admin-store-review-sidebar { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }

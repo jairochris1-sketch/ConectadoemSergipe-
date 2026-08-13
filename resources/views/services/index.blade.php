@@ -13,13 +13,23 @@
         min-height: 100vh;
     }
 
-    /* ── BANNER SWIPER ── */
-    .services-banner-swiper { height: 320px; }
+    /* ── BANNER SWIPER & HERO ── */
+    .services-banner-swiper {
+        height: 310px;
+        border-radius: 24px !important;
+    }
     .services-banner-slide { background-position: center; background-size: cover; }
     .services-banner-content {
-        position: relative; z-index: 2;
-        max-width: 820px;
-        text-shadow: 0 2px 6px rgba(0,0,0,.55);
+        position: relative; z-index: 5;
+        max-width: 800px;
+        width: 100%;
+        text-shadow: 0 2px 6px rgba(0,0,0,.6);
+    }
+    @media (max-width: 767.98px) {
+        .services-banner-swiper {
+            height: 350px;
+            border-radius: 18px !important;
+        }
     }
 
     /* ── HERO SEM BANNER ── */
@@ -266,104 +276,108 @@
 @endphp
 
 <div class="services-directory-page position-relative">
-    <a href="{{ url('/') }}" class="btn btn-sm btn-light rounded-pill shadow-sm" style="position:absolute; top:1rem; left:1rem; z-index: 1050; padding: 0.4rem 1rem;">
+    <a href="{{ route('home') }}" class="btn btn-sm btn-light rounded-pill shadow-sm" style="position:absolute; top:1rem; left:1rem; z-index: 1050; padding: 0.4rem 1rem;">
         <i class="fa-solid fa-arrow-left me-1"></i> Voltar
     </a>
     @if(!empty($serviceBanners))
-    <section class="swiper services-banner-swiper overflow-hidden position-relative">
-        <div class="swiper-wrapper">
-            @foreach($serviceBanners as $banner)
-                @php
-                    $serviceBannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
-                @endphp
-                <div class="swiper-slide services-banner-slide d-flex align-items-center justify-content-center text-center px-4"
-                     style="background-image: linear-gradient(rgba(8, 24, 48, 0.58), rgba(8, 24, 48, 0.68)), url('{{ $serviceBannerUrl }}');">
-                    <div class="services-banner-content text-white">
-                        <span class="badge rounded-pill bg-primary px-3 py-2 mb-3 text-uppercase">Profissionais de Sergipe</span>
-                        <h1 class="display-5 fw-bold mb-3">Encontre Prestadores de Serviços</h1>
-                        <p class="lead text-white mb-4">Conheça profissionais, veja seus trabalhos e fale diretamente pelo WhatsApp.</p>
+    <div class="container pt-3 mb-4">
+        <section class="swiper services-banner-swiper overflow-hidden position-relative shadow-lg" style="border-radius: 24px;">
+            <div class="swiper-wrapper">
+                @foreach($serviceBanners as $banner)
+                    @php
+                        $serviceBannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
+                        $cityName = rawurldecode(pathinfo($banner, PATHINFO_FILENAME));
+                    @endphp
+                    <div class="swiper-slide services-banner-slide position-relative"
+                         style="background-image: linear-gradient(rgba(8, 24, 48, 0.58), rgba(8, 24, 48, 0.72)), url('{{ $serviceBannerUrl }}'); background-size: cover; background-position: center; height: 100%;">
+                        @if($cityName && !str_starts_with($banner, 'http'))
+                            <div class="position-absolute top-0 end-0 m-3 z-3">
+                                <span class="badge rounded-pill bg-primary bg-gradient px-3 py-2 text-uppercase fw-bold shadow-sm" style="letter-spacing: 0.06em; font-size: 0.75rem;">
+                                    <i class="fa-solid fa-location-dot me-1"></i> {{ trim($cityName) }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Conteúdo Fixo + Caixa de Pesquisa DENTRO do Hero -->
+            <div class="position-absolute inset-0 w-100 h-100 top-0 start-0 d-flex flex-column align-items-center justify-content-center text-center px-3 py-3" style="z-index: 10; pointer-events: none;">
+                <div class="w-100" style="max-width: 780px; pointer-events: auto;">
+                    <span class="badge rounded-pill bg-primary bg-opacity-75 px-3 py-1.5 mb-2 text-uppercase fw-bold shadow-sm" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                        Profissionais de Sergipe
+                    </span>
+                    <h1 class="fw-bold mb-1 text-white fs-3" style="text-shadow: 0 2px 8px rgba(0,0,0,0.75);">
+                        Encontre Prestadores de Serviços em Sergipe
+                    </h1>
+                    <p class="small text-white opacity-90 mb-3" style="max-width: 620px; margin: 0 auto; text-shadow: 0 1px 4px rgba(0,0,0,0.65);">
+                        Conheça profissionais verificados, veja seus trabalhos e fale diretamente pelo WhatsApp.
+                    </p>
+
+                    <!-- Barra de Busca Pill DENTRO do Hero -->
+                    <form action="{{ route('module.services') }}" method="GET" class="services-pill-search shadow-lg my-2" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); margin: 0 auto; max-width: 720px;">
+                        <div class="services-pill-field">
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                            <input
+                                type="search"
+                                name="q"
+                                value="{{ $q }}"
+                                placeholder="O que você precisa hoje? Ex: Eletricista..."
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="services-pill-divider"></div>
+                        <div class="services-pill-field">
+                            <i class="fa-solid fa-location-dot text-muted"></i>
+                            <input
+                                type="text"
+                                name="city"
+                                value="{{ $city }}"
+                                placeholder="Cidade ou bairro. Ex: Aracaju..."
+                                list="hero-cities-list"
+                                autocomplete="off"
+                            >
+                            <datalist id="hero-cities-list">
+                                @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+                                    <option value="{{ $cityName }}">
+                                @endforeach
+                            </datalist>
+                        </div>
+                        <button type="button" class="services-pill-mic" aria-label="Buscar por voz" title="Buscar por voz">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <button type="submit" class="services-pill-submit">Buscar</button>
+                    </form>
+
+                    <!-- Chips de Buscas Populares DENTRO do Hero -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-1.5 mt-2">
+                        <span class="text-white-50 small me-1" style="font-size: 0.72rem; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Populares:</span>
+                        @foreach(array_slice($popularSearches, 0, 5) as $search)
+                            <a
+                                href="{{ route('module.services', ['q' => $search['label']]) }}"
+                                class="services-chip py-1 px-2.5 bg-white bg-opacity-90 text-dark border-0 shadow-sm {{ strcasecmp($q, $search['label']) === 0 ? 'active' : '' }}"
+                                style="font-size: 0.7rem;"
+                            >
+                                <i class="fa-solid {{ $search['icon'] }} text-primary"></i>
+                                {{ $search['label'] }}
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4">
                         @include('services._profile-cta', [
                             'profileCta' => $profileCta,
-                            'class' => 'btn btn-success rounded-pill px-4 py-2 fw-bold shadow',
+                            'class' => 'btn btn-success bg-gradient rounded-pill px-4 py-2 fw-bold shadow',
                         ])
                     </div>
                 </div>
-            @endforeach
-        </div>
-        <div class="services-banner-next swiper-button-next text-white"></div>
-        <div class="services-banner-prev swiper-button-prev text-white"></div>
-    </section>
-    @else
-    <section class="services-hero">
-        <div class="container">
-            {{-- Eyebrow + Headline --}}
-            <span class="services-hero-eyebrow">Encontre perto de você</span>
-            <h1 class="services-hero-title">
-                Encontre o serviço certo em <span class="text-sergipe">Sergipe.</span>
-            </h1>
-            <p class="services-hero-subtitle">Milhares de profissionais e empresas prontos para te ajudar.</p>
-
-            {{-- Barra de Busca Pill --}}
-            <form action="{{ route('module.services') }}" method="GET" class="services-pill-search">
-                <div class="services-pill-field">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input
-                        type="search"
-                        name="q"
-                        value="{{ $q }}"
-                        placeholder="O que você precisa hoje? Ex: Eletricista, Pedreiro..."
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="services-pill-divider"></div>
-                <div class="services-pill-field">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <input
-                        type="text"
-                        name="city"
-                        value="{{ $city }}"
-                        placeholder="Cidade ou bairro. Ex: Aracaju..."
-                        list="hero-cities-list"
-                        autocomplete="off"
-                    >
-                    <datalist id="hero-cities-list">
-                        @foreach(\App\Core\SergipeCities::getAll() as $cityName)
-                            <option value="{{ $cityName }}">
-                        @endforeach
-                    </datalist>
-                </div>
-                <button type="button" class="services-pill-mic" aria-label="Buscar por voz" title="Buscar por voz">
-                    <i class="fa-solid fa-microphone"></i>
-                </button>
-                <button type="submit" class="services-pill-submit">Buscar profissionais</button>
-            </form>
-
-            {{-- Chips de Buscas Populares --}}
-            <div class="services-hero-chips">
-                <span class="services-hero-chips-label">Buscas populares:</span>
-                @foreach(array_slice($popularSearches, 0, 6) as $search)
-                    <a
-                        href="{{ route('module.services', ['q' => $search['label']]) }}"
-                        class="services-chip {{ strcasecmp($q, $search['label']) === 0 ? 'active' : '' }}"
-                    >
-                        <i class="fa-solid {{ $search['icon'] }}"></i>
-                        {{ $search['label'] }}
-                    </a>
-                @endforeach
-                <a href="{{ route('module.services') }}" class="services-chip">
-                    <i class="fa-solid fa-th-large"></i> Ver todas
-                </a>
             </div>
 
-            {{-- CTA para criar/gerenciar perfil --}}
-            <div class="mt-3">
-                @include('services._profile-cta', [
-                    'profileCta' => $profileCta,
-                    'class' => 'btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm',
-                ])
-            </div>
-        </div>
-    </section>
+            <div class="services-banner-next swiper-button-next text-white" style="z-index: 20;"></div>
+            <div class="services-banner-prev swiper-button-prev text-white" style="z-index: 20;"></div>
+            <div class="services-banner-pagination swiper-pagination" style="z-index: 20;"></div>
+        </section>
+    </div>
     @endif
 
     <div class="container services-search-panel pb-5">
@@ -638,10 +652,19 @@
 <script>
     new Swiper('.services-banner-swiper', {
         loop: {{ count($serviceBanners) > 1 ? 'true' : 'false' }},
-        autoplay: {{ count($serviceBanners) > 1 ? "{ delay: 5000 }" : 'false' }},
+        effect: 'fade',
+        fadeEffect: {
+            crossFade: true
+        },
+        speed: 1500,
+        autoplay: {{ count($serviceBanners) > 1 ? "{ delay: 8000, disableOnInteraction: false }" : 'false' }},
         navigation: {
             nextEl: '.services-banner-next',
             prevEl: '.services-banner-prev'
+        },
+        pagination: {
+            el: '.services-banner-pagination',
+            clickable: true
         }
     });
 </script>

@@ -8,7 +8,7 @@
         'Pacatuba','Ilha das Flores','Neópolis','Cedro de São João',
         'Monte Alegre de Sergipe','Gararu','Porto da Folha','Nossa Senhora de Lourdes',
     ];
-    $productsHeroBanners = $heroBanners ?? ['images/banner-1.jpg'];
+    $productsHeroBanners = $productsBanners ?? $heroBanners ?? ['images/banner-1.jpg'];
     $productTypes = [
         ['label' => 'Todos', 'value' => null, 'icon' => 'fa-layer-group'],
         ['label' => 'Celulares', 'value' => 'Celulares', 'icon' => 'fa-mobile-screen'],

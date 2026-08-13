@@ -23,7 +23,7 @@
 {{-- ─── Cards dos Planos ────────────────────────────────────────────────── --}}
 <div class="row g-3 mb-5">
     @foreach($plans as $plan)
-    <div class="col-12 col-sm-6 col-xl-3">
+    <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
         <div class="card h-100 border-0 shadow-sm rounded-4 {{ $plan->is_highlighted ? 'border-2 border-primary' : '' }} position-relative">
             @if($plan->badge_label)
                 <span class="position-absolute top-0 end-0 badge bg-primary m-2 rounded-pill">{{ $plan->badge_label }}</span>

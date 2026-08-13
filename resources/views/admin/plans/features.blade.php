@@ -27,8 +27,8 @@
     {{-- ─── Features do Plano ──────────────────────────────────────────────── --}}
     <div class="col-12 col-lg-8">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
-                <h6 class="fw-bold text-dark mb-0">
+            <div class="card-header border-0 pt-4 px-4 pb-2">
+                <h6 class="fw-bold text-body mb-0">
                     <i class="fa-solid fa-check-circle text-success me-2"></i>
                     Features ativas neste plano ({{ $plan->featureValues->count() }})
                 </h6>

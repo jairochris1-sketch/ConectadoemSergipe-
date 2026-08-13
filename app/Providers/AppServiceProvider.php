@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        require_once app_path('helpers.php');
     }
 
     /**
@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (str_contains(request()->getHost(), 'ngrok') || request()->hasHeader('x-forwarded-proto')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }

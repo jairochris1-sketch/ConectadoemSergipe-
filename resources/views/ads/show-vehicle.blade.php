@@ -79,7 +79,7 @@
                     <h1 class="vehicle-title">{{ $ad->title }}</h1>
 
                     @if($ad->price > 0)
-                        <div class="vehicle-price">R$ {{ number_format($ad->price, 2, ',', '.') }}</div>
+                        <div class="vehicle-price">{{ $ad->formatted_price }}</div>
                     @else
                         <div class="vehicle-price vehicle-price-negotiable">Preço a combinar</div>
                     @endif

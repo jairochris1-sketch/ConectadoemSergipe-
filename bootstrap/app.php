@@ -17,11 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $trustedProxies = array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) env('TRUSTED_PROXIES', '127.0.0.1'))
-        )));
-        $middleware->trustProxies(at: $trustedProxies ?: ['127.0.0.1']);
+        $middleware->trustProxies(at: '*');
+        $middleware->validateCsrfTokens(except: ['webhooks/asaas/*']);
         $middleware->web(append: [ApplyLocationPreference::class, SetSecurityHeaders::class, UpdateLastSeen::class]);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,

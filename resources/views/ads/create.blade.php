@@ -26,9 +26,11 @@
                 </div>
             </div>
 
-            <!-- STEPPER HEADER PROGRESS BAR -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 publish-stepper-card">
-                <div class="card-body p-3 p-md-4">
+            <!-- CARD UNIFICADO (STEPPER + FORMULÁRIO) -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 publish-form-card">
+
+                <!-- CABEÇALHO DE ETAPAS -->
+                <div class="publish-stepper-header border-bottom p-3 p-md-4">
                     <div class="d-flex justify-content-between align-items-center position-relative px-2 px-md-5 publish-step-track">
                         
                         <!-- Etapa 1 -->
@@ -59,10 +61,7 @@
 
                     </div>
                 </div>
-            </div>
 
-            <!-- FORM CARD PRINCIPAL -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 publish-form-card">
                 <div class="card-body p-4 p-md-5">
 
                     @if($errors->any())
@@ -164,7 +163,7 @@
                             <div class="professional-motion-panel mb-3" aria-labelledby="advertiser-type-title">
                                 <span class="professional-motion-icon" aria-hidden="true">
                                     <i class="fa-solid fa-user-tie"></i>
-                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-check"></i>
                                 </span>
                                 <div class="professional-motion-copy">
                                     <h4 id="advertiser-type-title">Qual perfil representa você?</h4>
@@ -231,19 +230,14 @@
                                 <div class="d-flex justify-content-between align-items-end mb-1">
                                     <label for="title" class="form-label fw-semibold mb-0" id="title-label">Nome do perfil profissional *</label>
                                 </div>
-                                <div class="input-group input-group-lg shadow-sm">
-                                    <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" placeholder="Ex: iPhone 13 Pro Max 128GB Lacrado, Sofá Retrátil, etc." required oninput="updatePreview()" style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;">
-                                    <button class="btn btn-white border d-flex align-items-center" type="button" id="btn-search-google" title="Pesquisar dados deste produto no Google" onclick="searchOnGoogle()" style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background: #fff;">
-                                        <i class="fa-brands fa-google me-2" style="color: #4285F4;"></i> <span class="d-none d-sm-inline fw-semibold text-dark" style="font-size: 0.9rem;">Buscar infos</span>
-                                    </button>
-                                </div>
-                                <small class="text-muted d-block mt-1" id="title-help">Dica: seja claro e direto no nome. Use o botão do Google para achar ficha técnica facilmente.</small>
+                                <input type="text" class="form-control form-control-lg rounded-3 shadow-sm" id="title" name="title" value="{{ old('title') }}" placeholder="Ex: iPhone 13 Pro Max 128GB Lacrado, Sofá Retrátil, etc." required oninput="updatePreview()">
+                                <small class="text-muted d-block mt-1" id="title-help">Dica: seja claro e direto no nome do seu anúncio.</small>
                             </div>
 
                             <div class="mb-3" id="price-field">
                                 <label for="price" class="form-label fw-semibold">Preço (R$)</label>
-                                <input type="text" inputmode="decimal" class="form-control form-control-lg rounded-3" id="price" name="price" value="{{ old('price') }}" placeholder="Ex: 80.000,00">
-                                <small class="text-muted">Você pode digitar 80000 ou 80.000,00.</small>
+                                <input type="text" inputmode="decimal" class="form-control form-control-lg rounded-3" id="price" name="price" value="{{ old('price') }}" placeholder="Ex: 80.000,00" oninput="formatPriceInput(this); updatePreview();">
+                                <small class="text-muted">Digite os valores que a pontuação decimal (R$ 80.000,00) será formatada automaticamente.</small>
                             </div>
 
                             <div class="store-product-link mb-3 d-none" id="store-product-field">
@@ -341,7 +335,7 @@
 
                             <div class="mb-4">
                                 <label for="description" class="form-label fw-semibold" id="description-label">Sobre o profissional e seus serviços *</label>
-                                <textarea class="form-control rounded-3" id="description" name="description" rows="5" maxlength="1000" placeholder="Trabalho com instalações elétricas residenciais e comerciais, manutenção, troca de fiação, disjuntores, tomadas, iluminação, entre outros serviços. Atendimento rápido e com qualidade!" oninput="updateCharCount(this); updatePreview();" required>{{ old('description') }}</textarea>
+                                <textarea class="form-control rounded-3" id="description" name="description" rows="5" maxlength="1000" placeholder="Descreva os detalhes do seu anúncio ou serviço..." oninput="updateCharCount(this); updatePreview();" required>{{ old('description') }}</textarea>
                                 <div class="text-end text-muted small mt-1"><span id="char-count">0</span>/1000 caracteres</div>
                             </div>
 
@@ -443,21 +437,25 @@
                             </div>
 
                             <div class="mb-4">
-                                <h6 class="fw-bold text-dark mb-3"><i class="fa-brands fa-whatsapp text-success me-2"></i> Contato principal</h6>
+                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i> Canais de contato de atendimento</h6>
                                 <div class="row g-3">
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-4">
                                         <label for="whatsapp" class="form-label fw-semibold">WhatsApp *</label>
                                         <input type="text" class="form-control form-control-lg rounded-3" id="whatsapp" name="whatsapp" value="{{ old('whatsapp', auth()->user()->whatsapp ?? '') }}" placeholder="(79) 99999-9999" required oninput="updatePreview()">
                                     </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="phone" class="form-label fw-semibold">Telefone (opcional)</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="(79) 3333-3333">
+                                    <div class="col-12 col-md-4">
+                                        <label for="phone" class="form-label fw-semibold">Telefone de Contato *</label>
+                                        <input type="text" class="form-control form-control-lg rounded-3" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="(79) 3333-3333" required>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="telegram" class="form-label fw-semibold"><i class="fa-brands fa-telegram text-info me-1"></i> Telegram (opcional)</label>
+                                        <input type="text" class="form-control form-control-lg rounded-3" id="telegram" name="telegram" value="{{ old('telegram') }}" placeholder="@seutelegram ou (79) 99999-9999">
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-share-nodes text-primary me-2"></i> Redes sociais (opcional)</h6>
+                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-share-nodes text-secondary me-2"></i> Redes sociais (opcional)</h6>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
                                         <label for="instagram" class="form-label fw-semibold">Instagram</label>
@@ -578,7 +576,6 @@
     background: color-mix(in srgb, var(--card) 88%, transparent);
     border-color: var(--border);
 }
-.publish-stepper-card,
 .publish-form-card {
     color: var(--foreground);
     background:
@@ -586,17 +583,17 @@
         var(--card);
     border: 1px solid var(--border) !important;
 }
-.publish-stepper-card {
-    overflow: hidden;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, .07) !important;
+.publish-stepper-header {
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--publish-blue) 3%, transparent);
 }
 .publish-step-track::before {
     content: "";
     position: absolute;
     z-index: 0;
     top: 19px;
-    left: calc(10% + 12px);
-    right: calc(10% + 12px);
+    left: 10%;
+    right: 10%;
     height: 1px;
     background: var(--border);
 }
@@ -609,7 +606,7 @@
     box-shadow: 0 22px 55px rgba(15, 23, 42, .1) !important;
 }
 .publish-form-card .text-dark,
-.publish-stepper-card .step-label {
+.publish-stepper-header .step-label {
     color: var(--foreground) !important;
 }
 .publish-step-pill {
@@ -630,12 +627,12 @@
     --motion-color: #1265f5;
     --motion-color-soft: #6d91ff;
     position: relative;
-    min-height: 118px;
+    min-height: 90px;
     display: grid !important;
-    grid-template-columns: 92px minmax(0, 1fr) 28px;
+    grid-template-columns: 60px minmax(0, 1fr) 28px;
     align-items: center;
     gap: 12px;
-    padding: 14px 15px !important;
+    padding: 10px 12px !important;
     overflow: hidden;
     color: var(--foreground) !important;
     text-align: left;
@@ -645,30 +642,7 @@
     border: 1px solid var(--border) !important;
     transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
-.module-card-products {
-    --motion-color: #1265f5;
-    --motion-color-soft: #6d91ff;
-}
-.module-card-real-estate {
-    --motion-color: #1265f5;
-    --motion-color-soft: #6d91ff;
-}
-.module-card-vehicles {
-    --motion-color: #1265f5;
-    --motion-color-soft: #6d91ff;
-}
-.module-card-jobs {
-    --motion-color: #1265f5;
-    --motion-color-soft: #6d91ff;
-}
-.module-card-agro {
-    --motion-color: #24a148;
-    --motion-color-soft: #7ad957;
-}
-.module-card-store {
-    --motion-color: #8b5cf6;
-    --motion-color-soft: #a78bfa;
-}
+/* All module cards use the same primary color */
 .module-card:hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--motion-color) 68%, var(--border)) !important;
@@ -681,49 +655,19 @@
         0 14px 34px color-mix(in srgb, var(--motion-color) 20%, transparent) !important;
 }
 .btn-check:checked + .module-card::after {
-    content: "✓";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    background: var(--motion-color);
-    border-radius: 50%;
-    font-size: .72rem;
-    font-weight: 900;
-    box-shadow: 0 5px 13px color-mix(in srgb, var(--motion-color) 38%, transparent);
+    display: none !important;
 }
 .module-motion-icon {
     position: relative;
-    width: 88px;
-    height: 76px;
+    width: 60px;
+    height: 60px;
     display: grid;
     place-items: center;
     isolation: isolate;
 }
-.module-motion-icon::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--motion-color) 35%, transparent), transparent 68%);
-    filter: blur(5px);
-    animation: moduleMotionPulse 2.4s ease-in-out infinite;
-}
 .module-motion-icon i {
     color: var(--motion-color) !important;
-    font-size: 2.85rem;
-    filter: drop-shadow(0 5px 8px color-mix(in srgb, var(--motion-color) 30%, transparent));
-    transform: perspective(120px) rotateY(-8deg);
-    animation: moduleMotionFloat 2.8s ease-in-out infinite;
-}
-.module-card:hover .module-motion-icon i {
-    animation: moduleMotionBurst .55s ease both;
+    font-size: 2rem;
 }
 .module-card-copy {
     min-width: 0;
@@ -758,22 +702,20 @@
 .professional-motion-panel {
     position: relative;
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr) auto;
+    grid-template-columns: 100px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 20px;
-    min-height: 110px;
-    padding: 16px 22px;
+    gap: 15px;
+    min-height: 90px;
+    padding: 12px 18px;
     overflow: hidden;
     color: var(--foreground);
-    background:
-        linear-gradient(100deg, color-mix(in srgb, #4e35ec 12%, transparent), transparent 36%),
-        var(--card);
+    background: color-mix(in srgb, #1265f5 3%, var(--card));
     border: 1px solid var(--border);
     border-radius: 16px;
 }
 .professional-motion-icon {
     position: relative;
-    height: 78px;
+    height: 60px;
     display: grid;
     place-items: center;
     color: #1265f5;
@@ -781,20 +723,22 @@
 .professional-motion-icon .fa-user-tie {
     position: relative;
     z-index: 1;
-    font-size: 3.8rem;
-    filter: drop-shadow(0 6px 10px rgba(18, 101, 245, .32));
-    animation: moduleMotionFloat 2.7s ease-in-out infinite;
+    font-size: 2.5rem;
 }
+.professional-motion-icon .fa-check,
 .professional-motion-icon .fa-star {
     position: absolute;
     z-index: 2;
-    right: 28px;
-    bottom: 4px;
-    padding: 6px;
-    color: #ffd028;
-    background: #4730c8;
+    right: 15px;
+    bottom: 0px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    background: #1265f5;
     border-radius: 50%;
-    font-size: 1rem;
+    font-size: 0.7rem;
 }
 .professional-motion-copy h4 {
     margin: 0 0 5px;
@@ -807,6 +751,80 @@
     color: var(--muted-foreground);
     font-size: .76rem;
     line-height: 1.5;
+}
+.professional-motion-copy {
+    min-width: 0;
+}
+.advertiser-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+.advertiser-type-option {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    min-height: 66px;
+    padding: 10px 12px;
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--card) 92%, #1265f5 8%);
+    border: 1px solid color-mix(in srgb, var(--border) 78%, #1265f5 22%);
+    border-radius: 12px;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.advertiser-type-option:hover,
+.advertiser-type-option:focus-visible {
+    color: var(--foreground);
+    border-color: #1265f5;
+    box-shadow: 0 8px 20px rgba(18, 101, 245, .14);
+    transform: translateY(-2px);
+}
+.advertiser-type-option:focus-visible {
+    outline: 3px solid rgba(18, 101, 245, .22);
+    outline-offset: 2px;
+}
+.advertiser-type-option > i:first-child {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    color: #1265f5;
+    background: color-mix(in srgb, #1265f5 12%, var(--card));
+    border-radius: 10px;
+    font-size: .95rem;
+}
+.advertiser-type-option > span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+.advertiser-type-option strong,
+.advertiser-type-option small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+.advertiser-type-option strong {
+    font-size: .79rem;
+    line-height: 1.25;
+}
+.advertiser-type-option small {
+    color: var(--muted-foreground);
+    font-size: .66rem;
+    line-height: 1.35;
+}
+.advertiser-type-option > i:last-child {
+    color: #1265f5;
+    font-size: .72rem;
+    text-align: center;
 }
 .professional-motion-cta {
     display: inline-flex;
@@ -943,16 +961,15 @@
     transition: all 0.3s ease;
 }
 .step-item.active .step-icon {
-    background-color: #4f46e5;
+    background-color: #1265f5;
     color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
 }
 .step-item.completed .step-icon {
     background-color: #10b981;
     color: #ffffff;
 }
 .step-item.active .step-label {
-    color: #4f46e5;
+    color: #1265f5;
     font-weight: 700 !important;
 }
 #mod_services:checked + .module-card .service-module-icon {
@@ -1037,7 +1054,7 @@
     .publish-toolbar .btn-close {
         display: none;
     }
-    .publish-stepper-card .card-body {
+    .publish-stepper-header {
         padding: .8rem !important;
     }
     .publish-step-track {
@@ -1117,6 +1134,15 @@
     .professional-motion-copy p {
         font-size: .66rem;
     }
+    .advertiser-type-grid {
+        grid-column: 1 / -1;
+        grid-template-columns: 1fr;
+        margin-top: 10px;
+    }
+    .advertiser-type-option {
+        min-height: 60px;
+        padding: 9px 10px;
+    }
     .professional-motion-cta {
         grid-column: 1 / -1;
         justify-content: center;
@@ -1171,13 +1197,17 @@
         agro: '🚜 Agro'
     };
 
-    const categoryLists = {
+    const databaseCategoryLists = @json(
+        $categories->groupBy('module')->map(fn ($cats) => $cats->pluck('name')->values()->all())
+    );
+
+    const fallbackCategoryLists = {
         services: ['Eletricista', 'Encanador', 'Pintor', 'Mecânico', 'Advogado', 'Faxineira / Diarista', 'Marcenaria', 'TI / Informática', 'Frete e Mudanças', 'Restaurante / Pizzaria', 'Pedreiro', 'Jardineiro'],
-        products: ['Celulares & Telefonia', 'Informática', 'Roupas & Calçados', 'Móveis & Decoração', 'Eletrodomésticos', 'Esporte & Lazer'],
-        real_estate: ['Casas Aluguel/Venda', 'Apartamentos', 'Terrenos & Lotes', 'Salas Comerciais', 'Sítios & Chácaras'],
-        vehicles: ['Carros Usados/Seminovos', 'Motos', 'Caminhões', 'Peças & Acessórios'],
-        jobs: ['Vagas de Emprego', 'Currículos / Procurando', 'Estágios'],
-        agro: ['Animais & Pecuária', 'Tratores & Máquinas', 'Insumos & Sementes']
+        products: ['Celulares & Telefonia', 'Computadores & Informática', 'Eletrodomésticos & Eletrônicos', 'Móveis, Casa & Decoração', 'Moda, Roupas & Calçados', 'Beleza, Cosméticos & Perfumaria', 'Esportes, Fitness & Ciclismo', 'Automotivo & Acessórios'],
+        real_estate: ['Casas para Venda', 'Casas para Aluguel', 'Apartamentos para Venda', 'Apartamentos para Aluguel', 'Terrenos, Lotes & Chácaras', 'Salas Comerciais, Lojas & Galpões', 'Aluguel por Temporada & Pousadas'],
+        vehicles: ['Carros & Utilitários', 'Motos & Ciclomotores', 'Caminhões, Ônibus & Vans', 'Náutica, Barcos & Lanchas', 'Peças, Pneus & Acessórios'],
+        jobs: ['Vagas Operacionais & Serviços Gerais', 'Vagas Comerciais & Vendas', 'Vagas em Tecnologia & TI', 'Estágios & Jovem Aprendiz', 'Freelancers, Bicos & Autônomos'],
+        agro: ['Gado, Cavalos & Pecuária', 'Tratores, Máquinas & Implementos', 'Sementes, Mudas & Adubos', 'Produtos da Roça & Hortifrúti']
     };
 
     function chooseProfessionalProfile(profileKind = 'professional') {
@@ -1192,7 +1222,9 @@
     function selectModule(modKey, preserveTitle = false) {
         const catSelect = document.getElementById('category_select');
         catSelect.innerHTML = '';
-        const list = categoryLists[modKey] || categoryLists.services;
+        const list = (databaseCategoryLists[modKey] && databaseCategoryLists[modKey].length > 0)
+            ? databaseCategoryLists[modKey]
+            : (fallbackCategoryLists[modKey] || fallbackCategoryLists.products);
         
         list.forEach(item => {
             const opt = document.createElement('option');
@@ -1219,6 +1251,18 @@
         }
     }
 
+    function formatPriceInput(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (!value) {
+            input.value = '';
+            return;
+        }
+        let number = (parseInt(value, 10) / 100).toFixed(2);
+        let parts = number.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        input.value = parts.join(',');
+    }
+
     const categoryPlaceholders = {
         services: 'Ex: Eletricista Residencial e Comercial em Aracaju',
         products: 'Ex: iPhone 13 Pro Max 128GB Lacrado, Sofá Retrátil, etc.',
@@ -1228,6 +1272,15 @@
         agro: 'Ex: Trator Massey Ferguson 275, Sementes de Milho, etc.'
     };
 
+    const descriptionPlaceholders = {
+        services: 'Descreva aqui os seus serviços prestados, experiência, diferenciais, formas de atendimento e horários...',
+        products: 'Descreva o produto: marca, modelo, estado de conservação (novo/usado), itens inclusos e especificações principais...',
+        real_estate: 'Descreva o imóvel: quantidade de quartos, suítes, banheiros, vagas de garagem, metragem (m²), condomínio e diferenciais da localização...',
+        vehicles: 'Descreva o veículo: ano/modelo, quilometragem, tipo de câmbio, combustível, itens de série, opcionais e estado de conservação...',
+        jobs: 'Descreva os detalhes da vaga ou busca: principais atribuições, requisitos exigidos, jornada de trabalho e benefícios...',
+        agro: 'Descreva o item agrícola: raça/especificação, quantidade, ano/modelo do maquinário, conservação e detalhes de entrega...'
+    };
+
     function updateModuleLanguage(modKey) {
         const isService = modKey === 'services';
         const isProduct = modKey === 'products';
@@ -1235,6 +1288,11 @@
         const titleInput = document.getElementById('title');
         if (titleInput) {
             titleInput.placeholder = categoryPlaceholders[modKey] || categoryPlaceholders.products;
+        }
+
+        const descInput = document.getElementById('description');
+        if (descInput) {
+            descInput.placeholder = descriptionPlaceholders[modKey] || descriptionPlaceholders.products;
         }
 
         document.getElementById('details-heading').textContent = isService
@@ -1604,17 +1662,6 @@
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-    }
-
-    function searchOnGoogle() {
-        const titleInput = document.getElementById('title');
-        const titleValue = titleInput.value.trim();
-        if (titleValue.length > 0) {
-            window.open('https://www.google.com/search?q=' + encodeURIComponent(titleValue), '_blank');
-        } else {
-            alert('Por favor, digite o nome do produto antes de buscar no Google.');
-            titleInput.focus();
-        }
     }
 
     async function importImageByUrl(inputId) {

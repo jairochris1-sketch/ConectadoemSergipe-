@@ -6,6 +6,7 @@ use App\Models\Ad;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\Store;
+use App\Support\HomeCityGroupCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -196,13 +197,27 @@ class HomeController extends Controller
             ->get();
         $serviceSearchCategories = $this->serviceSearchCategories();
         $adSearchCategories = self::AD_SEARCH_CATEGORIES;
-        $defaultHeroBanners = [
-            1 => 'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1600&auto=format&fit=crop',
-            2 => 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=1600&auto=format&fit=crop',
-        ];
-        $heroBanners = collect(range(1, 6))
-            ->map(fn (int $slot) => Setting::get("home_banner_{$slot}", $defaultHeroBanners[$slot] ?? null))
+        $cityFiles = glob(public_path('Cidades/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}'), GLOB_BRACE) ?: [];
+        $defaultHeroBanners = array_map(function ($filePath) {
+            return 'Cidades/' . basename($filePath);
+        }, $cityFiles);
+
+        if (empty($defaultHeroBanners)) {
+            $defaultHeroBanners = [
+                'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1600&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=1600&auto=format&fit=crop',
+            ];
+        }
+
+        $customHeroBanners = collect(range(1, 10))
+            ->map(fn (int $slot) => Setting::get("home_banner_{$slot}"))
             ->filter()
+            ->values()
+            ->all();
+
+        $heroBanners = collect($customHeroBanners)
+            ->merge($defaultHeroBanners)
+            ->unique()
             ->values()
             ->all();
 
@@ -224,6 +239,16 @@ class HomeController extends Controller
 
         if (empty($vehiclesBanners)) {
             $vehiclesBanners = $heroBanners;
+        }
+
+        $productsBanners = collect(range(1, 5))
+            ->map(fn (int $slot) => Setting::get("products_banner_{$slot}"))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($productsBanners)) {
+            $productsBanners = $heroBanners;
         }
 
         $jobsBanners = collect(range(1, 5))
@@ -277,6 +302,25 @@ class HomeController extends Controller
             ->take(10)
             ->get();
 
+        $homeCityGroups = collect(HomeCityGroupCatalog::all())
+            ->map(function (array $group): array {
+                $city = $group['city'];
+                $slot = $group['slot'];
+
+                return [
+                    'slot' => $slot,
+                    'city' => $city,
+                    'gentilic' => $group['gentilic'],
+                    'cover' => Setting::get("home_city_group_cover_{$slot}", $group['cover']),
+                    'link' => Setting::get("home_city_group_link_{$slot}") ?: route('home', ['city' => $city]),
+                    'enabled' => Setting::get(
+                        "home_city_group_enabled_{$slot}",
+                        $group['default_enabled'] ? '1' : '0'
+                    ) === '1',
+                ];
+            })
+            ->values();
+
         return view('home', compact(
             'q',
             'city',
@@ -295,11 +339,13 @@ class HomeController extends Controller
             'heroBanners',
             'realEstateBanners',
             'vehiclesBanners',
+            'productsBanners',
             'jobsBanners',
             'realEstateAds',
             'vehicleAds',
             'productAds',
-            'jobAgroAds'
+            'jobAgroAds',
+            'homeCityGroups'
         ));
     }
 
@@ -445,11 +491,33 @@ class HomeController extends Controller
             ->withQueryString();
 
         $profileCta = $this->professionalProfileCta($request);
-        $serviceBanners = collect(range(1, 6))
+
+        $cityBanners = array_map(
+            fn ($file) => 'Cidades/' . basename($file),
+            glob(public_path('Cidades/*.{webp,jpg,jpeg,png}'), GLOB_BRACE) ?: []
+        );
+
+        if (empty($cityBanners)) {
+            $cityBanners = [
+                'Cidades/Aracaju.webp',
+                'Cidades/Canindé de São Francisco.webp',
+                'Cidades/Itabaiana.webp',
+                'Cidades/Monte Alegre.webp',
+                'Cidades/Nossa Senhora da Glória.webp',
+                'Cidades/Nossa Senhora das  Dores.webp',
+                'Cidades/Tobias Barreto.webp',
+            ];
+        }
+
+        $serviceBanners = collect(range(1, 10))
             ->map(fn (int $slot) => Setting::get("services_banner_{$slot}"))
             ->filter()
             ->values()
             ->all();
+
+        if (empty($serviceBanners)) {
+            $serviceBanners = $cityBanners;
+        }
 
         return view('services.index', compact(
             'providers',
@@ -473,6 +541,10 @@ class HomeController extends Controller
         $databaseCategories = Category::query()
             ->select(['categories.name', 'categories.icon'])
             ->where('categories.active', true)
+            ->where(function ($query) {
+                $query->where('categories.module', 'services')
+                    ->orWhereNull('categories.module');
+            })
             ->whereNotNull('categories.name')
             ->where('categories.name', '!=', '')
             ->distinct()

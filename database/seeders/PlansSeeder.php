@@ -45,8 +45,8 @@ class PlansSeeder extends Seeder
                 'slug'           => 'free',
                 'name'           => 'Gratuito',
                 'badge_label'    => null,
-                'headline'       => 'Comece a anunciar sem custo.',
-                'description'    => 'Ideal para quem está começando e quer divulgar seus serviços ou produtos gratuitamente.',
+                'headline'       => 'Comece a divulgar seu negócio sem custo.',
+                'description'    => 'Ideal para quem está começando: publique 1 anúncio, crie 1 loja com até 5 produtos e mostre seu perfil de prestador de serviço gratuitamente.',
                 'price'          => 0.00,
                 'color'          => 'secondary',
                 'is_active'      => true,
@@ -72,7 +72,7 @@ class PlansSeeder extends Seeder
                 'name'           => 'Plano PRO',
                 'badge_label'    => 'MAIS ESCOLHIDO',
                 'headline'       => 'Venda todos os dias e fique à frente.',
-                'description'    => 'Para lojas que vendem constantemente e querem mais visibilidade, anúncios ilimitados e destaque.',
+                'description'    => 'Para lojas que vendem constantemente e querem mais visibilidade, destaque e mais espaço para crescer.',
                 'price'          => 49.90,
                 'color'          => 'primary',
                 'is_active'      => true,
@@ -108,9 +108,9 @@ class PlansSeeder extends Seeder
         $values = [
 
             // ── FREE ────────────────────────────────────────────────────────────
-            ['plan' => 'free', 'feature' => 'store_limit',          'value' => '0',    'show' => true],
-            ['plan' => 'free', 'feature' => 'product_limit',         'value' => '0',    'show' => false],
-            ['plan' => 'free', 'feature' => 'ad_limit',              'value' => '3',    'show' => true],
+            ['plan' => 'free', 'feature' => 'store_limit',          'value' => '0',    'show' => true],   // Gratuito: sem loja (upgrade necesssário)
+            ['plan' => 'free', 'feature' => 'product_limit',         'value' => '5',    'show' => true],   // Gratuito: 5 produtos
+            ['plan' => 'free', 'feature' => 'ad_limit',              'value' => '1',    'show' => true],   // Gratuito: 1 anúncio
             ['plan' => 'free', 'feature' => 'store_banners',         'value' => '0',    'show' => false],
             ['plan' => 'free', 'feature' => 'store_gallery',         'value' => '0',    'show' => false],
             ['plan' => 'free', 'feature' => 'analytics_days',        'value' => '7',    'show' => true],
@@ -124,8 +124,8 @@ class PlansSeeder extends Seeder
 
             // ── START ────────────────────────────────────────────────────────────
             ['plan' => 'start', 'feature' => 'store_limit',          'value' => '1',    'show' => true],
-            ['plan' => 'start', 'feature' => 'product_limit',         'value' => '30',   'show' => true],
-            ['plan' => 'start', 'feature' => 'ad_limit',              'value' => '20',   'show' => true],
+            ['plan' => 'start', 'feature' => 'product_limit',         'value' => '30',   'show' => true],  // Start: 30 produtos/loja
+            ['plan' => 'start', 'feature' => 'ad_limit',              'value' => '5',    'show' => true],  // Start: 5 anúncios
             ['plan' => 'start', 'feature' => 'store_banners',         'value' => '1',    'show' => true],
             ['plan' => 'start', 'feature' => 'store_gallery',         'value' => '5',    'show' => true],
             ['plan' => 'start', 'feature' => 'analytics_days',        'value' => '30',   'show' => true],
@@ -139,8 +139,8 @@ class PlansSeeder extends Seeder
 
             // ── PRO ──────────────────────────────────────────────────────────────
             ['plan' => 'pro', 'feature' => 'store_limit',            'value' => '1',    'show' => true],
-            ['plan' => 'pro', 'feature' => 'product_limit',          'value' => '150',  'show' => true],
-            ['plan' => 'pro', 'feature' => 'ad_limit',               'value' => null,   'show' => true],
+            ['plan' => 'pro', 'feature' => 'product_limit',          'value' => '100',  'show' => true],  // PRO: 100 produtos/loja
+            ['plan' => 'pro', 'feature' => 'ad_limit',               'value' => '20',   'show' => true],  // PRO: 20 anúncios
             ['plan' => 'pro', 'feature' => 'store_banners',          'value' => '3',    'show' => true],
             ['plan' => 'pro', 'feature' => 'store_gallery',          'value' => '12',   'show' => true],
             ['plan' => 'pro', 'feature' => 'analytics_days',         'value' => '60',   'show' => true],
@@ -153,19 +153,19 @@ class PlansSeeder extends Seeder
             ['plan' => 'pro', 'feature' => 'feed_sponsored',         'value' => '1',    'show' => true],
 
             // ── ENTERPRISE (Premium) ─────────────────────────────────────────────
-            ['plan' => 'enterprise', 'feature' => 'store_limit',            'value' => '3',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'product_limit',          'value' => null, 'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'ad_limit',               'value' => null, 'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'store_banners',          'value' => '6',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'store_gallery',          'value' => '20', 'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'analytics_days',         'value' => '90', 'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'promotions_limit',       'value' => '10', 'show' => false],
-            ['plan' => 'enterprise', 'feature' => 'store_featured',         'value' => '1',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'verified_badge',         'value' => '1',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'priority_support',       'value' => '1',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'professional_profiles',  'value' => null, 'show' => false],
-            ['plan' => 'enterprise', 'feature' => 'provider_featured',      'value' => '1',  'show' => true],
-            ['plan' => 'enterprise', 'feature' => 'feed_sponsored',         'value' => '1',  'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'store_limit',            'value' => '3',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'product_limit',          'value' => '300', 'show' => true],  // Premium: 300 produtos/loja
+            ['plan' => 'enterprise', 'feature' => 'ad_limit',               'value' => '60',  'show' => true],  // Premium: 60 anúncios
+            ['plan' => 'enterprise', 'feature' => 'store_banners',          'value' => '6',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'store_gallery',          'value' => '20',  'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'analytics_days',         'value' => '90',  'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'promotions_limit',       'value' => '10',  'show' => false],
+            ['plan' => 'enterprise', 'feature' => 'store_featured',         'value' => '1',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'verified_badge',         'value' => '1',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'priority_support',       'value' => '1',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'professional_profiles',  'value' => null,  'show' => false],
+            ['plan' => 'enterprise', 'feature' => 'provider_featured',      'value' => '1',   'show' => true],
+            ['plan' => 'enterprise', 'feature' => 'feed_sponsored',         'value' => '1',   'show' => true],
         ];
 
         foreach ($values as $v) {

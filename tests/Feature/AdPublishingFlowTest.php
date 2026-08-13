@@ -127,6 +127,7 @@ class AdPublishingFlowTest extends TestCase
             'public_address' => 'Rua das Flores, 120, Centro',
             'description' => 'Descrição completa dos serviços profissionais.',
             'whatsapp' => '79999999999',
+            'phone' => '79999999999',
         ])->assertSessionHasNoErrors();
 
         $service = Ad::where('title', 'Eletricista de teste')->firstOrFail();

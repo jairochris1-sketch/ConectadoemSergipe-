@@ -191,8 +191,19 @@ class AdController extends Controller
                 'string',
                 'max:255',
             ],
-            'whatsapp' => 'required|string|max:20',
-            'phone' => 'nullable|string|max:20',
+            'whatsapp' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'),
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'phone' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'),
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'telegram' => 'nullable|string|max:50',
             'instagram' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
             'profile_is_claimed' => 'nullable|boolean',
@@ -300,6 +311,7 @@ class AdController extends Controller
             'contact_whatsapp' => $request->module === 'services' && ! $isClaimed
                 ? $request->whatsapp
                 : null,
+            'contact_telegram' => $request->telegram,
         ];
 
         if (Schema::hasColumn('ads', 'price_type')) {
@@ -449,9 +461,32 @@ class AdController extends Controller
         }
 
         $bannerPath = $oldBannerPath;
+        $coverNoticeAlert = null;
         if ($request->hasFile('banner')) {
+            $user = auth()->user();
+            $plan = $user ? $user->normalizedSubscriptionPlan() : 'free';
+
+            if ($plan === 'start' && $user->role !== 'admin') {
+                $currentChanges = $ad->monthly_cover_changes;
+                if ($currentChanges >= 3) {
+                    return back()->with('error', '⚠️ Limite atingido (Plano Start): Você já realizou as 3 alterações de capa permitidas para este mês. O limite será renovado no próximo mês ou você pode fazer upgrade para o Plano PRO ou Ouro para alterações ilimitadas.');
+                }
+            }
+
             $optimizedBanner = ImageOptimizer::convertToWebp($request->file('banner'), 'banner');
-            $bannerPath = $optimizedBanner ?: $oldBannerPath;
+            if ($optimizedBanner) {
+                $bannerPath = $optimizedBanner;
+                $ad->recordCoverChange();
+                $newCount = $ad->monthly_cover_changes;
+
+                if ($plan === 'start' && $user->role !== 'admin') {
+                    if ($newCount === 2) {
+                        $coverNoticeAlert = '⚠️ Atenção (Plano Start): Você realizou 2 de 3 alterações de capa permitidas para este mês. Resta apenas 1 alteração até a renovação no próximo mês!';
+                    } elseif ($newCount === 3) {
+                        $coverNoticeAlert = 'ℹ️ Aviso (Plano Start): Você utilizou a 3ª e última alteração de capa permitida para este mês.';
+                    }
+                }
+            }
         } elseif ($request->boolean('remove_banner')) {
             $bannerPath = null;
         }
@@ -489,6 +524,7 @@ class AdController extends Controller
                 : null,
             'instagram' => $request->instagram ?? $ad->instagram,
             'facebook' => $request->facebook ?? $ad->facebook,
+            'contact_telegram' => $request->telegram ?? $ad->contact_telegram,
             'logo' => $logoPath,
             'banner' => $bannerPath,
             'business_hours' => $request->input('business_hours', $ad->business_hours),
@@ -580,7 +616,12 @@ class AdController extends Controller
             ? [$ad->store, $ad]
             : $ad->slug;
 
-        return redirect()->route($route, $routeParameters)->with('success', $message);
+        $redirectResponse = redirect()->route($route, $routeParameters)->with('success', $message);
+        if ($coverNoticeAlert) {
+            $redirectResponse->with('warning', $coverNoticeAlert);
+        }
+
+        return $redirectResponse;
     }
 
     private function resolveStoreId(
@@ -642,7 +683,7 @@ class AdController extends Controller
             : "Sua loja atingiu o limite de {$limit} produtos do plano {$user->subscriptionPlanLabel()}. Remova um produto da loja ou escolha outro plano.";
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $ad = Ad::with(['images', 'variations'])->findOrFail($id);
         $this->authorizeAdManagement($ad);
@@ -656,6 +697,13 @@ class AdController extends Controller
         $ad->delete();
 
         $files->each(fn ($path) => $this->deletePublicFile($path));
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Anúncio removido com sucesso!',
+                'ad_id' => (int) $ad->id,
+            ]);
+        }
 
         return redirect()->route('user.panel')->with('success', 'Anúncio removido com sucesso!');
     }
@@ -841,5 +889,32 @@ class AdController extends Controller
         }
 
         return is_numeric($normalized) ? (float) $normalized : null;
+    }
+
+    public function updateCoverPosition(Ad $ad, Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user && ($user->id === $ad->user_id || $user->role === 'admin'), 403, 'Acesso não autorizado.');
+
+        if (! $user->hasPaidPlan()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'O ajuste de posição da capa está disponível a partir dos Planos Pagos.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'cover_position_y' => 'required|integer|min:0|max:100',
+        ]);
+
+        $ad->update([
+            'cover_position_y' => $validated['cover_position_y'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'cover_position_y' => $ad->cover_position_y,
+            'message' => 'Posição da capa salva com sucesso!',
+        ]);
     }
 }

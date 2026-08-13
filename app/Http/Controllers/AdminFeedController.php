@@ -11,9 +11,13 @@ class AdminFeedController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->query('status', 'pending');
+        $status = in_array((string) $request->query('status'), ['pending', 'reported', 'published', 'rejected', 'hidden'], true)
+            ? (string) $request->query('status')
+            : 'pending';
         $posts = FeedPost::with(['user', 'images', 'reports.reporter'])
             ->withCount(['likes', 'comments', 'reports'])
+            ->when($status === 'reported', fn ($query) => $query
+                ->whereHas('reports', fn ($reports) => $reports->where('status', 'pending')))
             ->when(in_array($status, ['pending', 'published', 'rejected', 'hidden'], true), fn ($query) => $query->where('status', $status))
             ->latest()->paginate(20)->withQueryString();
 

@@ -69,10 +69,14 @@
                     <h5 class="fw-bold privacy-section-title mt-4 mb-3">3. Recomendações e personalização</h5>
                     <p class="mb-4">Para organizar recomendações na Comunidade, podemos considerar cidade, anúncios visualizados, favoritos e cliques realizados dentro do próprio Conectado em Sergipe. Visitantes não autenticados são reconhecidos somente por uma chave pseudonimizada da sessão; este recurso não armazena endereço IP nem agente do navegador. Impressões e preferências de visitantes são mantidas por até 30 dias, e as vinculadas a uma conta por até 90 dias. O usuário pode escolher os modos “Recentes” ou “Perto de você”, ocultar recomendações específicas e utilizar o sinal de privacidade do navegador.</p>
 
-                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">4. Proteção de Dados</h5>
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">4. Cookies e tecnologias semelhantes</h5>
+                    <p class="mb-3">Utilizamos cookies estritamente necessários para manter a sessão, proteger formulários e permitir o funcionamento da plataforma. Cookies opcionais de preferências, análise e marketing somente podem ser ativados depois da sua autorização.</p>
+                    <p class="mb-4">Você pode aceitar, rejeitar ou escolher categorias na Central de Preferências e alterar sua decisão a qualquer momento pelo botão <strong>Redefinir Cookies</strong> no rodapé. A recusa de cookies opcionais não impede o acesso às funcionalidades essenciais do site.</p>
+
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">5. Proteção de Dados</h5>
                     <p class="mb-4">Adotamos medidas técnicas e organizacionais rigorosas para proteger seus dados contra acessos não autorizados, perdas ou alterações ilícitas, em total conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).</p>
 
-                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">5. Compartilhamento de Dados</h5>
+                    <h5 class="fw-bold privacy-section-title mt-4 mb-3">6. Compartilhamento de Dados</h5>
                     <p class="mb-0">Não vendemos nem alugamos suas informações pessoais a terceiros. As informações de contato fornecidas em anúncios públicos serão exibidas apenas para conectar compradores e vendedores.</p>
                 </div>
 

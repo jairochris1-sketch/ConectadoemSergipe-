@@ -5935,3 +5935,251 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
         flex: 0 0 auto;
     }
 }
+
+/* =========================================================
+   AJUSTES GLOBAIS DE PROPORÇÃO MOBILE
+   ========================================================= */
+@media (max-width: 767.98px) {
+    /* Títulos de Seção e Cabeçalhos Compactos */
+    .section-title,
+    h2.fw-bold,
+    h3.fw-bold,
+    h4.fw-bold {
+        font-size: clamp(1.05rem, 4vw, 1.25rem) !important;
+        line-height: 1.25 !important;
+    }
+
+    /* Cards e Badges em Carrosséis Mobile */
+    .card-premium .badge,
+    .card .badge {
+        font-size: 0.62rem !important;
+        padding: 2px 5px !important;
+    }
+
+    .card-premium .card-title,
+    .card .card-title,
+    .home-clickable-name {
+        font-size: 0.88rem !important;
+        font-weight: 800 !important;
+        line-height: 1.2 !important;
+    }
+
+    .card-premium strong.text-primary,
+    .card strong.text-primary {
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+    }
+
+    .swiper-featured-ads .card,
+    .swiper-featured-ads .card-premium,
+    .swiper-category-ads .card,
+    .swiper-category-ads .card-premium {
+        height: 155px !important;
+    }
+
+    .swiper-featured-ads .card-img-top,
+    .swiper-featured-ads .card-img-placeholder,
+    .swiper-category-ads .card-img-top,
+    .swiper-category-ads .card-img-placeholder {
+        height: 75px !important;
+    }
+
+    .swiper-featured-ads .card-body,
+    .swiper-category-ads .card-body {
+        padding: 4px 6px !important;
+    }
+
+    .swiper-featured-ads .card-body small.text-muted.d-block,
+    .swiper-category-ads .card-body small.text-muted.d-block {
+        display: none !important;
+    }
+
+    /* Navegação dos Carrosséis */
+    .swiper-button-prev,
+    .swiper-button-next {
+        width: 26px !important;
+        height: 26px !important;
+        opacity: 0.8;
+    }
+
+    .swiper-button-prev::after,
+    .swiper-button-next::after {
+        font-size: 0.75rem !important;
+    }
+
+    /* Widgets Flutuantes (Acessibilidade & Tema) */
+    .theme-toggle-container {
+        bottom: 74px !important;
+        right: 14px !important;
+        z-index: 1070 !important;
+    }
+
+    .theme-toggle-btn {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    [vw] [vw-access-button] {
+        transform: scale(0.72) !important;
+        transform-origin: right center !important;
+    }
+}
+
+/* =========================================================
+   SUITE DE CORREÇÕES DO MODO ESCURO (DARK MODE)
+   ========================================================= */
+html[data-theme="dark"],
+[data-bs-theme="dark"] {
+    --background: #0b1120;
+    --card: #111827;
+    --foreground: #f8fafc;
+    --border: #283548;
+}
+
+/* Correção de Títulos e Textos no Modo Escuro */
+html[data-theme="dark"] .text-dark,
+[data-bs-theme="dark"] .text-dark,
+html[data-theme="dark"] h4.text-dark,
+[data-bs-theme="dark"] h4.text-dark {
+    color: var(--foreground, #f8fafc) !important;
+}
+
+html[data-theme="dark"] .home-clickable-name,
+html[data-theme="dark"] a .home-clickable-name,
+[data-bs-theme="dark"] .home-clickable-name,
+[data-bs-theme="dark"] a .home-clickable-name {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .card-title,
+[data-bs-theme="dark"] .card-title {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] strong.text-primary,
+[data-bs-theme="dark"] strong.text-primary {
+    color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .text-muted,
+[data-bs-theme="dark"] .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* Correção dos Inputs da Busca no Modo Escuro */
+html[data-theme="dark"] .hero-search-input-box,
+[data-bs-theme="dark"] .hero-search-input-box {
+    background-color: #172033 !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+html[data-theme="dark"] .hero-search-input-box input,
+html[data-theme="dark"] .hero-search-input-box select,
+[data-bs-theme="dark"] .hero-search-input-box input,
+[data-bs-theme="dark"] .hero-search-input-box select {
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .hero-search-input-box select option,
+[data-bs-theme="dark"] .hero-search-input-box select option {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+/* Botão Consultar sempre Azul Vibrante (mesmo no Modo Escuro) */
+.home-search-submit,
+html[data-theme="dark"] .home-search-submit,
+[data-bs-theme="dark"] .home-search-submit,
+html[data-theme="dark"] button.home-search-submit,
+[data-bs-theme="dark"] button.home-search-submit {
+    background-color: #0d6efd !important;
+    background: #0d6efd !important;
+    border: none !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .home-search-submit:hover,
+[data-bs-theme="dark"] .home-search-submit:hover {
+    background-color: #0b5ed7 !important;
+    background: #0b5ed7 !important;
+    color: #ffffff !important;
+}
+
+/* Correção da Barra Inferior no Modo Escuro */
+html[data-theme="dark"] .home-auth-mobile-bottom-nav,
+[data-bs-theme="dark"] .home-auth-mobile-bottom-nav {
+    background: rgba(17, 24, 39, .96) !important;
+    border-top-color: rgba(255, 255, 255, .12) !important;
+}
+
+html[data-theme="dark"] .home-auth-mobile-bottom-nav a,
+[data-bs-theme="dark"] .home-auth-mobile-bottom-nav a {
+    color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .home-auth-mobile-bottom-nav a.is-active,
+[data-bs-theme="dark"] .home-auth-mobile-bottom-nav a.is-active {
+    color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .home-auth-mobile-bottom-nav a.is-primary i,
+[data-bs-theme="dark"] .home-auth-mobile-bottom-nav a.is-primary i {
+    border-color: #111827 !important;
+}
+
+/* =========================================================
+   HIERARQUIA VISUAL DOS CARDS: NOME DO ANÚNCIO EM DESTAQUE E PREÇO SUAVE
+   ========================================================= */
+.card-premium .card-title,
+.card .card-title,
+.home-clickable-name,
+h6.home-clickable-name {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+}
+
+.card-premium strong.text-primary,
+.card strong.text-primary,
+strong.text-primary {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+
+/* =========================================================
+   UTILITÁRIOS DE ESPAÇAMENTO DECIMAL (.5)
+   O Bootstrap 5 vanilla não inclui valores com casas decimais.
+   Necessário pois o projeto usa py-0.5, px-2.5, gap-1.5, gap-2.5
+   em múltiplas views (home, admin/categories, services, site-header).
+   ========================================================= */
+
+/* Padding vertical */
+.py-0\.5 { padding-top: 0.125rem !important; padding-bottom: 0.125rem !important; }
+.py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+.py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+.py-3\.5 { padding-top: 0.875rem !important; padding-bottom: 0.875rem !important; }
+
+/* Padding horizontal */
+.px-0\.5 { padding-left: 0.125rem !important; padding-right: 0.125rem !important; }
+.px-1\.5 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
+.px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+.px-3\.5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+
+/* Padding geral */
+.p-0\.5 { padding: 0.125rem !important; }
+.p-1\.5 { padding: 0.375rem !important; }
+.p-2\.5 { padding: 0.625rem !important; }
+.p-3\.5 { padding: 0.875rem !important; }
+
+/* Margin bottom */
+.mb-0\.5 { margin-bottom: 0.125rem !important; }
+.mb-1\.5 { margin-bottom: 0.375rem !important; }
+.mb-2\.5 { margin-bottom: 0.625rem !important; }
+.mb-3\.5 { margin-bottom: 0.875rem !important; }
+
+/* Gap */
+.gap-0\.5 { gap: 0.125rem !important; }
+.gap-1\.5 { gap: 0.375rem !important; }
+.gap-2\.5 { gap: 0.625rem !important; }
+.gap-3\.5 { gap: 0.875rem !important; }

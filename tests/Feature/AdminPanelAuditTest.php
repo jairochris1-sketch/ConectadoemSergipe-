@@ -34,8 +34,14 @@ class AdminPanelAuditTest extends TestCase
             'admin.ads',
             'admin.reports',
             'admin.reviews',
+            'admin.provider_claims.index',
+            'admin.feed.index',
+            'admin.culture.index',
+            'admin.community-help.index',
             'admin.categories',
+            'admin.plans.index',
             'admin.stores',
+            'admin.orders.index',
             'admin.settings',
         ] as $routeName) {
             $this->actingAs($admin)

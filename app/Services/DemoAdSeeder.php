@@ -8,9 +8,9 @@ use App\Models\User;
 
 class DemoAdSeeder
 {
-    public static function seedIfNeeded(): void
+    public static function seedIfNeeded(bool $force = false): void
     {
-        if (Ad::where('status', 'active')->count() >= 8) {
+        if (! $force && Ad::where('status', 'active')->count() >= 8) {
             return;
         }
 
@@ -70,6 +70,18 @@ class DemoAdSeeder
                 'status' => 'active',
                 'image' => 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80'
             ],
+            [
+                'user_id' => $user->id,
+                'module' => 'real_estate',
+                'title' => 'Casa com Piscina no Mosqueiro',
+                'slug' => 'casa-com-piscina-no-mosqueiro',
+                'description' => 'Casa ampla no Mosqueiro com 3 quartos, área gourmet, piscina e garagem para 2 carros.',
+                'price' => 680000.00,
+                'city' => 'Aracaju',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80'
+            ],
 
             // VEÍCULOS
             [
@@ -108,6 +120,30 @@ class DemoAdSeeder
                 'status' => 'active',
                 'image' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80'
             ],
+            [
+                'user_id' => $user->id,
+                'module' => 'vehicles',
+                'title' => 'Jeep Renegade Longitude 2021',
+                'slug' => 'jeep-renegade-longitude-2021',
+                'description' => 'Jeep Renegade Longitude automático, completo, revisado e com 38.000 km rodados.',
+                'price' => 92900.00,
+                'city' => 'Aracaju',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80'
+            ],
+            [
+                'user_id' => $user->id,
+                'module' => 'vehicles',
+                'title' => 'Fiat Strada Freedom 2022',
+                'slug' => 'fiat-strada-freedom-2022',
+                'description' => 'Fiat Strada Freedom cabine dupla, flex, completa e pronta para trabalho ou lazer.',
+                'price' => 89900.00,
+                'city' => 'Itabaiana',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=800&q=80'
+            ],
 
             // PRODUTOS
             [
@@ -145,6 +181,30 @@ class DemoAdSeeder
                 'state' => 'SE',
                 'status' => 'active',
                 'image' => 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=800&q=80'
+            ],
+            [
+                'user_id' => $user->id,
+                'module' => 'products',
+                'title' => 'Cadeira de Escritório Ergonômica',
+                'slug' => 'cadeira-de-escritorio-ergonomica',
+                'description' => 'Cadeira ergonômica com apoio lombar, regulagem de altura e braços ajustáveis.',
+                'price' => 890.00,
+                'city' => 'Aracaju',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80'
+            ],
+            [
+                'user_id' => $user->id,
+                'module' => 'products',
+                'title' => 'Smartwatch com GPS e Bluetooth',
+                'slug' => 'smartwatch-com-gps-e-bluetooth',
+                'description' => 'Relógio inteligente com GPS, monitor cardíaco, notificações e bateria de longa duração.',
+                'price' => 649.00,
+                'city' => 'Nossa Senhora do Socorro',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
             ],
 
             // SERVIÇOS
@@ -214,6 +274,18 @@ class DemoAdSeeder
                 'status' => 'active',
                 'image' => 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=800&q=80'
             ],
+            [
+                'user_id' => $user->id,
+                'module' => 'jobs',
+                'title' => 'Assistente Administrativo',
+                'slug' => 'vaga-assistente-administrativo',
+                'description' => 'Empresa em Aracaju contrata assistente administrativo com ensino médio completo e informática básica.',
+                'price' => 1900.00,
+                'city' => 'Aracaju',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80'
+            ],
 
             // AGRO
             [
@@ -227,6 +299,30 @@ class DemoAdSeeder
                 'state' => 'SE',
                 'status' => 'active',
                 'image' => 'https://images.unsplash.com/photo-1530267981608-bc7e3be93d56?auto=format&fit=crop&w=800&q=80'
+            ],
+            [
+                'user_id' => $user->id,
+                'module' => 'agro',
+                'title' => 'Novilhas Nelore para Cria',
+                'slug' => 'novilhas-nelore-para-cria',
+                'description' => 'Lote de novilhas Nelore saudáveis, vacinadas e prontas para criação em propriedade rural.',
+                'price' => 4200.00,
+                'city' => 'Lagarto',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80'
+            ],
+            [
+                'user_id' => $user->id,
+                'module' => 'agro',
+                'title' => 'Cestas de Hortifruti da Roça',
+                'slug' => 'cestas-de-hortifruti-da-roca',
+                'description' => 'Cestas semanais com frutas, verduras e legumes frescos produzidos por agricultores locais.',
+                'price' => 75.00,
+                'city' => 'Itabaiana',
+                'state' => 'SE',
+                'status' => 'active',
+                'image' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'
             ]
         ];
 

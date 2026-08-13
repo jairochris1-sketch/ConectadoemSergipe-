@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Ad;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\ImageModerationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -86,6 +87,120 @@ class AdminSettingsTest extends TestCase
         @unlink(public_path($servicesBannerPath));
         if ($socialPreviewPath) {
             @unlink(public_path($socialPreviewPath));
+        }
+    }
+
+    public function test_administrator_can_save_integrations_and_authentication_balloon_settings(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.settings.update'), [
+                'site_name' => 'Conectado em Sergipe',
+                'contact_email' => 'contato@example.com',
+                'image_moderation_enabled' => '1',
+                'google_vision_api_key' => 'vision-secret',
+                'google_login_enabled' => '1',
+                'google_client_id' => 'google-client-id',
+                'google_client_secret' => 'google-client-secret',
+                'auth_balloon_enabled' => '1',
+                'auth_balloon_msg1' => 'Mensagem personalizada principal',
+                'auth_balloon_msg2' => 'Segunda mensagem personalizada',
+                'auth_balloon_msg3' => 'Terceira mensagem personalizada',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertSame('1', Setting::get('image_moderation_enabled'));
+        $this->assertSame('vision-secret', Setting::get('google_vision_api_key'));
+        $this->assertSame('1', Setting::get('google_login_enabled'));
+        $this->assertSame('google-client-id', Setting::get('google_client_id'));
+        $this->assertSame('google-client-secret', Setting::get('google_client_secret'));
+        $this->assertSame('1', Setting::get('auth_balloon_enabled'));
+        $this->assertSame('Mensagem personalizada principal', Setting::get('auth_balloon_msg1'));
+        $this->assertSame('Segunda mensagem personalizada', Setting::get('auth_balloon_msg2'));
+        $this->assertSame('Terceira mensagem personalizada', Setting::get('auth_balloon_msg3'));
+
+        $this->get(route('admin.settings'))
+            ->assertOk()
+            ->assertDontSee('vision-secret', false)
+            ->assertDontSee('google-client-secret', false)
+            ->assertSee('deixe em branco para manter');
+
+        $this->app['auth']->logout();
+
+        foreach (['login', 'register', 'password.request'] as $routeName) {
+            $this->get(route($routeName))
+                ->assertOk()
+                ->assertSee('id="auth-floating-balloon"', false)
+                ->assertSee('data-auth-balloon-close', false)
+                ->assertSee('aria-label="Fechar balão"', false)
+                ->assertSee('balloon.hidden = true', false)
+                ->assertSee('class="auth-message-balloon', false)
+                ->assertSee('auth-message-balloon-header', false)
+                ->assertSee('auth-message-balloon-label', false)
+                ->assertSee('auth-message-balloon-dots', false)
+                ->assertSee('data-balloon-current', false)
+                ->assertSee('data-balloon-previous', false)
+                ->assertSee('data-balloon-next', false)
+                ->assertSee('data-balloon-pause', false)
+                ->assertSee('aria-label="Pausar mensagens"', false)
+                ->assertSee('height: 315px;', false)
+                ->assertSee('max-height: 145px;', false)
+                ->assertSee('font-size: clamp(.98rem, 1.7vw, 1.12rem);', false)
+                ->assertSee('line-height: 1.45;', false)
+                ->assertSee('}, 7000);', false)
+                ->assertSee('isPaused = !isPaused', false)
+                ->assertSee('dots.forEach', false)
+                ->assertSee('Conectado em Sergipe')
+                ->assertSee('Descubra novas possibilidades')
+                ->assertSee('Mensagem personalizada principal')
+                ->assertSee('Segunda mensagem personalizada')
+                ->assertSee('Terceira mensagem personalizada');
+        }
+
+        foreach (['login', 'register'] as $routeName) {
+            $this->get(route($routeName))
+                ->assertOk()
+                ->assertSee('href="'.route('auth.google').'"', false)
+                ->assertSee('class="auth-google-button"', false)
+                ->assertSee('class="auth-google-icon"', false)
+                ->assertSee('fill="#4285F4"', false)
+                ->assertSee('fill="#34A853"', false)
+                ->assertSee('fill="#FBBC05"', false)
+                ->assertSee('fill="#EA4335"', false)
+                ->assertSee('Continuar com Google');
+        }
+
+        $this->actingAs($admin)
+            ->post(route('admin.settings.update'), [
+                'site_name' => 'Conectado em Sergipe',
+                'contact_email' => 'contato@example.com',
+                'google_vision_api_key' => '',
+                'google_client_secret' => '',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertSame('0', Setting::get('image_moderation_enabled'));
+        $this->assertSame('0', Setting::get('google_login_enabled'));
+        $this->assertSame('0', Setting::get('auth_balloon_enabled'));
+        $this->assertSame('vision-secret', Setting::get('google_vision_api_key'));
+        $this->assertSame('google-client-secret', Setting::get('google_client_secret'));
+        $this->assertSame(
+            'disabled',
+            app(ImageModerationService::class)->inspect('unused-while-disabled.jpg')['details']['status']
+        );
+
+        $this->app['auth']->logout();
+
+        foreach (['login', 'register', 'password.request'] as $routeName) {
+            $response = $this->get(route($routeName))->assertOk();
+            $response->assertDontSee('id="auth-floating-balloon"', false);
+
+            if ($routeName !== 'password.request') {
+                $response->assertDontSee('href="'.route('auth.google').'"', false);
+            }
         }
     }
 

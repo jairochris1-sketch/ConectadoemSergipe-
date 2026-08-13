@@ -86,7 +86,7 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('WhatsApp')
             ->assertSee(route('provider.show', $provider->slug));
 
-        $this->get('/')
+        $this->get(route('home'))
             ->assertOk()
             ->assertSee('navbar-mobile-brand-title', false)
             ->assertSee('Conectado em Sergipe')
@@ -97,9 +97,9 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee($provider->title)
             ->assertSee('Em destaque')
             ->assertSee('Eletricista')
-            ->assertSee('d-lg-none', false)
-            ->assertSee('col-6 col-md-6 col-xl-3', false)
-            ->assertSee('provider-card-avatar', false)
+            ->assertSee('home-provider-desktop-column', false)
+            ->assertSee('swiper-providers', false)
+            ->assertDontSee('home-provider-guest-mobile', false)
             ->assertDontSee($provider->description)
             ->assertSee(route('provider.show', $provider->slug));
     }
@@ -169,7 +169,7 @@ class ServiceProviderProfileTest extends TestCase
 
         $this->get(route('provider.show', $provider->slug))
             ->assertOk()
-            ->assertSee('Perfil reivindicado')
+            ->assertDontSee('Perfil reivindicado')
             ->assertSee('provider-profile-header', false)
             ->assertSee('provider-profile-overview', false)
             ->assertSee('max-width: 1080px !important;', false)
@@ -388,6 +388,7 @@ class ServiceProviderProfileTest extends TestCase
                 'title' => 'Segundo perfil bloqueado',
                 'city' => 'Aracaju',
                 'description' => 'Este segundo perfil não deve ser salvo no plano gratuito.',
+                'phone' => '79999999999',
                 'whatsapp' => '79999999999',
             ])
             ->assertSessionHasNoErrors()

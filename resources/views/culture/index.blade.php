@@ -179,49 +179,93 @@
 
 @section('content')
 <main class="culture-page pb-5">
-    <!-- Hero Banner Cultural -->
-    <section class="cordel-hero pt-5 pb-5 mb-5 position-relative">
-        <div class="cordel-hero-pattern"></div>
-        <div class="container position-relative z-index-2 py-4">
-            <div class="row align-items-center">
-                <!-- Coluna Esquerda: Textos e Botões -->
-                <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start">
-                    <span class="badge text-white px-3 py-2 text-uppercase mb-4 shadow-sm" style="background-color: #9C2720; border: 1px solid #5B130E; letter-spacing: 2px; border-radius: 0;">
-                        LITERATURA DE CORDEL
-                    </span>
-                    <h1 class="display-4 hero-title-serif mb-4">A banca de folhetos dos artistas sergipanos</h1>
-                    <p class="lead mb-4 mx-auto mx-lg-0" style="color: #4A3E31; font-family: Georgia, serif; max-width: 550px;">
-                        Escritores, repentistas e xilogravadores anunciam suas obras, publicam seus versos para ler on-line e recebem pedidos direto no WhatsApp. Sem intermediário, sem taxa.
-                    </p>
+    <!-- Hero Banner Cultural (Reduzido e Dinâmico) -->
+    <div class="container pt-3 mb-4">
+        @if(!empty($cultureBanners))
+        <section class="swiper culture-banner-swiper overflow-hidden position-relative shadow-lg" style="border-radius: 20px; min-height: 250px; height: 280px; max-height: 310px;">
+            <div class="swiper-wrapper">
+                @foreach($cultureBanners as $banner)
+                    @php
+                        $cultureBannerUrl = str_starts_with($banner, 'http') ? $banner : asset($banner);
+                    @endphp
+                    <div class="swiper-slide cordel-hero-slide position-relative"
+                         style="background-image: linear-gradient(rgba(43, 33, 24, 0.65), rgba(43, 33, 24, 0.78)), url('{{ $cultureBannerUrl }}'); background-size: cover; background-position: center; height: 100%;">
+                    </div>
+                @endforeach
+            </div>
 
-                    <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+            <!-- Conteúdo Fixo Sobreposto ao Banner -->
+            <div class="position-absolute inset-0 w-100 h-100 top-0 start-0 d-flex flex-column align-items-center justify-content-center text-center px-3 py-3" style="z-index: 10; pointer-events: none;">
+                <div class="w-100" style="max-width: 760px; pointer-events: auto;">
+                    <span class="badge text-white px-3 py-1.5 text-uppercase mb-2 shadow-sm" style="background-color: #9C2720; border: 1px solid #5B130E; letter-spacing: 1.5px; border-radius: 0; font-size: 0.72rem;">
+                        ARTE & CULTURA SERGIPANA
+                    </span>
+                    <h1 class="fw-bold hero-title-serif mb-2 text-white fs-3" style="text-shadow: 0 2px 8px rgba(0,0,0,0.85);">
+                        Vitrine de Arte, Cultura & Cordel de Sergipe
+                    </h1>
+                    <p class="small text-white opacity-90 mb-3" style="max-width: 580px; margin: 0 auto; font-family: Georgia, serif; text-shadow: 0 1px 4px rgba(0,0,0,0.75);">
+                        Artistas, poetas, artesãos, músicos e escritores divulgam suas obras, cordéis e artesanato sergipano.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
                         @auth
-                            <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-4 py-3">
-                                Publicar minha Obra
+                            <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                                <i class="fa-solid fa-feather-pointed me-1"></i> Publicar Minha Obra / Arte
                             </a>
-                            <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline px-4 py-3">
-                                Meus Rascunhos
+                            <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline text-white border-white px-3 py-2 btn-sm">
+                                Minhas Obras
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-cordel-red px-4 py-3">
-                                Sou Escritor / Publicar
+                            <a href="{{ route('login') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                                Sou Artista / Publicar
                             </a>
                         @endauth
-                        <a href="#culture-works-container" class="btn btn-cordel-outline px-4 py-3">
-                            Buscar Folhetos
+                        <a href="#culture-works-container" class="btn btn-cordel-outline text-white border-white px-3 py-2 btn-sm">
+                            Explorar Obras
                         </a>
                     </div>
                 </div>
+            </div>
 
-                <!-- Coluna Direita: Imagem de Xilogravura -->
-                <div class="col-lg-6 text-center text-lg-end">
-                    <div class="p-2 d-inline-block shadow" style="background: #EFE4D3; border: 3px solid #2B2118;">
-                        <img src="{{ asset('images/cordelista_hero.png') }}" alt="Cordelista Sergipano" class="img-fluid" style="max-height: 400px; border: 2px solid #2B2118; mix-blend-mode: multiply;">
-                    </div>
+            @if(count($cultureBanners) > 1)
+                <div class="culture-banner-next swiper-button-next text-white" style="z-index: 20;"></div>
+                <div class="culture-banner-prev swiper-button-prev text-white" style="z-index: 20;"></div>
+                <div class="culture-banner-pagination swiper-pagination" style="z-index: 20;"></div>
+            @endif
+        </section>
+        @else
+        <!-- Hero Compacto Sem Imagem de Banner -->
+        <section class="cordel-hero py-4 px-3 rounded-4 position-relative shadow-sm" style="border-radius: 20px !important;">
+            <div class="cordel-hero-pattern"></div>
+            <div class="container position-relative z-index-2 text-center py-2">
+                <span class="badge text-white px-3 py-1.5 text-uppercase mb-2 shadow-sm" style="background-color: #9C2720; border: 1px solid #5B130E; letter-spacing: 1.5px; border-radius: 0; font-size: 0.72rem;">
+                    ARTE & CULTURA SERGIPANA
+                </span>
+                <h1 class="fw-bold hero-title-serif mb-2 fs-3">Vitrine de Arte, Cultura & Cordel de Sergipe</h1>
+                <p class="small mb-3 mx-auto" style="color: #4A3E31; font-family: Georgia, serif; max-width: 580px;">
+                    Artistas, poetas, artesãos, músicos e escritores divulgam todas as formas de arte, obras, cordéis e artesanato sergipano.
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    @auth
+                        <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                            <i class="fa-solid fa-feather-pointed me-1"></i> Publicar Minha Obra / Arte
+                        </a>
+                        <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline px-3 py-2 btn-sm">
+                            Minhas Obras
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                            Sou Artista / Publicar
+                        </a>
+                    @endauth
+                    <a href="#culture-works-container" class="btn btn-cordel-outline px-3 py-2 btn-sm">
+                        Explorar Obras
+                    </a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+        @endif
+    </div>
 
     <div class="container">
         <!-- Filtros e Busca em Tempo Real -->
@@ -232,18 +276,20 @@
                 <div class="col-12 col-md-4">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" name="q" value="{{ request('q') }}" class="form-control bg-light border-start-0 rounded-end-3" placeholder="Buscar por palavra-chave ou título...">
+                        <input type="text" name="q" value="{{ request('q') }}" class="form-control bg-light border-start-0 rounded-end-3" placeholder="Buscar obras, arte ou artistas...">
                     </div>
                 </div>
 
                 <!-- Categoria -->
                 <div class="col-6 col-md-3">
                     <select name="category" class="form-select bg-light rounded-3">
-                        <option value="">Todas as Categorias</option>
-                        <option value="cordel" {{ request('category') === 'cordel' ? 'selected' : '' }}>📜 Cordéis</option>
-                        <option value="literatura" {{ request('category') === 'literatura' ? 'selected' : '' }}>📚 Literatura & Poesia</option>
+                        <option value="">Todas as Artes & Culturas</option>
+                        <option value="cordel" {{ request('category') === 'cordel' ? 'selected' : '' }}>📜 Cordel & Poesia</option>
+                        <option value="artesanato" {{ request('category') === 'artesanato' ? 'selected' : '' }}>🧵 Artesanato & Escultura</option>
+                        <option value="arte_visual" {{ request('category') === 'arte_visual' ? 'selected' : '' }}>🎨 Pintura & Artes Visuais</option>
                         <option value="musica" {{ request('category') === 'musica' ? 'selected' : '' }}>🎵 Música & Áudio</option>
-                        <option value="arte_visual" {{ request('category') === 'arte_visual' ? 'selected' : '' }}>🎨 Artes Visuais</option>
+                        <option value="literatura" {{ request('category') === 'literatura' ? 'selected' : '' }}>📚 Literatura & Livros</option>
+                        <option value="teatro" {{ request('category') === 'teatro' ? 'selected' : '' }}>🎭 Teatro & Performance</option>
                     </select>
                 </div>
 
@@ -515,6 +561,26 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         renderSavedSearches();
+
+        if (document.querySelector('.culture-banner-swiper')) {
+            new Swiper('.culture-banner-swiper', {
+                slidesPerView: 1,
+                loop: true,
+                autoplay: {
+                    delay: 8000,
+                    disableOnInteraction: false,
+                },
+                speed: 800,
+                pagination: {
+                    el: '.culture-banner-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.culture-banner-next',
+                    prevEl: '.culture-banner-prev',
+                },
+            });
+        }
 
         const savedMode = localStorage.getItem('conectado_culture_view_mode') || 'grid';
         if (savedMode !== 'grid') {

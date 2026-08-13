@@ -677,7 +677,7 @@ html[data-theme="dark"] .plans-about-map-label {
     <section class="plans-hero-section text-center">
         <div class="container">
             <div class="d-flex align-items-center mb-3">
-                <a href="{{ url('/') }}" class="plans-back-btn">
+                <a href="{{ route('home') }}" class="plans-back-btn">
                     <i class="fa-solid fa-arrow-left"></i> Voltar
                 </a>
             </div>
@@ -700,8 +700,8 @@ html[data-theme="dark"] .plans-about-map-label {
                         GRATUITO
                     </div>
                     <div class="plan-card-body">
-                        <h2 class="plan-card-headline">Comece a anunciar sem custo.</h2>
-                        <p class="plan-card-desc">Ideal para quem está começando e quer divulgar seus serviços ou produtos gratuitamente.</p>
+                        <h2 class="plan-card-headline">Comece a divulgar seu negócio sem custo.</h2>
+                        <p class="plan-card-desc">Crie seu perfil de prestador, abra uma loja com até 5 produtos e faça seu primeiro anúncio — tudo 100% grátis.</p>
 
                         <div class="plan-card-price-block">
                             <span class="plan-card-price-currency">R$</span>
@@ -710,11 +710,11 @@ html[data-theme="dark"] .plans-about-map-label {
                         </div>
 
                         <ul class="plan-card-features">
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 3 anúncios ativos</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> <strong>1 perfil</strong> de prestador de serviço</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> <strong>1 loja</strong> online (até 5 produtos)</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> <strong>1 anúncio</strong> ativo</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas dos últimos 7 dias</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Chat do site</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> WhatsApp</li>
-                            <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Loja online</li>
+                            <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Banners e galeria da loja</li>
                             <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Destaque na vitrine</li>
                             <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Selo de verificado</li>
                             <li class="blocked-feature"><i class="fa-solid fa-xmark icon-cross-grey"></i> Suporte prioritário</li>
@@ -723,11 +723,11 @@ html[data-theme="dark"] .plans-about-map-label {
                         <div>
                             @auth
                                 <a href="{{ route('page.contact') }}" class="plan-cta-btn btn-free">
-                                    Anunciar Grátis <i class="fa-solid fa-arrow-right"></i>
+                                    Começar Grátis <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             @else
                                 <a href="{{ route('register') }}" class="plan-cta-btn btn-free">
-                                    Anunciar Grátis <i class="fa-solid fa-arrow-right"></i>
+                                    Começar Grátis <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             @endauth
                             <div class="plan-trust-badge">
@@ -756,9 +756,9 @@ html[data-theme="dark"] .plans-about-map-label {
                         </div>
 
                         <ul class="plan-card-features">
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> 1 loja online</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 30 produtos por loja</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 20 anúncios ativos</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> <strong>1</strong> loja online</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>30 produtos</strong> por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>5 anúncios</strong> ativos</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Até 5 fotos por produto</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> 1 banner da loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas dos últimos 30 dias</li>
@@ -797,7 +797,7 @@ html[data-theme="dark"] .plans-about-map-label {
                     </div>
                     <div class="plan-card-body">
                         <h2 class="plan-card-headline">Venda todos os dias e fique à frente.</h2>
-                        <p class="plan-card-desc">Para lojas que vendem constantemente e querem mais visibilidade, anúncios ilimitados e destaque.</p>
+                        <p class="plan-card-desc">Para lojas que vendem constantemente e querem mais visibilidade, destaque e mais espaço para crescer.</p>
 
                         <div class="plan-card-price-block">
                             <span class="plan-card-price-currency">R$</span>
@@ -807,10 +807,10 @@ html[data-theme="dark"] .plans-about-map-label {
 
                         <ul class="plan-card-features">
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Tudo do Plano Start</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 150 produtos por loja</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Anúncios ilimitados</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>100 produtos</strong> por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>20 anúncios</strong> ativos</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Até 12 fotos por produto</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 3 banner(s) por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 3 banners por loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas dos últimos 60 dias</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Loja em destaque na vitrine</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Prestador em destaque na página inicial</li>
@@ -857,15 +857,16 @@ html[data-theme="dark"] .plans-about-map-label {
 
                         <ul class="plan-card-features">
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Tudo do Plano PRO</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 3 lojas online</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Produtos ilimitados por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>3 lojas</strong> online</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>300 produtos</strong> por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até <strong>60 anúncios</strong> ativos</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Até 20 fotos por produto</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 6 banner(s) por loja</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Até 6 banners por loja</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Destaque permanente na vitrine</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Destaque na página inicial</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Prestador em destaque na página inicial</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Prioridade máxima nas pesquisas</li>
-                            <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas avançadas</li>
+                            <li><i class="fa-solid fa-check icon-check-blue"></i> Estatísticas avançadas (90 dias)</li>
                             <li><i class="fa-solid fa-check icon-check-blue"></i> Suporte VIP exclusivo</li>
                         </ul>
 

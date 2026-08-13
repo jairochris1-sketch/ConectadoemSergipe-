@@ -25,11 +25,19 @@
 <main class="product-page">
     <div class="product-page-shell">
         <nav class="product-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{{ route('home') }}"><i class="fa-solid fa-house me-1"></i>Início</a>
+            <i class="fa-solid fa-chevron-right"></i>
             <a href="{{ route('stores.index') }}">Lojas</a>
             <i class="fa-solid fa-chevron-right"></i>
             <a href="{{ route('store.show', $store->slug) }}">{{ $store->name }}</a>
+            @if($product->category)
+                @foreach($product->category->category_trail as $catBranch)
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <a href="{{ route('module.products', ['category' => $catBranch->slug]) }}">{{ $catBranch->name }}</a>
+                @endforeach
+            @endif
             <i class="fa-solid fa-chevron-right"></i>
-            <span>{{ $product->title }}</span>
+            <span class="text-truncate" style="max-width: 280px;">{{ $product->title }}</span>
         </nav>
 
         @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif

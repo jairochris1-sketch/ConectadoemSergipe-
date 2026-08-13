@@ -39,7 +39,7 @@
                 <span class="community-ad-city"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ $feedAd->city ?: 'Sergipe' }}</span>
                 <span class="community-ad-footer-actions">
                     @if((float) $feedAd->price > 0)
-                        <strong>R$ {{ number_format((float) $feedAd->effective_price, 2, ',', '.') }}</strong>
+                        <strong>{{ $feedAd->formatted_price }}</strong>
                     @endif
                     <span class="community-ad-cta">Ver anúncio <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
                 </span>

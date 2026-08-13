@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'asaas' => [
+        'sandbox_url' => env('ASAAS_SANDBOX_URL', 'https://api-sandbox.asaas.com'),
+        'production_url' => env('ASAAS_PRODUCTION_URL', 'https://api.asaas.com'),
+        'user_agent' => env('ASAAS_USER_AGENT', 'ConectadoEmSergipe/1.0'),
+        'webhook_base_url' => env('ASAAS_WEBHOOK_BASE_URL') ?: env('APP_URL'),
+    ],
+
 ];

@@ -11,9 +11,10 @@
             <div class="w-100 mx-auto" style="max-width: 400px;">
                 
                 <!-- Logo -->
-                <div class="mb-3 text-start">
-                    <a href="{{ route('home') }}">
-                        <img src="{{ asset('images/logo.png') }}" height="40" alt="Conectado em Sergipe">
+                <div class="mb-4 text-center">
+                    <a href="{{ route('home') }}" class="d-inline-block" aria-label="Ir para a página inicial">
+                        <img src="{{ asset('images/2mapa-sergipe-conectado-azul.png') }}" class="auth-theme-brand-logo auth-theme-brand-logo-light" alt="Conectado em Sergipe">
+                        <img src="{{ asset('images/1mapa-sergipe-conectado.png') }}" class="auth-theme-brand-logo auth-theme-brand-logo-dark" alt="Conectado em Sergipe">
                     </a>
                 </div>
 
@@ -76,7 +77,7 @@
 
         <!-- COLUNA DA DIREITA: PAINEL DE DESTAQUE HERO -->
         <div class="col-lg-7 d-none d-lg-block position-relative overflow-hidden bg-dark">
-            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;"></div>
+            @include('auth._city-slideshow')
 
             <svg class="position-absolute top-0 start-0 w-100 h-100 opacity-20" xmlns="http://www.w3.org/2000/svg">
                 <polyline points="200,150 400,250 350,450 650,300 700,500" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6,6" />
@@ -145,18 +146,31 @@
                 </div>
             </div>
 
-            <!-- Banner Flutuante Central de Vidro -->
-            <div class="position-absolute top-50 start-50 translate-middle p-4 p-xl-5 text-white rounded-4 border border-white border-opacity-20 shadow-2xl" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); width: 80%; max-width: 520px; z-index: 10;">
-                <h3 class="fw-bold lh-base text-white mb-0 fs-3">
-                    Conecte-se a <span class="text-info fw-bold">serviços</span>, <span class="text-info fw-bold">produtos</span>, <span class="text-info fw-bold">imóveis</span>, <span class="text-info fw-bold">veículos</span> e <span class="text-info fw-bold">oportunidades</span> em um único lugar.
-                </h3>
-            </div>
+            @include('auth._message_balloon')
 
         </div>
     </div>
 </div>
 
 <style>
+.auth-theme-brand-logo {
+    display: block;
+    width: 156px;
+    height: auto;
+}
+
+.auth-theme-brand-logo-dark {
+    display: none;
+}
+
+html[data-theme="dark"] .auth-theme-brand-logo-light {
+    display: none;
+}
+
+html[data-theme="dark"] .auth-theme-brand-logo-dark {
+    display: block;
+}
+
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }

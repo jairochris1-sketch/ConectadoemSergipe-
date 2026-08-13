@@ -59,7 +59,7 @@ class ProviderClaimFeatureTest extends TestCase
 
         $this->assertDatabaseHas('ads', [
             'title' => 'Pintor cadastrado pelo administrador',
-            'user_id' => $admin->id,
+            'user_id' => $selectedUser->id,
             'module' => 'services',
             'is_claimed' => false,
             'claiming_enabled' => false,
@@ -271,7 +271,8 @@ class ProviderClaimFeatureTest extends TestCase
 
         $this->get(route('provider.show', $provider->slug))
             ->assertOk()
-            ->assertSee('Perfil reivindicado')
+            ->assertDontSee('Perfil reivindicado')
+            ->assertDontSee('Perfil não reivindicado')
             ->assertDontSee('Reivindicar este perfil');
     }
 

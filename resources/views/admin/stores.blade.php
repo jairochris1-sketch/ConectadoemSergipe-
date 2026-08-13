@@ -370,9 +370,13 @@
     .admin-store-empty i { margin-bottom: 5px; color: #2563eb; font-size: 2rem; }
     .admin-store-empty strong { color: var(--foreground); }
     .admin-store-pagination { padding: 17px 20px; border-top: 1px solid var(--border); }
-    @media (max-width: 1199.98px) {
-        .admin-store-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 1399.98px) {
+        .admin-store-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .admin-store-filters { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+    }
+    @media (max-width: 991.98px) {
+        .admin-store-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .admin-store-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 767.98px) {
         .admin-store-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -380,7 +384,7 @@
         .admin-store-filters > button { grid-column: 1 / -1; }
     }
     @media (max-width: 479.98px) {
-        .admin-store-metrics { gap: 8px; }
+        .admin-store-metrics { grid-template-columns: 1fr; gap: 8px; }
         .admin-store-metrics article { padding: 12px; }
         .admin-store-metrics article > span { width: 36px; height: 36px; flex-basis: 36px; }
         .admin-store-metrics strong { font-size: 1.05rem; }

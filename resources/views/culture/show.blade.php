@@ -273,7 +273,7 @@
                         <p class="text-muted small mb-3">Esta obra possui versão impressa ou produto cadastrado no catálogo.</p>
                         
                         <div class="d-flex align-items-center justify-content-between mb-3">
-                            <span class="fs-4 fw-extrabold text-success">R$ {{ number_format($work->ad->price, 2, ',', '.') }}</span>
+                            <span class="fs-4 fw-extrabold text-success">{{ $work->ad->formatted_price }}</span>
                         </div>
 
                         @if($work->user->pix_key)

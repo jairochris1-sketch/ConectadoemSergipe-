@@ -173,6 +173,16 @@ class CommunityFeedTest extends TestCase
             ->assertOk()
             ->assertSee('Maria Santos')
             ->assertSee('@maria.santos');
+
+        $post->forceFill(['published_at' => now()->subDay()])->save();
+
+        $this->get(route('profile.show', $admin->username))
+            ->assertOk()
+            ->assertSee('conectadoemsergipe.com')
+            ->assertDontSee('@admin.conectado')
+            ->assertSee('há 1 dia')
+            ->assertDontSee('1 day ago')
+            ->assertSee('border:1px solid rgba(255,255,255,.9);border-radius:18px', false);
     }
 
     public function test_homepage_uses_the_same_blue_clickable_name_pattern(): void

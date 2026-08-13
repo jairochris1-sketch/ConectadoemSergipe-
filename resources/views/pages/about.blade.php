@@ -175,6 +175,42 @@
     letter-spacing: -0.5px;
     margin-bottom: 16px;
 }
+.about-founder-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+.about-founder-heading .about-card-title {
+    margin-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+}
+.about-founder-toggle {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #1d4ed8;
+    border-radius: 10px;
+    background: transparent;
+    color: #1d4ed8;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.about-founder-toggle:hover,
+.about-founder-toggle:focus-visible {
+    background: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-1px);
+    outline: none;
+}
 .about-card-accent {
     width: 32px;
     height: 3px;
@@ -425,9 +461,18 @@ body.about-page-no-header .site-header {
                                     <i class="fa-solid fa-check"></i>
                                 </div>
                             </div>
-                            <div class="about-card-body pt-4">
+                            <div class="about-card-body pt-4" data-founder-card>
                                 <span class="about-card-subtitle">Fundador & CEO</span>
-                                <h3 class="about-card-title">Jairo dos Santos</h3>
+                                <div class="about-founder-heading">
+                                    <h3 class="about-card-title" data-founder-name>Conectado em Sergipe</h3>
+                                    <button type="button"
+                                            class="about-founder-toggle"
+                                            data-founder-toggle
+                                            aria-label="Mostrar nome do fundador"
+                                            aria-pressed="false">
+                                        <i class="fa-regular fa-user" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                                 <div class="about-card-accent"></div>
                                 <p class="about-card-text">
                                     Começar rápido é fácil. Impulsionar os negócios de Sergipe é a nossa missão. Criamos o Conectado em Sergipe para conectar a comunidade sergipana, oferecendo tecnologia prática, segura e feita para durar.
@@ -561,3 +606,46 @@ body.about-page-no-header .site-header {
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const founderCard = document.querySelector('[data-founder-card]');
+
+    if (!founderCard) {
+        return;
+    }
+
+    const founderName = founderCard.querySelector('[data-founder-name]');
+    const founderToggle = founderCard.querySelector('[data-founder-toggle]');
+    const founderIcon = founderToggle?.querySelector('i');
+    let resetTimer = null;
+
+    const renderFounderName = function (showPersonName) {
+        founderName.textContent = showPersonName ? 'Jairo dos Santos' : 'Conectado em Sergipe';
+        founderToggle.setAttribute('aria-pressed', showPersonName ? 'true' : 'false');
+        founderToggle.setAttribute(
+            'aria-label',
+            showPersonName ? 'Voltar ao nome Conectado em Sergipe' : 'Mostrar nome do fundador'
+        );
+
+        if (founderIcon) {
+            founderIcon.className = showPersonName ? 'fa-solid fa-arrow-rotate-left' : 'fa-regular fa-user';
+        }
+    };
+
+    founderToggle.addEventListener('click', function () {
+        const showPersonName = founderToggle.getAttribute('aria-pressed') !== 'true';
+
+        window.clearTimeout(resetTimer);
+        renderFounderName(showPersonName);
+
+        if (showPersonName) {
+            resetTimer = window.setTimeout(function () {
+                renderFounderName(false);
+            }, 10000);
+        }
+    });
+});
+</script>
+@endpush

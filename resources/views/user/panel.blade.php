@@ -278,20 +278,21 @@
                 @endif
             </section>
 
-            <div class="bg-white rounded-4 shadow-sm border p-4 user-items-panel">
-                <h4 class="fw-bold text-dark mb-4 user-items-title"><i class="fa-solid fa-rectangle-ad text-primary me-2"></i> Meus anúncios e perfis ({{ count($ads) }})</h4>
+            <div class="bg-white rounded-4 shadow-sm border p-4 user-items-panel" data-user-ads-panel>
+                <h4 class="fw-bold text-dark mb-4 user-items-title"><i class="fa-solid fa-rectangle-ad text-primary me-2"></i> Meus anúncios e perfis (<span data-user-ads-count>{{ count($ads) }}</span>)</h4>
 
-                @if(count($ads) === 0)
-                    <div class="text-center py-5">
-                        <i class="fa-solid fa-folder-open text-muted fs-1 mb-3"></i>
-                        <h6 class="fw-bold text-dark">Nenhum anúncio publicado ainda</h6>
-                        <p class="text-muted small mb-4">Comece a vender ou oferecer seus serviços em Sergipe hoje!</p>
-                        <a href="{{ route('ad.create') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Anunciar Agora</a>
-                    </div>
-                @else
-                    <div class="row g-3">
-                        @foreach($ads as $item)
-                        <div class="col-12">
+                <div class="alert mb-3" data-user-ads-feedback role="status" aria-live="polite" hidden></div>
+
+                <div class="text-center py-5 {{ count($ads) === 0 ? '' : 'd-none' }}" data-user-ads-empty>
+                    <i class="fa-solid fa-folder-open text-muted fs-1 mb-3"></i>
+                    <h6 class="fw-bold text-dark">Nenhum anúncio publicado ainda</h6>
+                    <p class="text-muted small mb-4">Comece a vender ou oferecer seus serviços em Sergipe hoje!</p>
+                    <a href="{{ route('ad.create') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Anunciar Agora</a>
+                </div>
+
+                <div class="row g-3 {{ count($ads) === 0 ? 'd-none' : '' }}" data-user-ads-list>
+                    @foreach($ads as $item)
+                        <div class="col-12 user-ad-row" data-user-ad-row="{{ $item->id }}">
                             <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light user-item-card">
                                 <div class="d-flex align-items-center gap-3 user-item-summary">
                                     @if($item->card_image)
@@ -306,7 +307,7 @@
                                         @if($item->module === 'services')
                                             <span class="fw-bold text-primary"><i class="fa-solid fa-user-tie me-1"></i>Perfil profissional</span>
                                         @else
-                                            <span class="fw-bold text-primary">R$ {{ number_format($item->price, 2, ',', '.') }}</span>
+                                            <span class="fw-bold text-primary">{{ $item->formatted_price }}</span>
                                         @endif
                                         @if($item->module === 'products' && $item->store)
                                             <span class="badge rounded-pill text-bg-light border ms-2 user-item-store">
@@ -320,10 +321,15 @@
                                     <a href="{{ $item->module === 'services' ? route('provider.show', $item->slug) : route('ad.show', $item->slug) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                                         <i class="fa-solid fa-eye me-1"></i> Ver
                                     </a>
+                                    @if(\App\Support\ServiceBookingCatalog::eligible($item))
+                                        <a href="{{ route('service-booking.manage', $item) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="fa-regular fa-calendar-check me-1"></i> Agenda e financeiro
+                                        </a>
+                                    @endif
                                     <a href="{{ route('ad.edit', $item->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                         <i class="fa-solid fa-pen me-1"></i> Editar
                                     </a>
-                                    <form action="{{ route('ad.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Deseja realmente excluir este anúncio?');">
+                                    <form action="{{ route('ad.destroy', $item->id) }}" method="POST" data-user-ad-delete-form data-ad-title="{{ $item->title }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
@@ -333,9 +339,8 @@
                                 </div>
                             </div>
                         </div>
-                        @endforeach
-                    </div>
-                @endif
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
@@ -485,6 +490,16 @@
         margin-left: 1rem;
     }
 
+    .user-ad-row {
+        transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .user-ad-row.is-removing {
+        opacity: 0;
+        transform: translateX(14px);
+        pointer-events: none;
+    }
+
     @media (max-width: 575.98px) {
         .user-panel-page {
             padding-top: 1rem !important;
@@ -569,3 +584,80 @@
     }
 </style>
 @endsection
+
+@push('scripts')
+<script>
+    (() => {
+        const panel = document.querySelector('[data-user-ads-panel]');
+        if (!panel) return;
+
+        const list = panel.querySelector('[data-user-ads-list]');
+        const emptyState = panel.querySelector('[data-user-ads-empty]');
+        const count = panel.querySelector('[data-user-ads-count]');
+        const feedback = panel.querySelector('[data-user-ads-feedback]');
+
+        const showFeedback = (message, type) => {
+            feedback.textContent = message;
+            feedback.className = `alert alert-${type} mb-3`;
+            feedback.hidden = false;
+        };
+
+        panel.addEventListener('submit', async (event) => {
+            const form = event.target.closest('[data-user-ad-delete-form]');
+            if (!form) return;
+
+            event.preventDefault();
+
+            const adTitle = form.dataset.adTitle || 'este anúncio';
+            if (!window.confirm(`Deseja realmente excluir “${adTitle}”?`)) return;
+
+            const button = form.querySelector('button[type="submit"]');
+            const originalButtonContent = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Excluindo';
+            feedback.hidden = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                let payload = {};
+                try {
+                    payload = await response.json();
+                } catch (error) {
+                    // A mensagem padrão abaixo cobre respostas sem JSON.
+                }
+
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Não foi possível excluir o anúncio. Tente novamente.');
+                }
+
+                const row = form.closest('[data-user-ad-row]');
+                row.classList.add('is-removing');
+                await new Promise((resolve) => window.setTimeout(resolve, 200));
+                row.remove();
+
+                const remainingAds = list.querySelectorAll('[data-user-ad-row]').length;
+                count.textContent = remainingAds;
+
+                if (remainingAds === 0) {
+                    list.classList.add('d-none');
+                    emptyState.classList.remove('d-none');
+                }
+
+                showFeedback(payload.message || 'Anúncio removido com sucesso!', 'success');
+            } catch (error) {
+                button.disabled = false;
+                button.innerHTML = originalButtonContent;
+                showFeedback(error.message || 'Não foi possível excluir o anúncio. Tente novamente.', 'danger');
+            }
+        });
+    })();
+</script>
+@endpush

@@ -21,7 +21,7 @@
 
                 @if($work->ad)
                     <span class="badge bg-success text-white position-absolute top-0 end-0 m-2 shadow-sm fw-bold" style="font-size: 0.65rem;">
-                        <i class="fa-solid fa-bag-shopping me-1"></i> R$ {{ number_format($work->ad->price, 2, ',', '.') }}
+                        <i class="fa-solid fa-bag-shopping me-1"></i> {{ $work->ad->formatted_price }}
                     </span>
                 @elseif($work->embed_media_url)
                     <span class="badge bg-danger text-white position-absolute top-0 end-0 m-2 shadow-sm fw-bold" style="font-size: 0.65rem;">

@@ -31,6 +31,7 @@ class Ad extends Model
         'video_url',
         'price_type',
         'service_modes',
+        'booking_enabled',
         'cnpj',
         'city',
         'state',
@@ -41,6 +42,9 @@ class Ad extends Model
         'facebook',
         'logo',
         'banner',
+        'cover_position_y',
+        'cover_change_count',
+        'cover_change_window_started_at',
         'status',
         'views',
         'publication_ip',
@@ -49,11 +53,13 @@ class Ad extends Model
         'claimed_at',
         'contact_phone',
         'contact_whatsapp',
+        'contact_telegram',
     ];
 
     protected $casts = [
         'business_hours' => 'array',
         'service_modes' => 'array',
+        'booking_enabled' => 'boolean',
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
         'stock_quantity' => 'integer',
@@ -65,7 +71,32 @@ class Ad extends Model
         'is_claimed' => 'boolean',
         'claiming_enabled' => 'boolean',
         'claimed_at' => 'datetime',
+        'cover_change_count' => 'integer',
+        'cover_change_window_started_at' => 'datetime',
     ];
+
+    public function getMonthlyCoverChangesAttribute(): int
+    {
+        $startedAt = $this->cover_change_window_started_at;
+        if (! $startedAt || $startedAt->lt(now()->startOfMonth())) {
+            return 0;
+        }
+
+        return (int) ($this->cover_change_count ?? 0);
+    }
+
+    public function recordCoverChange(): void
+    {
+        $startedAt = $this->cover_change_window_started_at;
+        if (! $startedAt || $startedAt->lt(now()->startOfMonth())) {
+            $this->cover_change_count = 1;
+            $this->cover_change_window_started_at = now();
+        } else {
+            $this->cover_change_count = ($this->cover_change_count ?? 0) + 1;
+        }
+
+        $this->save();
+    }
 
     public function user()
     {
@@ -138,6 +169,13 @@ class Ad extends Model
         return $this->hasMany(ProviderClaim::class);
     }
 
+    public function serviceProcedures() { return $this->hasMany(ServiceProcedure::class); }
+    public function serviceStaff() { return $this->hasMany(ServiceStaff::class); }
+    public function serviceAppointments() { return $this->hasMany(ServiceAppointment::class); }
+    public function serviceFinancialEntries() { return $this->hasMany(ServiceFinancialEntry::class); }
+    public function serviceSubscriptionPlans() { return $this->hasMany(ServiceSubscriptionPlan::class); }
+    public function serviceClientSubscriptions() { return $this->hasMany(ServiceClientSubscription::class); }
+
     public function pendingProviderClaims()
     {
         return $this->hasMany(ProviderClaim::class)
@@ -177,6 +215,16 @@ class Ad extends Model
         return $this->sale_price !== null && (float) $this->sale_price < (float) $this->price
             ? (float) $this->sale_price
             : (float) $this->price;
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        $val = (float) $this->effective_price;
+        if (! $val || $val <= 0) {
+            return 'Sob consulta';
+        }
+
+        return 'R$ ' . number_format($val, 2, ',', '.');
     }
 
     public function getIsOutOfStockAttribute(): bool

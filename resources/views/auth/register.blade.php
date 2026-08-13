@@ -11,9 +11,10 @@
             <div class="w-100 mx-auto" style="max-width: 400px;">
                 
                 <!-- Logo -->
-                <div class="mb-3 text-start">
-                    <a href="{{ route('home') }}">
-                        <img src="{{ asset('images/logo.png') }}" height="40" alt="Conectado em Sergipe">
+                <div class="mb-4 text-center">
+                    <a href="{{ route('home') }}" class="d-inline-block" aria-label="Ir para a página inicial">
+                        <img src="{{ asset('images/2mapa-sergipe-conectado-azul.png') }}" class="auth-theme-brand-logo auth-theme-brand-logo-light" alt="Conectado em Sergipe">
+                        <img src="{{ asset('images/1mapa-sergipe-conectado.png') }}" class="auth-theme-brand-logo auth-theme-brand-logo-dark" alt="Conectado em Sergipe">
                     </a>
                 </div>
 
@@ -38,71 +39,66 @@
                     @csrf
                     
                     <div class="mb-2.5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-regular fa-user"></i></span>
-                            <input type="text" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.9rem;" id="name" name="name" value="{{ old('name') }}" required placeholder="Seu nome completo">
-                        </div>
+                        <input type="text" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.9rem;" id="name" name="name" value="{{ old('name') }}" required placeholder="Seu nome completo">
                     </div>
 
                     <div class="mb-2.5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3 fw-bold">@</span>
-                            <input type="text" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark @error('username') is-invalid @enderror" style="font-size: 0.9rem;" id="username" name="username" value="{{ old('username') }}" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9._]+" autocomplete="username" placeholder="Nome de usuário" aria-describedby="username-error">
-                        </div>
+                        <input type="text" class="form-control bg-light rounded-3 py-2 text-dark @error('username') is-invalid @enderror" style="font-size: 0.9rem;" id="username" name="username" value="{{ old('username') }}" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9._]+" autocomplete="username" placeholder="Nome de usuário" aria-describedby="username-error">
                         @error('username')
                             <div class="text-danger small mt-1" id="username-error">
-                                <i class="fa-solid fa-circle-exclamation me-1"></i>{{ $message }}
+                                {{ $message }}
                             </div>
                         @enderror
                     </div>
 
                     <div class="mb-2.5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-regular fa-envelope"></i></span>
-                            <input type="email" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.9rem;" id="email" name="email" value="{{ old('email') }}" required placeholder="Seu e-mail principal">
-                        </div>
+                        <input type="email" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.9rem;" id="email" name="email" value="{{ old('email') }}" required placeholder="Seu e-mail principal">
                     </div>
 
                     <div class="row g-2 mb-2.5">
                         <div class="col-6">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-solid fa-phone"></i></span>
-                                <input type="tel" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.85rem;" id="phone" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="WhatsApp obrigatório">
-                            </div>
+                            <input type="tel" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.85rem;" id="phone" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="WhatsApp obrigatório">
                         </div>
                         <div class="col-6">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-solid fa-location-dot"></i></span>
-                                <select class="form-select bg-light border-start-0 rounded-end-3 py-2 text-secondary" style="font-size: 0.85rem;" id="city" name="city">
-                                    @foreach(\App\Core\SergipeCities::getAll() as $cityName)
-                                        <option value="{{ $cityName }}" {{ $cityName === 'Aracaju' ? 'selected' : '' }}>{{ $cityName }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <select class="form-select auth-register-select-clean bg-light rounded-3 py-2 text-secondary" style="font-size: 0.85rem;" id="city" name="city">
+                                @foreach(\App\Core\SergipeCities::getAll() as $cityName)
+                                    <option value="{{ $cityName }}" {{ $cityName === 'Aracaju' ? 'selected' : '' }}>{{ $cityName }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-solid fa-lock"></i></span>
-                                <input type="password" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.85rem;" id="password" name="password" required placeholder="Senha">
-                            </div>
+                            <input type="password" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.85rem;" id="password" name="password" required autocomplete="new-password" placeholder="Senha">
                         </div>
                         <div class="col-6">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted border-end-0 rounded-start-3"><i class="fa-solid fa-shield-halved"></i></span>
-                                <input type="password" class="form-control bg-light border-start-0 rounded-end-3 py-2 text-dark" style="font-size: 0.85rem;" id="password_confirmation" name="password_confirmation" required placeholder="Confirmação">
-                            </div>
+                            <input type="password" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.85rem;" id="password_confirmation" name="password_confirmation" required autocomplete="new-password" placeholder="Confirmação">
                         </div>
                     </div>
 
+                    <div class="form-check auth-register-terms mb-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="terms_accepted" name="terms_accepted" required {{ old('terms_accepted') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="terms_accepted">
+                            Li e aceito os
+                            <a href="{{ route('page.terms') }}" target="_blank" rel="noopener" class="fw-bold text-primary text-decoration-none">Termos de Uso</a>
+                            do site.
+                        </label>
+                        @error('terms_accepted')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-success rounded-pill py-2.5 fw-bold shadow-sm" style="font-size: 0.95rem;">
-                            <i class="fa-solid fa-user-plus me-2"></i> Criar Conta & Publicar
+                        <button type="submit" class="btn btn-primary auth-register-submit fw-bold shadow-sm" data-register-submit>
+                            <i class="fa-solid fa-user-check me-2" aria-hidden="true"></i> Criar agora
                         </button>
                     </div>
                 </form>
+
+                @if(\App\Models\Setting::get('google_login_enabled', '1') === '1')
+                    @include('auth._google_button')
+                @endif
 
                 <!-- Retorno para o Login -->
                 <div class="text-center pt-2">
@@ -184,21 +180,84 @@
                 </div>
             </div>
 
-            <!-- Banner Flutuante Central de Vidro -->
-            <div class="position-absolute top-50 start-50 translate-middle p-4 p-xl-5 text-white rounded-4 border border-white border-opacity-20 shadow-2xl" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); width: 80%; max-width: 520px; z-index: 10;">
-                <h3 class="fw-bold lh-base text-white mb-0 fs-3">
-                    Conecte-se a <span class="text-info fw-bold">serviços</span>, <span class="text-info fw-bold">produtos</span>, <span class="text-info fw-bold">imóveis</span>, <span class="text-info fw-bold">veículos</span> e <span class="text-info fw-bold">oportunidades</span> em um único lugar.
-                </h3>
-            </div>
+            @include('auth._message_balloon')
 
         </div>
     </div>
 </div>
 
 <style>
+.auth-theme-brand-logo {
+    display: block;
+    width: 156px;
+    height: auto;
+}
+
+.auth-theme-brand-logo-dark {
+    display: none;
+}
+
+html[data-theme="dark"] .auth-theme-brand-logo-light {
+    display: none;
+}
+
+html[data-theme="dark"] .auth-theme-brand-logo-dark {
+    display: block;
+}
+
+.auth-register-submit {
+    min-height: 50px;
+    color: #fff !important;
+    background: #0d6efd !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    font-size: .95rem;
+}
+
+.auth-register-submit:hover,
+.auth-register-submit:focus-visible {
+    background: #0b5ed7 !important;
+}
+
+.auth-register-select-clean {
+    padding-right: .75rem !important;
+    background-image: none !important;
+}
+
+.auth-register-terms {
+    color: var(--foreground);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+.auth-register-terms .form-check-input {
+    margin-top: .18rem;
+}
+
+.auth-register-submit:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
 }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const termsCheckbox = document.getElementById('terms_accepted');
+    const submitButton = document.querySelector('[data-register-submit]');
+
+    if (!termsCheckbox || !submitButton) return;
+
+    const updateSubmitState = () => {
+        submitButton.disabled = !termsCheckbox.checked;
+        submitButton.setAttribute('aria-disabled', submitButton.disabled ? 'true' : 'false');
+    };
+
+    termsCheckbox.addEventListener('change', updateSubmitState);
+    updateSubmitState();
+});
+</script>
 @endsection

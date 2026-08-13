@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,6 +25,14 @@ class ExampleTest extends TestCase
     {
         $this->get(route('home'))
             ->assertOk()
+            ->assertSee('Arte e Cultura')
+            ->assertSee('href="'.route('culture.index').'"', false)
+            ->assertSee('O maior ecossistema digital de Sergipe')
+            ->assertSee('Assine agora nossos planos e saia na frente.')
+            ->assertSee('Conhecer planos')
+            ->assertSee('aria-label="Ver banner anterior"', false)
+            ->assertSee('aria-label="Ver próximo banner"', false)
+            ->assertSee("navigation: { nextEl: '.home-hero-next', prevEl: '.home-hero-prev' }", false)
             ->assertSee("const swiperFeatured = new Swiper('.swiper-featured-ads'", false)
             ->assertSee('speed: 650', false)
             ->assertSee("const compact = el.classList.contains('swiper-category-compact')", false)
@@ -39,5 +49,46 @@ class ExampleTest extends TestCase
             ->assertSee('data-close-home-plans', false)
             ->assertSee('.card-premium > button[aria-label="Favoritar"]', false)
             ->assertDontSee('+ 50 mil usuários');
+    }
+
+    public function test_authenticated_home_includes_the_mobile_experience(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('home-authenticated', false)
+            ->assertSee('aria-label="Navegação principal mobile"', false)
+            ->assertSee('home-auth-mobile-providers', false)
+            ->assertSee('Consultar');
+
+        $this->app['auth']->logout();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('aria-label="Navegação principal mobile"', false)
+            ->assertDontSee('home-provider-guest-mobile', false);
+    }
+
+    public function test_home_combines_custom_and_city_folder_banners(): void
+    {
+        Setting::set('home_banner_1', 'uploads/custom-home-banner.webp');
+
+        $response = $this->get(route('home'))->assertOk();
+        $heroBanners = $response->viewData('heroBanners');
+
+        $this->assertContains('uploads/custom-home-banner.webp', $heroBanners);
+        $this->assertContains('Cidades/Aracaju.webp', $heroBanners);
+    }
+
+    public function test_authentication_pages_use_the_city_folder_slideshow(): void
+    {
+        foreach (['login', 'register', 'password.request'] as $routeName) {
+            $this->get(route($routeName))
+                ->assertOk()
+                ->assertSee('class="auth-city-slideshow"', false)
+                ->assertSee('Cidades/Aracaju.webp', false);
+        }
     }
 }

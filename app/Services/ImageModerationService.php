@@ -19,8 +19,12 @@ class ImageModerationService
     public function inspect(UploadedFile|string $file): array
     {
         // 1. Verificar se a moderação de imagem está ativa nas configurações
-        $enabled = Setting::get('image_moderation_enabled', env('IMAGE_MODERATION_ENABLED', false));
-        if (! $enabled && ! env('IMAGE_MODERATION_ENABLED', false)) {
+        $enabled = filter_var(
+            Setting::get('image_moderation_enabled', env('IMAGE_MODERATION_ENABLED', false)),
+            FILTER_VALIDATE_BOOL
+        );
+
+        if (! $enabled) {
             return [
                 'isSafe' => true,
                 'reason' => null,

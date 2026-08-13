@@ -5,7 +5,7 @@
 @section('content')
 <div class="container py-5 position-relative">
     <div class="mb-3">
-        <a href="{{ url('/') }}" class="btn btn-sm btn-light rounded-pill shadow-sm" style="font-size: 0.9rem; font-weight: 600; color: #1d4ed8; padding: 0.4rem 1rem;">
+        <a href="{{ route('home') }}" class="btn btn-sm btn-light rounded-pill shadow-sm" style="font-size: 0.9rem; font-weight: 600; color: #1d4ed8; padding: 0.4rem 1rem;">
             <i class="fa-solid fa-arrow-left me-1"></i> Voltar
         </a>
     </div>

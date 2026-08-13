@@ -43,10 +43,12 @@
                         <div class="col-12 col-md-6">
                             <label for="category" class="form-label fw-bold">Categoria *</label>
                             <select name="category" id="category" class="form-select form-select-lg rounded-3" required>
-                                <option value="cordel" {{ old('category') === 'cordel' ? 'selected' : '' }}>📜 Cordel / Poesia</option>
-                                <option value="literatura" {{ old('category') === 'literatura' ? 'selected' : '' }}>📚 Literatura / Livro</option>
+                                <option value="cordel" {{ old('category') === 'cordel' ? 'selected' : '' }}>📜 Cordel & Poesia</option>
+                                <option value="artesanato" {{ old('category') === 'artesanato' ? 'selected' : '' }}>🧵 Artesanato & Escultura</option>
+                                <option value="arte_visual" {{ old('category') === 'arte_visual' ? 'selected' : '' }}>🎨 Pintura & Artes Visuais / Xilogravura</option>
                                 <option value="musica" {{ old('category') === 'musica' ? 'selected' : '' }}>🎵 Música / Áudio (Spotify/YouTube)</option>
-                                <option value="arte_visual" {{ old('category') === 'arte_visual' ? 'selected' : '' }}>🎨 Artes Visuais / Xilogravura</option>
+                                <option value="literatura" {{ old('category') === 'literatura' ? 'selected' : '' }}>📚 Literatura / Livro</option>
+                                <option value="teatro" {{ old('category') === 'teatro' ? 'selected' : '' }}>🎭 Teatro & Performance</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">

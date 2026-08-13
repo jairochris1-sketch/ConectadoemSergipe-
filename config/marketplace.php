@@ -211,4 +211,15 @@ return [
         'gold'         => 10,
         'ouro'         => 10,
     ],
+
+    /* Grupos locais exibidos na página inicial, na ordem definida abaixo. */
+    'home_city_groups' => [
+        1 => ['city' => 'Aracaju', 'gentilic' => 'aracajuense', 'cover' => 'Cidades/Aracaju.webp'],
+        2 => ['city' => 'Tobias Barreto', 'gentilic' => 'tobiense', 'cover' => 'Cidades/Tobias Barreto.webp'],
+        3 => ['city' => 'Itabaiana', 'gentilic' => 'itabaianense', 'cover' => 'Cidades/Itabaiana.webp'],
+        4 => ['city' => 'Nossa Senhora da Glória', 'gentilic' => 'gloriense', 'cover' => 'Cidades/Nossa Senhora da Glória.webp'],
+        5 => ['city' => 'Canindé de São Francisco', 'gentilic' => 'canindeense', 'cover' => 'Cidades/Canindé de São Francisco.webp'],
+        6 => ['city' => 'Monte Alegre de Sergipe', 'gentilic' => 'monte-alegrense', 'cover' => 'Cidades/Monte Alegre.webp'],
+        7 => ['city' => 'Nossa Senhora das Dores', 'gentilic' => 'dorense', 'cover' => 'Cidades/Nossa Senhora das  Dores.webp'],
+    ],
 ];
