@@ -127,10 +127,20 @@ class CategorySeeder extends Seeder
             ['name' => 'Ferramentas, Jardim & Indústria', 'icon' => 'fa-screwdriver', 'color' => '#475569'],
             ['name' => 'Livros, Papelaria & Escritório', 'icon' => 'fa-book-open', 'color' => '#2563eb'],
             ['name' => 'Alimentos, Bebidas & Supermercado', 'icon' => 'fa-basket-shopping', 'color' => '#16a34a'],
-            ['name' => 'Pet Shop & Animais de Estimação', 'icon' => 'fa-dog', 'color' => '#d97706'],
-            ['name' => 'Saúde, Suplementos & Farmácia', 'icon' => 'fa-capsules', 'color' => '#ef4444'],
             ['name' => 'Automotivo & Acessórios de Veículos', 'icon' => 'fa-car-battery', 'color' => '#64748b'],
             ['name' => 'Artesanato, Antiguidades & Colecionáveis', 'icon' => 'fa-box-archive', 'color' => '#92400e'],
+            [
+                'name' => 'Produtos Agrícolas & Agropecuária',
+                'icon' => 'fa-tractor',
+                'color' => '#16a34a',
+                'children' => [
+                    ['name' => 'Sementes, Mudas & Adubos'],
+                    ['name' => 'Rações, Selaria & Insumos'],
+                    ['name' => 'Produtos da Roça & Hortifrúti'],
+                    ['name' => 'Gado, Cavalos & Pecuária'],
+                    ['name' => 'Aves, Suínos & Animais Rurais'],
+                ]
+            ],
         ];
 
         foreach ($productCategoriesTree as $data) {
@@ -208,29 +218,7 @@ class CategorySeeder extends Seeder
             ]);
         }
 
-        // 6. AGRO
-        $agroCategories = [
-            ['name' => 'Gado, Cavalos & Pecuária', 'icon' => 'fa-cow', 'color' => '#16a34a'],
-            ['name' => 'Aves, Suínos & Outros Animais', 'icon' => 'fa-feather', 'color' => '#059669'],
-            ['name' => 'Tratores, Máquinas & Implementos', 'icon' => 'fa-tractor', 'color' => '#d97706'],
-            ['name' => 'Sementes, Mudas & Adubos', 'icon' => 'fa-wheat-awn', 'color' => '#65a30d'],
-            ['name' => 'Rações, Selaria & Insumos', 'icon' => 'fa-sack-xmark', 'color' => '#b45309'],
-            ['name' => 'Produtos da Roça & Hortifrúti', 'icon' => 'fa-carrot', 'color' => '#ea580c'],
-        ];
-
-        foreach ($agroCategories as $data) {
-            Category::create([
-                'name' => $data['name'],
-                'slug' => Str::slug($data['name']),
-                'module' => 'agro',
-                'icon' => $data['icon'],
-                'color' => $data['color'],
-                'sort_order' => $sortIndex++,
-                'active' => true,
-            ]);
-        }
-
-        // 7. ARTE & CULTURA
+        // 6. ARTE & CULTURA
         $cultureCategories = [
             ['name' => 'Cordel, Poesia & Literatura Sergipana', 'icon' => 'fa-scroll', 'color' => '#9c2720'],
             ['name' => 'Artesanato, Xilogravuras & Esculturas', 'icon' => 'fa-scissors', 'color' => '#d97706'],

@@ -96,6 +96,18 @@ class StoreFollowFeatureTest extends TestCase
             ->assertSee('Deixar de seguir');
     }
 
+    public function test_empty_followed_stores_panel_uses_store_icon(): void
+    {
+        $visitor = User::factory()->create();
+
+        $this->actingAs($visitor)
+            ->get(route('user.panel'))
+            ->assertOk()
+            ->assertSee('Você ainda não segue nenhuma loja')
+            ->assertSee('fa-store user-followed-stores-empty-icon', false)
+            ->assertDontSee('fa-heart user-followed-stores-empty-icon', false);
+    }
+
     private function createStore(User $owner): Store
     {
         return Store::create([

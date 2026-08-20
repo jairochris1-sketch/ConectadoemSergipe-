@@ -12,4 +12,5 @@ class ServiceStaff extends Model
     public function ad() { return $this->belongsTo(Ad::class); }
     public function procedures() { return $this->belongsToMany(ServiceProcedure::class, 'service_staff_procedure'); }
     public function availabilities() { return $this->hasMany(ServiceAvailability::class); }
+    public function scheduleBlocks() { return $this->hasMany(ServiceScheduleBlock::class); }
 }

@@ -360,7 +360,7 @@
                                         </div>
                                         <div class="text-center px-2 pb-3 pt-2">
                                             <h5 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">{{ $cStore['name'] }}</h5>
-                                            <small class="text-muted d-block mb-2" style="font-size: 0.7rem;"><i class="fa-solid fa-location-dot text-danger"></i> {{ $cStore['city'] }}</small>
+                                            <small class="city-badge mb-2 d-inline-flex" style="font-size: 0.68rem;"><i class="fa-solid fa-location-dot"></i> {{ $cStore['city'] }}</small>
                                             <span class="badge bg-light text-secondary border rounded-pill px-2 py-1 mb-2" style="font-size: 0.6rem;">{{ $cStore['category'] }}</span>
                                             
                                             <div class="d-flex justify-content-center gap-1 mt-2">
@@ -576,10 +576,10 @@
                                     @endif
                                 </div>
 
-                                <p class="store-card-city">
-                                    <i class="fa-solid fa-location-dot text-danger"></i>
+                                <span class="store-card-city city-badge">
+                                    <i class="fa-solid fa-location-dot"></i>
                                     {{ $storeCity }}/SE
-                                </p>
+                                </span>
 
                                 <p class="store-card-description">
                                     {{ \Illuminate\Support\Str::limit($store->description ?: 'Conheça os produtos e novidades desta loja.', 92) }}

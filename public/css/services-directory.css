@@ -218,8 +218,8 @@
 
 .services-directory-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
 }
 
 /* ─────────────────────────────────────────────
@@ -231,9 +231,10 @@
 .sdc-card {
     display: flex;
     flex-direction: column;
+    height: 100%;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 18px;
     box-shadow: 0 4px 20px rgba(15, 23, 42, .08);
     overflow: hidden;
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
@@ -249,11 +250,12 @@
 /* Banner de Capa Superior */
 .sdc-banner {
     position: relative;
-    height: 155px;
+    height: 125px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-color: var(--muted-bg);
+    flex-shrink: 0;
 }
 
 .sdc-banner-badge {
@@ -277,33 +279,34 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 0 16px 16px 16px;
+    flex: 1 1 auto;
+    gap: 6px;
+    padding: 0 12px 14px 12px;
 }
 
-/* Avatar Grande Sobreposto */
+/* Avatar Sobreposto sem borda externa */
 .sdc-avatar-wrap {
     position: relative;
-    width: 145px;
-    height: 145px;
-    margin-top: -72px;
-    margin-bottom: 4px;
-    border-radius: 28px;
+    width: 105px;
+    height: 105px;
+    margin-top: -52px;
+    margin-bottom: 2px;
+    border-radius: 16px;
     overflow: visible;
     text-decoration: none;
     display: block;
-    border: 3px solid var(--card);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .2);
     flex-shrink: 0;
-    background: var(--card);
+    background: transparent;
 }
 
 .sdc-avatar-dot {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
-    width: 14px;
-    height: 14px;
+    bottom: 3px;
+    right: 3px;
+    width: 13px;
+    height: 13px;
     background: #22c55e;
     border: 2px solid var(--card);
     border-radius: 50%;
@@ -336,18 +339,23 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    border-radius: 18px;
+    border-radius: 16px;
+    border: none !important;
 }
 
 .sdc-avatar-initials {
     width: 100%;
     height: 100%;
-    border-radius: 18px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #075be8, #3b82f6);
     color: #fff;
+    border: none !important;
+    font-size: 2rem;
+    font-weight: 800;
+}
     font-size: 2.2rem;
     font-weight: 800;
 }
@@ -415,32 +423,37 @@
     white-space: nowrap;
 }
 
-/* Localização Destaque em Azul */
+/* Localização — badge chip */
 .sdc-location {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     margin: 0;
     color: #075be8 !important;
     font-size: .78rem;
-    font-weight: 700;
+    font-weight: 600;
+    background: rgba(7, 91, 232, 0.10);
+    border-radius: 20px;
+    padding: 2px 10px 2px 7px;
+    width: fit-content;
 }
 
 .sdc-location i {
     color: #075be8 !important;
-    font-size: .8rem;
+    font-size: .75rem;
 }
 
 /* Descrição */
 .sdc-description {
     font-size: .78rem;
     color: var(--muted-foreground);
-    line-height: 1.5;
+    line-height: 1.4;
     margin: 2px 0 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.2rem;
 }
 
 /* Badges */
@@ -449,6 +462,7 @@
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 2px;
+    min-height: 24px;
 }
 
 .sdc-badge {
@@ -477,13 +491,13 @@
     border: 1px solid rgba(14, 165, 233, 0.22);
 }
 
-/* Botões de Ação Inferiores */
+/* Botões de Ação Inferiores - Alinhados perfeitamente na base */
 .sdc-actions {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 6px;
-    padding-top: 2px;
+    margin-top: auto !important;
+    padding-top: 8px;
     width: 100%;
 }
 
@@ -580,21 +594,20 @@
 /* ─────────────────────────────────────────────
    RESPONSIVO
 ───────────────────────────────────────────── */
-@media (max-width: 1399.98px) {
+@media (max-width: 1099.98px) {
     .services-directory-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
     }
-}
-
-@media (max-width: 1199.98px) {
-    .services-directory-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1099.98px) {
     .services-results-layout {
         grid-template-columns: 210px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 899.98px) {
+    .services-directory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
     }
 }
 
@@ -638,10 +651,11 @@
 
     /* Avatar menor para caber nas 2 colunas */
     .sdc-avatar-wrap {
-        width: 105px;
-        height: 105px;
-        margin-top: -52px;
-        border-radius: 20px;
+        width: 85px;
+        height: 85px;
+        margin-top: -42px;
+        border-radius: 14px;
+        border: none !important;
     }
 
     .sdc-avatar-dot {
@@ -702,7 +716,8 @@
     .sdc-actions {
         flex-direction: row;
         gap: 3px;
-        margin-top: 4px;
+        margin-top: auto !important;
+        padding-top: 4px;
     }
 
     .sdc-btn {
@@ -710,6 +725,255 @@
         font-size: .64rem;
         padding: 0 3px;
         gap: 3px;
+    }
+}
+
+/* ─────────────────────────────────────────────
+   MODO ESCURO (DARK MODE) - CONTRASTE E LEGIBILIDADE
+───────────────────────────────────────────── */
+[data-bs-theme="dark"] .services-directory-page,
+html[data-theme="dark"] .services-directory-page {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .sdc-card,
+html[data-theme="dark"] .sdc-card {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-bs-theme="dark"] .sdc-card:hover,
+html[data-theme="dark"] .sdc-card:hover {
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-bs-theme="dark"] .sdc-category,
+html[data-theme="dark"] .sdc-category {
+    color: #60a5fa !important;
+}
+
+[data-bs-theme="dark"] .sdc-title a,
+html[data-theme="dark"] .sdc-title a {
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .sdc-title a:hover,
+html[data-theme="dark"] .sdc-title a:hover {
+    color: #93c5fd !important;
+}
+
+[data-bs-theme="dark"] .sdc-rating-val,
+html[data-theme="dark"] .sdc-rating-val {
+    color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .sdc-reviews-count,
+html[data-theme="dark"] .sdc-reviews-count {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .sdc-location,
+html[data-theme="dark"] .sdc-location {
+    color: #7dd3fc !important;
+    background: rgba(125, 211, 252, 0.12);
+}
+[data-bs-theme="dark"] .sdc-location i,
+html[data-theme="dark"] .sdc-location i {
+    color: #7dd3fc !important;
+}
+
+[data-bs-theme="dark"] .sdc-description,
+html[data-theme="dark"] .sdc-description {
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .sdc-badge-home,
+html[data-theme="dark"] .sdc-badge-home {
+    color: #7dd3fc !important;
+    background: rgba(14, 165, 233, 0.18) !important;
+    border-color: rgba(14, 165, 233, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .sdc-badge-available,
+html[data-theme="dark"] .sdc-badge-available {
+    color: #86efac !important;
+    background: rgba(34, 197, 94, 0.18) !important;
+    border-color: rgba(34, 197, 94, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .sdc-badge-offline,
+html[data-theme="dark"] .sdc-badge-offline {
+    color: #94a3b8 !important;
+    background: rgba(148, 163, 184, 0.15) !important;
+    border-color: rgba(148, 163, 184, 0.28) !important;
+}
+
+[data-bs-theme="dark"] .sdc-btn-profile,
+html[data-theme="dark"] .sdc-btn-profile {
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-bs-theme="dark"] .sdc-btn-profile:hover,
+html[data-theme="dark"] .sdc-btn-profile:hover {
+    color: #93c5fd !important;
+    border-color: #3b82f6 !important;
+    background: rgba(59, 130, 246, 0.18) !important;
+}
+
+[data-bs-theme="dark"] .services-directory-filter,
+html[data-theme="dark"] .services-directory-filter {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .services-directory-filter-toggle,
+html[data-theme="dark"] .services-directory-filter-toggle {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .services-rating-btn,
+html[data-theme="dark"] .services-rating-btn {
+    background: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .services-rating-btn:hover,
+[data-bs-theme="dark"] .services-rating-btn.active,
+html[data-theme="dark"] .services-rating-btn:hover,
+html[data-theme="dark"] .services-rating-btn.active {
+    color: #fbbf24 !important;
+    border-color: #fbbf24 !important;
+    background: rgba(251, 191, 36, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .services-directory-popular a,
+html[data-theme="dark"] .services-directory-popular a {
+    background: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .services-directory-popular a:hover,
+[data-bs-theme="dark"] .services-directory-popular a.active,
+html[data-theme="dark"] .services-directory-popular a:hover,
+html[data-theme="dark"] .services-directory-popular a.active {
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-color: #3b82f6 !important;
+    color: #93c5fd !important;
+}
+
+[data-bs-theme="dark"] .services-directory-page > a.btn-light,
+html[data-theme="dark"] .services-directory-page > a.btn-light {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .services-directory-heading h2,
+html[data-theme="dark"] .services-directory-heading h2 {
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .services-directory-content .bg-white,
+html[data-theme="dark"] .services-directory-content .bg-white {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+/* Barra de Busca no Hero - Modo Escuro */
+[data-bs-theme="dark"] .services-pill-search,
+html[data-theme="dark"] .services-pill-search {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-bs-theme="dark"] .services-pill-field input,
+html[data-theme="dark"] .services-pill-field input {
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .services-pill-field input::placeholder,
+html[data-theme="dark"] .services-pill-field input::placeholder {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .services-pill-field i,
+html[data-theme="dark"] .services-pill-field i {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .services-pill-divider,
+html[data-theme="dark"] .services-pill-divider {
+    background: rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-bs-theme="dark"] .services-pill-mic,
+html[data-theme="dark"] .services-pill-mic {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .services-pill-mic:hover,
+html[data-theme="dark"] .services-pill-mic:hover {
+    color: #60a5fa !important;
+}
+
+/* Campos de Filtro Lateral na Sidebar */
+[data-bs-theme="dark"] .services-directory-field .form-control,
+[data-bs-theme="dark"] .services-directory-field .form-select,
+html[data-theme="dark"] .services-directory-field .form-control,
+html[data-theme="dark"] .services-directory-field .form-select {
+    background-color: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .services-directory-field .form-control::placeholder,
+html[data-theme="dark"] .services-directory-field .form-control::placeholder {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .services-directory-field label,
+[data-bs-theme="dark"] .services-directory-popular-title,
+html[data-theme="dark"] .services-directory-field label,
+html[data-theme="dark"] .services-directory-popular-title {
+    color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .services-check-badge,
+html[data-theme="dark"] .services-check-badge {
+    background: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f1f5f9 !important;
+}
+
+/* Chips populares no Hero */
+[data-bs-theme="dark"] .services-chip,
+html[data-theme="dark"] .services-chip {
+    background: rgba(30, 41, 59, 0.9) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .services-chip i,
+html[data-theme="dark"] .services-chip i {
+    color: #60a5fa !important;
+}
+
+@media (max-width: 767.98px) {
+    [data-bs-theme="dark"] .services-pill-field,
+    html[data-theme="dark"] .services-pill-field {
+        background: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
     }
 }
 

@@ -45,6 +45,15 @@ class Report extends Model
         'other' => 'Outro',
     ];
 
+    public const CHAT_REASONS = [
+        'scam' => 'Possível golpe ou fraude',
+        'offensive' => 'Ofensa, ameaça ou assédio',
+        'spam' => 'Spam ou mensagens invasivas',
+        'prohibited_negotiation' => 'Tentativa de negociação proibida',
+        'inappropriate_content' => 'Conteúdo impróprio',
+        'other' => 'Outro motivo',
+    ];
+
     protected $fillable = [
         'public_id',
         'ad_id',

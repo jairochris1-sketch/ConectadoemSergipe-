@@ -21,11 +21,11 @@ body.cookie-preferences-open { overflow: hidden; }
     right: 0;
     bottom: 0;
     left: 0;
-    padding: 16px clamp(16px, 3vw, 42px);
+    padding: 8px clamp(14px, 2.5vw, 32px);
     color: var(--cookie-text);
     background: rgba(7, 26, 57, .98);
     border-top: 1px solid rgba(143, 183, 241, .3);
-    box-shadow: 0 -14px 36px rgba(2, 10, 25, .3);
+    box-shadow: 0 -8px 24px rgba(2, 10, 25, .25);
     backdrop-filter: blur(14px);
 }
 
@@ -35,27 +35,28 @@ body.cookie-preferences-open { overflow: hidden; }
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 20px 30px;
+    gap: 8px 24px;
 }
 
 .cookie-consent-copy h2 {
     display: flex;
     align-items: center;
-    gap: 9px;
-    margin: 0 0 7px;
+    gap: 7px;
+    margin: 0 0 2px;
     color: #fff;
-    font-size: 1rem;
+    font-size: 0.88rem;
     font-weight: 800;
+    line-height: 1.2;
 }
 
 .cookie-consent-copy h2 i { color: #82b8ff; }
 
 .cookie-consent-copy p {
-    max-width: 790px;
+    max-width: 840px;
     margin: 0;
     color: var(--cookie-muted);
-    font-size: .82rem;
-    line-height: 1.55;
+    font-size: .78rem;
+    line-height: 1.35;
 }
 
 .cookie-consent-copy a {
@@ -68,20 +69,20 @@ body.cookie-preferences-open { overflow: hidden; }
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
 }
 
 .cookie-button {
-    min-height: 42px;
+    min-height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    padding: 9px 18px;
+    gap: 6px;
+    padding: 5px 14px;
     border: 1px solid #a9c5eb;
     border-radius: 999px;
     font: inherit;
-    font-size: .8rem;
+    font-size: .76rem;
     font-weight: 800;
     line-height: 1.1;
     white-space: nowrap;
@@ -259,24 +260,25 @@ html[data-theme="dark"] .cookie-preferences-footer .cookie-button-secondary,
 [data-bs-theme="dark"] .cookie-preferences-footer .cookie-button-secondary { color: #e7effc; border-color: #7185a2; }
 
 @media (max-width: 991.98px) {
-    .cookie-consent-shell { grid-template-columns: 1fr; }
-    .cookie-consent-actions { justify-content: flex-start; flex-wrap: wrap; }
+    .cookie-consent-banner { padding: 8px 14px; }
+    .cookie-consent-shell { grid-template-columns: 1fr; gap: 6px; }
+    .cookie-consent-actions { justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
+    .cookie-button { min-height: 30px; padding: 4px 12px; font-size: .74rem; }
 }
 
 @media (max-width: 575.98px) {
-    .cookie-consent-banner { padding: 14px 12px; }
-    .cookie-consent-copy p { font-size: .74rem; }
-    .cookie-consent-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .cookie-consent-actions [data-cookie-settings] { grid-column: 1 / -1; }
-    .cookie-button { min-height: 44px; padding: 9px 12px; font-size: .72rem; white-space: normal; }
+    .cookie-consent-banner { padding: 6px 10px; }
+    .cookie-consent-copy h2 { font-size: .80rem; margin-bottom: 2px; }
+    .cookie-consent-copy p { font-size: .70rem; line-height: 1.25; margin-bottom: 4px; }
+    .cookie-consent-actions { display: flex; flex-direction: row; gap: 5px; width: 100%; }
+    .cookie-consent-actions .cookie-button { min-height: 30px; padding: 4px 6px; font-size: .68rem; flex: 1 1 0; text-align: center; border-radius: 6px; }
     .cookie-preferences-backdrop { align-items: end; padding: 0; }
     .cookie-preferences-dialog { max-height: 94vh; border-radius: 20px 20px 0 0; }
-    .cookie-preferences-header { padding: 18px 16px 15px; }
-    .cookie-preferences-body { padding: 17px 16px 5px; }
-    .cookie-category { gap: 9px; padding: 13px 0; }
-    .cookie-switch { min-width: 82px; }
-    .cookie-preferences-footer { display: grid; grid-template-columns: 1fr 1fr; padding: 13px 16px 16px; }
-    .cookie-preferences-footer [data-cookie-accept] { grid-column: 1 / -1; grid-row: 1; }
+    .cookie-preferences-header { padding: 14px 14px 10px; }
+    .cookie-preferences-body { padding: 12px 14px 4px; }
+    .cookie-category { gap: 8px; padding: 10px 0; }
+    .cookie-switch { min-width: 76px; }
+    .cookie-preferences-footer { display: flex; gap: 6px; padding: 10px 14px 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

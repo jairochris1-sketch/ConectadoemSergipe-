@@ -202,4 +202,120 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    /* =========================================================
+       PROTEÇÃO GLOBAL DE IMAGENS E PORTFÓLIOS DOS PRESTADORES
+       Bloqueia clique direito e arrastar em mídias protegidas
+       ========================================================= */
+    const isProtectedMediaTarget = target => {
+        return target && target.closest && target.closest(
+            '.protected-media, .provider-protected-img, .provider-airbnb-main, .provider-airbnb-thumb, .provider-gallery-modal-image, .provider-gallery-modal-thumb, .sdc-avatar-img, .provider-cover-wrapper, img[data-protected], .protected-media-shield, [data-provider-gallery]'
+        );
+    };
+
+    document.addEventListener('contextmenu', e => {
+        if (isProtectedMediaTarget(e.target) || (e.target.tagName === 'IMG' && e.target.closest('.provider-airbnb-card, .service-detail-shell, .provider-gallery-modal, .service-card, .sdc-card'))) {
+            e.preventDefault();
+        }
+    }, { capture: true });
+
+    document.addEventListener('dragstart', e => {
+        if (isProtectedMediaTarget(e.target) || (e.target.tagName === 'IMG' && e.target.closest('.provider-airbnb-card, .service-detail-shell, .provider-gallery-modal, .service-card, .sdc-card'))) {
+            e.preventDefault();
+        }
+    }, { capture: true });
+
+    /* =========================================================
+       PROTEÇÃO CONTRA INSPEÇÃO E ATALHOS DE DESENVOLVEDOR (F12)
+       Bloqueia F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S
+       ========================================================= */
+    document.addEventListener('keydown', e => {
+        const isMac = navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+        const key = e.key ? e.key.toUpperCase() : '';
+
+        // Bloqueia F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Bloqueia Ctrl+Shift+I (Inspecionar), Ctrl+Shift+J (Console), Ctrl+Shift+C (Inspecionar Elemento)
+        if (cmdOrCtrl && e.shiftKey && (key === 'I' || key === 'J' || key === 'C')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        // Bloqueia Ctrl+U (Exibir Código Fonte) e Ctrl+S (Salvar Página Completa)
+        if (cmdOrCtrl && !e.shiftKey && !e.altKey && (key === 'U' || key === 'S')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, { capture: true });
+
+    /* =========================================================
+       ENQUADRAMENTO INTELIGENTE DE MÍDIA NOS CARDS (AUTO DETECT)
+       Decide se é foto comum (cover) ou arte/vertical (contain + scale + blur)
+       ========================================================= */
+    const detectCardMediaOrientation = img => {
+        if (!img || img.dataset.framingProcessed) return;
+
+        const applyClassification = () => {
+            if (!img.naturalWidth || !img.naturalHeight) return;
+
+            const ratio = img.naturalWidth / img.naturalHeight;
+            const wrapper = img.closest('.card-media-hybrid, .card-media-wrapper');
+
+            // Se for imagem vertical ou arte/panfleto alto (proporção < 0.98)
+            if (ratio < 0.98) {
+                img.classList.add('arte');
+                img.classList.remove('foto-normal');
+                if (wrapper) wrapper.classList.add('has-art');
+            } else {
+                // Se for horizontal (casa, moto, carro, paisagem padrão)
+                img.classList.add('foto-normal');
+                img.classList.remove('arte');
+                if (wrapper) wrapper.classList.remove('has-art');
+            }
+
+            img.dataset.framingProcessed = 'true';
+        };
+
+        if (img.complete && img.naturalWidth > 0) {
+            applyClassification();
+        } else {
+            img.addEventListener('load', applyClassification, { once: true });
+        }
+    };
+
+    const processAllCardMedia = (root = document) => {
+        root.querySelectorAll('.card-media-main, .card-media-hybrid img:not(.card-media-bg)').forEach(detectCardMediaOrientation);
+    };
+
+    // Execução inicial
+    processAllCardMedia();
+
+    // Observa novos elementos adicionados dinamicamente (carrosséis, paginação, ajax)
+    if (window.MutationObserver) {
+        const cardObserver = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // ELEMENT_NODE
+                        if (node.matches && (node.matches('.card-media-main') || node.matches('.card-media-hybrid'))) {
+                            processAllCardMedia(node.parentElement || node);
+                        } else if (node.querySelectorAll) {
+                            processAllCardMedia(node);
+                        }
+                    }
+                });
+            });
+        });
+
+        cardObserver.observe(document.body, { childList: true, subtree: true });
+    }
 });
+
+

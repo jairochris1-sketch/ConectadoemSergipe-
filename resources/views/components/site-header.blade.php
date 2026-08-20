@@ -7,17 +7,12 @@
         ->sum(fn ($item) => is_array($item) ? (int) ($item['quantity'] ?? 0) : (int) $item);
     $mainHeaderItems = [
         ['label' => 'Início', 'route' => 'home', 'icon' => 'fa-house', 'class' => 'home', 'active' => request()->is('/')],
-        ['label' => 'Lojas', 'route' => 'stores.index', 'icon' => 'fa-store', 'class' => 'stores', 'active' => request()->is('lojas*') || request()->is('loja*')],
-        ['label' => 'Imóveis', 'route' => 'module.real_estate', 'icon' => 'fa-building', 'class' => 'real-estate', 'active' => request()->is('imoveis*')],
-        ['label' => 'Veículos', 'route' => 'module.vehicles', 'icon' => 'fa-car', 'class' => 'vehicles', 'active' => request()->is('veiculos*')],
-        ['label' => 'Produtos', 'route' => 'module.products', 'icon' => 'fa-bag-shopping', 'class' => 'products', 'active' => request()->is('produtos*')],
         ['label' => 'Serviços', 'route' => 'module.services', 'icon' => 'fa-screwdriver-wrench', 'class' => 'services', 'active' => request()->is('servicos*') || request()->is('prestadores*')],
-    ];
-    $moreHeaderItems = [
-        ['label' => 'Empregos', 'route' => 'module.jobs', 'icon' => 'fa-briefcase', 'class' => 'jobs', 'active' => request()->is('empregos*')],
-        ['label' => 'Arte & Cultura', 'route' => 'culture.index', 'icon' => 'fa-palette', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
+        ['label' => 'Lojas & Vendas', 'route' => 'stores-sales.index', 'icon' => 'fa-store', 'class' => 'stores', 'active' => request()->is('lojas-e-vendas*') || request()->is('lojas*') || request()->is('loja*')],
         ['label' => 'Comunidade', 'route' => 'feed.index', 'icon' => 'fa-users', 'class' => 'community', 'active' => request()->is('comunidade*')],
+        ['label' => 'Arte & Cultura', 'route' => 'culture.index', 'icon' => 'fa-palette', 'class' => 'culture', 'active' => request()->is('cultura-e-cordel*')],
     ];
+    $moreHeaderItems = [];
     $headerItems = array_merge($mainHeaderItems, $moreHeaderItems);
     $isMoreActive = collect($moreHeaderItems)->contains('active', true);
 @endphp
@@ -71,6 +66,7 @@
                     </a>
                 @endforeach
 
+                @if(count($moreHeaderItems) > 0)
                 <!-- Menu Dropdown "Mais" -->
                 <div class="dropdown d-inline-block">
                     <button
@@ -86,17 +82,18 @@
                         @foreach($moreHeaderItems as $item)
                             <li>
                                 <a
-                                    href="{{ route($item['route']) }}"
-                                    class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2.5 fw-semibold {{ $item['active'] ? 'active bg-primary text-white' : '' }}"
-                                    style="font-size: 0.85rem;"
+                                     href="{{ route($item['route']) }}"
+                                     class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2.5 fw-semibold {{ $item['active'] ? 'active bg-primary text-white' : '' }}"
+                                     style="font-size: 0.85rem;"
                                 >
-                                    <i class="fa-solid {{ $item['icon'] }} {{ $item['active'] ? 'text-white' : 'text-primary' }}" style="width: 18px;"></i>
-                                    <span>{{ $item['label'] }}</span>
+                                     <i class="fa-solid {{ $item['icon'] }} {{ $item['active'] ? 'text-white' : 'text-primary' }}" style="width: 18px;"></i>
+                                     <span>{{ $item['label'] }}</span>
                                 </a>
                             </li>
                         @endforeach
                     </ul>
                 </div>
+                @endif
             </nav>
 
             <div class="marketplace-header-actions">

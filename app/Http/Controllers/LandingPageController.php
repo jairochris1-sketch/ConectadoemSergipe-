@@ -18,6 +18,10 @@ class LandingPageController extends Controller
             return redirect()->route('home');
         }
 
+        if ($request->has('q') || $request->has('module') || $request->has('city')) {
+            return redirect()->route('home', $request->query());
+        }
+
         $cityImages = array_values(array_map(
             fn (string $path): string => 'Cidades/'.basename($path),
             glob(public_path('Cidades/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}'), GLOB_BRACE) ?: []

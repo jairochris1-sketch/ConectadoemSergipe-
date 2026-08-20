@@ -420,7 +420,12 @@ class User extends Authenticatable
     public function favorites()
     {
         return $this->belongsToMany(Ad::class, 'favorites', 'user_id', 'ad_id')
-            ->withPivot('created_at');
+            ->withPivot(['folder_id', 'created_at']);
+    }
+
+    public function favoriteFolders()
+    {
+        return $this->hasMany(FavoriteFolder::class);
     }
 
     public function followedStores()
@@ -457,5 +462,33 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function blockedUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'blocker_id', 'blocked_id')->withTimestamps();
+    }
+
+    public function blockedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'blocked_id', 'blocker_id')->withTimestamps();
+    }
+
+    public function isBlocking(int|string|null $userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        return $this->blockedUsers()->where('blocked_id', (int) $userId)->exists();
+    }
+
+    public function isBlockedBy(int|string|null $userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        return $this->blockedByUsers()->where('blocker_id', (int) $userId)->exists();
     }
 }

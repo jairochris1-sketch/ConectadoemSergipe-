@@ -8,6 +8,89 @@ use Illuminate\Support\Str;
 
 class Ad extends Model
 {
+    public const PROFILE_KINDS = [
+        'professional' => [
+            'label' => 'Prestador de serviços',
+            'subtitle' => 'Autônomo, diarista, eletricista, manicure, pedreiro, motorista etc.',
+            'icon' => 'fa-solid fa-user-gear',
+            'badge_icon' => 'fa-solid fa-user-gear',
+        ],
+        'service_company' => [
+            'label' => 'Empresa de serviços',
+            'subtitle' => 'Assistência técnica, construtora, clínica, oficina, empresa de limpeza etc.',
+            'icon' => 'fa-solid fa-building',
+            'badge_icon' => 'fa-solid fa-building',
+        ],
+        'store_commerce' => [
+            'label' => 'Loja ou comércio',
+            'subtitle' => 'Loja física, virtual, mercado, material de construção, roupas, celulares etc.',
+            'icon' => 'fa-solid fa-store',
+            'badge_icon' => 'fa-solid fa-store',
+        ],
+        'liberal_professional' => [
+            'label' => 'Profissional liberal',
+            'subtitle' => 'Advogado, dentista, corretor, professor, técnico, contador etc.',
+            'icon' => 'fa-solid fa-user-tie',
+            'badge_icon' => 'fa-solid fa-user-tie',
+        ],
+        'agro_producer' => [
+            'label' => 'Produtor rural / Agro',
+            'subtitle' => 'Produtor, criador, agricultor, comércio rural etc.',
+            'icon' => 'fa-solid fa-tractor',
+            'badge_icon' => 'fa-solid fa-tractor',
+        ],
+        'cultural_artist' => [
+            'label' => 'Artista / Profissional da cultura',
+            'subtitle' => 'Músicos, cordelistas, fotógrafos, artesãos, produtores culturais etc.',
+            'icon' => 'fa-solid fa-palette',
+            'badge_icon' => 'fa-solid fa-palette',
+        ],
+        'real_estate_agency' => [
+            'label' => 'Imobiliária',
+            'subtitle' => 'Imobiliárias, corretoras e administradoras de imóveis',
+            'icon' => 'fa-solid fa-house-chimney',
+            'badge_icon' => 'fa-solid fa-house-chimney',
+        ],
+        'hiring_company' => [
+            'label' => 'Empresa contratante',
+            'subtitle' => 'Empresas e negócios publicando oportunidades e vagas',
+            'icon' => 'fa-solid fa-briefcase',
+            'badge_icon' => 'fa-solid fa-briefcase',
+        ],
+    ];
+
+    public static function getProfileKinds(): array
+    {
+        return self::PROFILE_KINDS;
+    }
+
+    public function getProfileKindLabelAttribute(): ?string
+    {
+        if (! $this->profile_kind) {
+            return null;
+        }
+
+        return self::PROFILE_KINDS[$this->profile_kind]['label'] ?? null;
+    }
+
+    public function getProfileKindIconAttribute(): ?string
+    {
+        if (! $this->profile_kind) {
+            return null;
+        }
+
+        return self::PROFILE_KINDS[$this->profile_kind]['icon'] ?? null;
+    }
+
+    public function getProfileKindInfoAttribute(): ?array
+    {
+        if (! $this->profile_kind) {
+            return null;
+        }
+
+        return self::PROFILE_KINDS[$this->profile_kind] ?? null;
+    }
+
     protected $fillable = [
         'user_id',
         'store_id',
@@ -151,7 +234,7 @@ class Ad extends Model
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorites', 'ad_id', 'user_id')
-            ->withPivot('created_at');
+            ->withPivot(['folder_id', 'created_at']);
     }
 
     public function reports()
@@ -173,6 +256,7 @@ class Ad extends Model
     public function serviceStaff() { return $this->hasMany(ServiceStaff::class); }
     public function serviceAppointments() { return $this->hasMany(ServiceAppointment::class); }
     public function serviceFinancialEntries() { return $this->hasMany(ServiceFinancialEntry::class); }
+    public function serviceScheduleBlocks() { return $this->hasMany(ServiceScheduleBlock::class); }
     public function serviceSubscriptionPlans() { return $this->hasMany(ServiceSubscriptionPlan::class); }
     public function serviceClientSubscriptions() { return $this->hasMany(ServiceClientSubscription::class); }
 
@@ -297,6 +381,91 @@ class Ad extends Model
             'jobs' => 'Empregos',
             'agro' => 'Agro',
             default => 'Anúncio',
+        };
+    }
+
+    public function getCategoryIconAttribute(): string
+    {
+        $categoryName = Str::lower(Str::ascii($this->display_category ?? $this->advertiser_type ?? ''));
+        $titleDesc = Str::lower(Str::ascii($this->title . ' ' . $this->description));
+
+        if (str_contains($categoryName, 'advog') || str_contains($titleDesc, 'advog') || str_contains($categoryName, 'juridic')) {
+            return 'fa-solid fa-scale-balanced';
+        }
+        if (str_contains($categoryName, 'pintor') || str_contains($categoryName, 'pintura') || str_contains($titleDesc, 'pintor')) {
+            return 'fa-solid fa-paint-roller';
+        }
+        if (str_contains($categoryName, 'eletric') || str_contains($titleDesc, 'eletric')) {
+            return 'fa-solid fa-bolt';
+        }
+        if (str_contains($categoryName, 'encanador') || str_contains($categoryName, 'hidraulic') || str_contains($titleDesc, 'encanador')) {
+            return 'fa-solid fa-faucet-drip';
+        }
+        if (str_contains($categoryName, 'pedreiro') || str_contains($categoryName, 'alvenaria') || str_contains($categoryName, 'construcao') || str_contains($titleDesc, 'pedreiro')) {
+            return 'fa-solid fa-trowel-bricks';
+        }
+        if (str_contains($categoryName, 'mecanic') || str_contains($titleDesc, 'mecanic')) {
+            return 'fa-solid fa-wrench';
+        }
+        if (str_contains($categoryName, 'marcen') || str_contains($categoryName, 'montador') || str_contains($titleDesc, 'marcen')) {
+            return 'fa-solid fa-hammer';
+        }
+        if (str_contains($categoryName, 'mudanca') || str_contains($categoryName, 'frete') || str_contains($categoryName, 'carro de mudanca') || str_contains($titleDesc, 'mudanca') || str_contains($titleDesc, 'frete')) {
+            return 'fa-solid fa-truck-moving';
+        }
+        if (str_contains($categoryName, 'manicure') || str_contains($categoryName, 'pedicure') || str_contains($categoryName, 'unha') || str_contains($titleDesc, 'manicure') || str_contains($titleDesc, 'unha')) {
+            return 'fa-solid fa-hand-sparkles';
+        }
+        if (str_contains($categoryName, 'cabel') || str_contains($categoryName, 'barbe') || str_contains($categoryName, 'salao') || str_contains($titleDesc, 'cabel') || str_contains($titleDesc, 'barbe')) {
+            return 'fa-solid fa-scissors';
+        }
+        if (str_contains($categoryName, 'programad') || str_contains($categoryName, 'desenvolved') || str_contains($categoryName, 'informatic') || str_contains($categoryName, 'computador') || str_contains($categoryName, 'ti') || str_contains($titleDesc, 'programad') || str_contains($titleDesc, 'developer') || str_contains($titleDesc, 'software')) {
+            return 'fa-solid fa-laptop-code';
+        }
+        if (str_contains($categoryName, 'faxin') || str_contains($categoryName, 'diarista') || str_contains($categoryName, 'limpeza') || str_contains($titleDesc, 'faxin') || str_contains($titleDesc, 'diarista')) {
+            return 'fa-solid fa-broom';
+        }
+        if (str_contains($categoryName, 'jardin') || str_contains($titleDesc, 'jardin')) {
+            return 'fa-solid fa-seedling';
+        }
+        if (str_contains($categoryName, 'restaurante') || str_contains($categoryName, 'pizzaria') || str_contains($categoryName, 'lanche') || str_contains($titleDesc, 'pizzaria')) {
+            return 'fa-solid fa-utensils';
+        }
+        if (str_contains($categoryName, 'fotograf') || str_contains($titleDesc, 'fotograf') || str_contains($titleDesc, 'filmag')) {
+            return 'fa-solid fa-camera';
+        }
+        if (str_contains($categoryName, 'medico') || str_contains($categoryName, 'dentista') || str_contains($categoryName, 'psicolog') || str_contains($categoryName, 'fisioterap') || str_contains($categoryName, 'saude')) {
+            return 'fa-solid fa-stethoscope';
+        }
+        if (str_contains($categoryName, 'personal') || str_contains($categoryName, 'treinador') || str_contains($categoryName, 'academia')) {
+            return 'fa-solid fa-dumbbell';
+        }
+        if (str_contains($categoryName, 'artista') || str_contains($categoryName, 'cultura') || str_contains($categoryName, 'musica') || str_contains($categoryName, 'artesanato')) {
+            return 'fa-solid fa-palette';
+        }
+        if (str_contains($categoryName, 'imob') || str_contains($categoryName, 'corretor') || str_contains($categoryName, 'imove')) {
+            return 'fa-solid fa-building';
+        }
+        if (str_contains($categoryName, 'agro') || str_contains($categoryName, 'rural') || str_contains($categoryName, 'gado') || str_contains($categoryName, 'trator')) {
+            return 'fa-solid fa-tractor';
+        }
+        if (str_contains($categoryName, 'veiculo') || str_contains($categoryName, 'carro') || str_contains($categoryName, 'moto')) {
+            return 'fa-solid fa-car';
+        }
+        if (str_contains($categoryName, 'emprego') || str_contains($categoryName, 'vaga') || str_contains($categoryName, 'contratante')) {
+            return 'fa-solid fa-briefcase';
+        }
+        if (str_contains($categoryName, 'loja') || str_contains($categoryName, 'comercio') || str_contains($categoryName, 'produto')) {
+            return 'fa-solid fa-bag-shopping';
+        }
+
+        return match ($this->module) {
+            'real_estate' => 'fa-solid fa-building',
+            'vehicles' => 'fa-solid fa-car',
+            'products' => 'fa-solid fa-bag-shopping',
+            'jobs' => 'fa-solid fa-briefcase',
+            'agro' => 'fa-solid fa-tractor',
+            default => 'fa-solid fa-user-tie',
         };
     }
 }

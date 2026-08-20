@@ -77,6 +77,18 @@ class UserController extends Controller
         $storeProductLimit = $user->storeProductLimit();
         $canCreateStore = $user->canCreateAnotherStore();
         $favorites = $user->favorites()->with('mainImage')->get();
+        $favoriteFolders = $user->favoriteFolders()
+            ->with(['ads' => fn ($query) => $query
+                ->where('status', 'active')
+                ->with(['mainImage', 'user'])
+                ->orderByPivot('created_at', 'desc')])
+            ->orderBy('name')
+            ->get();
+        $unfiledFavorites = $user->favorites()
+            ->wherePivotNull('folder_id')
+            ->where('status', 'active')
+            ->with(['mainImage', 'user'])
+            ->get();
         $followedStores = $user->followedStores()
             ->publiclyVisible()
             ->with(['user'])
@@ -92,15 +104,22 @@ class UserController extends Controller
         $unreadNotificationsCount = $user->reportNotifications()->whereNull('read_at')->count();
         $reportNotifications = $user->reportNotifications()->latest()->take(20)->get();
 
+        $totalViews = (int) $ads->sum('views');
+        $activeAdsCount = $ads->where('status', 'active')->count();
+
         return view('user.panel', compact(
             'user',
             'ads',
+            'totalViews',
+            'activeAdsCount',
             'store',
             'stores',
             'storeLimit',
             'storeProductLimit',
             'canCreateStore',
             'favorites',
+            'favoriteFolders',
+            'unfiledFavorites',
             'followedStores',
             'reportNotifications',
             'unreadMessagesCount',

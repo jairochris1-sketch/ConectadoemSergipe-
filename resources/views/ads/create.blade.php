@@ -41,7 +41,7 @@
                         <!-- Etapa 2 -->
                         <div class="text-center z-index-2 step-item" id="step-nav-2">
                             <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">2</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Informações</small>
+                            <small class="step-label d-none d-md-block fw-semibold">Informações & Contato</small>
                         </div>
                         <!-- Etapa 3 -->
                         <div class="text-center z-index-2 step-item" id="step-nav-3">
@@ -51,11 +51,6 @@
                         <!-- Etapa 4 -->
                         <div class="text-center z-index-2 step-item" id="step-nav-4">
                             <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">4</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Contato</small>
-                        </div>
-                        <!-- Etapa 5 -->
-                        <div class="text-center z-index-2 step-item" id="step-nav-5">
-                            <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">5</div>
                             <small class="step-label d-none d-md-block fw-semibold">Publicar</small>
                         </div>
 
@@ -84,126 +79,282 @@
 
                         <!-- ================= ETAPA 1: CATEGORIA ================= -->
                         <div class="wizard-step" id="wizard-step-1">
-                            <div class="text-center mb-4">
-                                <span class="publish-step-pill mb-3" id="publish-step-pill">Etapa 1 de 5</span>
-                                <h3 class="fw-bold text-dark mb-1">O que você deseja anunciar?</h3>
-                                <p class="text-muted">Escolha a categoria que melhor representa o seu anúncio.</p>
+                            <div class="mb-4">
+                                <h2 class="fw-bold text-dark mb-1" style="font-size: 1.85rem; letter-spacing: -0.5px;">O que você deseja anunciar?</h2>
+                                <p class="text-muted fs-6 mb-0">Escolha a opção que melhor representa o que você quer criar no Conectado em Sergipe.</p>
+                            </div>
+
+                            {{-- OS 2 GRANDES CARDS MESTRES (SERVIÇOS vs PRODUTOS, IMÓVEIS E MAIS) --}}
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-6">
+                                    <div class="master-choice-card is-active shadow-sm" id="card-choice-services" onclick="selectPublishMode('services')">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="master-choice-icon is-services">
+                                                <i class="fa-solid fa-briefcase"></i>
+                                            </div>
+                                            <div class="master-choice-copy flex-grow-1">
+                                                <strong class="master-choice-title text-dark d-block">Serviços</strong>
+                                                <span class="master-choice-text text-muted">Divulgue seus serviços profissionais e encontre mais clientes.</span>
+                                            </div>
+                                            <div class="master-choice-check">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="master-choice-card shadow-sm" id="card-choice-items" onclick="selectPublishMode('items')">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="master-choice-icon is-items">
+                                                <i class="fa-solid fa-bag-shopping"></i>
+                                            </div>
+                                            <div class="master-choice-copy flex-grow-1">
+                                                <strong class="master-choice-title text-dark d-block">Vendas e Anúncios</strong>
+                                                <span class="master-choice-text text-muted">Anuncie produtos, imóveis, veículos, empregos, lojas e agro.</span>
+                                            </div>
+                                            <div class="master-choice-check">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <input type="radio" class="d-none" name="module" id="mod_services" value="services" {{ old('module', $requestedModule) === 'services' ? 'checked' : '' }} onchange="selectModule('services')">
 
-                            <div class="row g-3 mb-4 publish-module-grid">
-                                <div class="col-6 col-md-4">
-                                    <input type="radio" class="btn-check" name="module" id="mod_products" value="products" {{ old('module', $requestedModule) === 'products' ? 'checked' : '' }} onchange="selectModule('products')">
-                                    <label class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-products" for="mod_products">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-cart-shopping"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Produto</span>
-                                            <small class="text-muted">Venda produtos novos ou usados.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </label>
+                            {{-- SEÇÃO 1: COMO VOCÊ ATUA NA ÁREA DE SERVIÇOS? --}}
+                            <div id="section-services-flow" class="publish-flow-section mb-4">
+                                <h5 class="fw-bold text-dark mb-3" style="font-size: 1.15rem;">Como você atua na área de serviços?</h5>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('professional')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-regular fa-user"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Prestador de serviços</strong>
+                                            <small class="service-role-desc text-muted">Você trabalha por conta própria e oferece seus serviços.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('service_company')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-regular fa-building"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Empresa de serviços</strong>
+                                            <small class="service-role-desc text-muted">Você representa uma empresa que oferece serviços.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('liberal_professional')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-user-graduate"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Profissional liberal</strong>
+                                            <small class="service-role-desc text-muted">Você atua de forma autônoma com formação técnica ou superior.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('cultural_artist')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-palette"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Artista / Profissional da cultura</strong>
+                                            <small class="service-role-desc text-muted">Você atua nas áreas artísticas ou culturais.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('agro_producer')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-tractor"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Produtor rural / Agro</strong>
+                                            <small class="service-role-desc text-muted">Produtor, criador, agricultor ou comércio rural.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('store_commerce')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-store"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Loja ou comércio</strong>
+                                            <small class="service-role-desc text-muted">Ponto comercial físico, virtual ou mercadinho.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('real_estate_agency')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-house-chimney"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Imobiliária</strong>
+                                            <small class="service-role-desc text-muted">Corretoras e administradoras de imóveis.</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <button type="button" class="service-role-card w-100 text-start" onclick="chooseProfessionalProfile('hiring_company')">
+                                            <div class="service-role-icon">
+                                                <i class="fa-solid fa-briefcase"></i>
+                                            </div>
+                                            <strong class="service-role-title d-block text-dark">Empresa contratante</strong>
+                                            <small class="service-role-desc text-muted">Empresas e negócios publicando vagas.</small>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <input type="radio" class="btn-check" name="module" id="mod_real_estate" value="real_estate" {{ old('module', $requestedModule) === 'real_estate' ? 'checked' : '' }} onchange="selectModule('real_estate')">
-                                    <label class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-real-estate" for="mod_real_estate">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-house-chimney"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Imóvel</span>
-                                            <small class="text-muted">Aluguel, venda ou temporada.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </label>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <input type="radio" class="btn-check" name="module" id="mod_vehicles" value="vehicles" {{ old('module', $requestedModule) === 'vehicles' ? 'checked' : '' }} onchange="selectModule('vehicles')">
-                                    <label class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-vehicles" for="mod_vehicles">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-car-side"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Veículo</span>
-                                            <small class="text-muted">Carros, motos, caminhões e muito mais.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </label>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <input type="radio" class="btn-check" name="module" id="mod_jobs" value="jobs" {{ old('module', $requestedModule) === 'jobs' ? 'checked' : '' }} onchange="selectModule('jobs')">
-                                    <label class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-jobs" for="mod_jobs">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-briefcase"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Emprego</span>
-                                            <small class="text-muted">Vagas ou busca por oportunidades.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </label>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <input type="radio" class="btn-check" name="module" id="mod_agro" value="agro" {{ old('module', $requestedModule) === 'agro' ? 'checked' : '' }} onchange="selectModule('agro')">
-                                    <label class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-agro" for="mod_agro">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-tractor"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Agro</span>
-                                            <small class="text-muted">Produtos e serviços agrícolas.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </label>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <a href="{{ route('store.create') }}" class="btn btn-outline-primary w-100 rounded-4 shadow-sm h-100 module-card module-card-store text-decoration-none d-flex flex-column justify-content-between text-start" title="Criar sua Loja ou Comércio Local no Conectado em Sergipe">
-                                        <span class="module-motion-icon"><i class="fa-solid fa-store"></i></span>
-                                        <span class="module-card-copy">
-                                            <span class="fw-bold text-dark d-block">Loja</span>
-                                            <small class="text-muted">Crie sua loja ou comércio local.</small>
-                                        </span>
-                                        <span class="module-card-arrow"><i class="fa-solid fa-chevron-right"></i></span>
-                                    </a>
+
+                                {{-- BOX INFORMATIVO AZUL SUAVE --}}
+                                <div class="info-help-callout d-flex align-items-center gap-3 p-3.5 rounded-4 mb-4">
+                                    <div class="info-help-icon flex-shrink-0">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </div>
+                                    <div class="info-help-copy">
+                                        <strong class="d-block text-dark fw-bold mb-0.5">Atenção: A categoria e o tipo de atuação não poderão ser alterados após a publicação.</strong>
+                                        <span class="text-muted small">Essa regra garante a integridade dos filtros, busca local, SEO e a confiança dos clientes que encontram o seu perfil.</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="professional-motion-panel mb-3" aria-labelledby="advertiser-type-title">
-                                <span class="professional-motion-icon" aria-hidden="true">
-                                    <i class="fa-solid fa-user-tie"></i>
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
-                                <div class="professional-motion-copy">
-                                    <h4 id="advertiser-type-title">Qual perfil representa você?</h4>
-                                    <p>Escolha uma opção para seguir ao cadastro correto. Empresa de serviços usa o perfil profissional; restaurante usa a vitrine de loja.</p>
-                                    <div class="advertiser-type-grid" role="group" aria-label="Tipo de anunciante">
-                                        <button type="button" class="advertiser-type-option" onclick="chooseProfessionalProfile('professional')">
-                                            <i class="fa-solid fa-user-gear"></i>
-                                            <span><strong>Prestador de serviços</strong><small>Profissional autônomo.</small></span>
-                                            <i class="fa-solid fa-arrow-right"></i>
-                                        </button>
-                                        <button type="button" class="advertiser-type-option" onclick="chooseProfessionalProfile('service_company')">
-                                            <i class="fa-solid fa-building"></i>
-                                            <span><strong>Empresa de serviços</strong><small>Equipe, clínica, salão ou agência.</small></span>
-                                            <i class="fa-solid fa-arrow-right"></i>
-                                        </button>
-                                        <a href="{{ route('store.create') }}" class="advertiser-type-option text-decoration-none">
-                                            <i class="fa-solid fa-store"></i>
-                                            <span><strong>Loja / Comércio</strong><small>Vitrine e catálogo de produtos.</small></span>
-                                            <i class="fa-solid fa-arrow-right"></i>
+                            {{-- SEÇÃO 2: VENDAS E ANÚNCIOS (GRID 3x2 IDÊNTICO AO MOCKUP) --}}
+                            <div id="section-items-flow" class="publish-flow-section mb-4 d-none">
+                                <h5 class="fw-bold text-dark mb-3" style="font-size: 1.15rem;">Escolha a categoria do seu anúncio:</h5>
+
+                                <div class="row g-3 mb-4">
+                                    {{-- 1. PRODUTO --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <input type="radio" class="btn-check d-none" name="module" id="mod_products" value="products" {{ old('module', $requestedModule) === 'products' ? 'checked' : '' }} onchange="selectModule('products')">
+                                        <label class="item-choice-card w-100 {{ old('module', $requestedModule) === 'products' ? 'is-active' : '' }}" for="mod_products" id="label-mod-products">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-cart-shopping"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Produto</strong>
+                                                    <small class="item-choice-desc text-muted">Novos, usados, agro e produtos da roça.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {{-- 2. IMÓVEL --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <input type="radio" class="btn-check d-none" name="module" id="mod_real_estate" value="real_estate" {{ old('module', $requestedModule) === 'real_estate' ? 'checked' : '' }} onchange="selectModule('real_estate')">
+                                        <label class="item-choice-card w-100 {{ old('module', $requestedModule) === 'real_estate' ? 'is-active' : '' }}" for="mod_real_estate" id="label-mod-real_estate">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-house"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Imóvel</strong>
+                                                    <small class="item-choice-desc text-muted">Aluguel, venda, chácaras ou temporada.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {{-- 3. VEÍCULO --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <input type="radio" class="btn-check d-none" name="module" id="mod_vehicles" value="vehicles" {{ old('module', $requestedModule) === 'vehicles' ? 'checked' : '' }} onchange="selectModule('vehicles')">
+                                        <label class="item-choice-card w-100 {{ old('module', $requestedModule) === 'vehicles' ? 'is-active' : '' }}" for="mod_vehicles" id="label-mod-vehicles">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-car-side"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Veículo</strong>
+                                                    <small class="item-choice-desc text-muted">Carros, motos, caminhões e máquinas.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {{-- 4. EMPREGO --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <input type="radio" class="btn-check d-none" name="module" id="mod_jobs" value="jobs" {{ old('module', $requestedModule) === 'jobs' ? 'checked' : '' }} onchange="selectModule('jobs')">
+                                        <label class="item-choice-card w-100 {{ old('module', $requestedModule) === 'jobs' ? 'is-active' : '' }}" for="mod_jobs" id="label-mod-jobs">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-briefcase"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Emprego</strong>
+                                                    <small class="item-choice-desc text-muted">Vagas ou busca por oportunidades.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {{-- 5. LOJA --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <a href="{{ route('store.create') }}" class="item-choice-card w-100 text-decoration-none d-block" id="label-mod-store" title="Criar sua Loja ou Comércio Local no Conectado em Sergipe">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-store"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Loja</strong>
+                                                    <small class="item-choice-desc text-muted">Crie sua página de loja e divulgue seu comércio.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i>
+                                                </div>
+                                            </div>
                                         </a>
-                                        <a href="{{ route('store.create', ['category' => 'Alimentação']) }}" class="advertiser-type-option text-decoration-none">
-                                            <i class="fa-solid fa-utensils"></i>
-                                            <span><strong>Restaurante / Alimentação</strong><small>Cardápio, retirada e entrega.</small></span>
-                                            <i class="fa-solid fa-arrow-right"></i>
-                                        </a>
+                                    </div>
+
+                                    {{-- 6. AGRO --}}
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <input type="radio" class="btn-check d-none" name="module" id="mod_agro" value="agro" {{ old('module', $requestedModule) === 'agro' ? 'checked' : '' }} onchange="selectModule('agro')">
+                                        <label class="item-choice-card w-100 {{ old('module', $requestedModule) === 'agro' ? 'is-active' : '' }}" for="mod_agro" id="label-mod-agro">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="item-choice-icon">
+                                                    <i class="fa-solid fa-tractor"></i>
+                                                </div>
+                                                <div class="item-choice-copy flex-grow-1">
+                                                    <strong class="item-choice-title text-dark d-block">Agro</strong>
+                                                    <small class="item-choice-desc text-muted">Produtos, animais, máquinas e serviços rurais.</small>
+                                                </div>
+                                                <div class="item-choice-check">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {{-- BOX INFORMATIVO AZUL SUAVE --}}
+                                <div class="info-help-callout d-flex align-items-center gap-3 p-3.5 rounded-4 mb-4">
+                                    <div class="info-help-icon flex-shrink-0 text-primary">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </div>
+                                    <div class="info-help-copy">
+                                        <span class="text-dark fw-medium small">Sua escolha define os campos do próximo passo para te ajudar a anunciar mais rápido e melhor.</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center pt-3 border-top wizard-actions">
-                                <a href="{{ route('home') }}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold wizard-action">
-                                    <i class="fa-solid fa-arrow-left me-2"></i> Voltar
+                                <a href="{{ route('home') }}" class="btn btn-outline-secondary rounded-3 px-4 py-2.5 fw-semibold wizard-action">
+                                    <i class="fa-solid fa-arrow-left me-1"></i> Voltar
                                 </a>
-                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2.5 fw-bold shadow-sm wizard-action" onclick="goToStep(2)">
-                                    Continuar <i class="fa-solid fa-arrow-right ms-2"></i>
+                                <button type="button" class="btn btn-primary rounded-3 px-5 py-2.5 fw-bold shadow-sm wizard-action" onclick="goToStep(2)">
+                                    Continuar <i class="fa-solid fa-arrow-right ms-1"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- ================= ETAPA 2: INFORMAÇÕES ================= -->
+                        <!-- ================= ETAPA 2: INFORMAÇÕES & CONTATO ================= -->
                         <div class="wizard-step d-none" id="wizard-step-2">
                             <div class="text-center mb-4">
                                 <h3 class="fw-bold text-dark mb-1" id="details-heading">Informações do seu serviço</h3>
@@ -220,6 +371,19 @@
                                 </button>
                             </div>
 
+                            <div class="mb-3 d-none" id="profile-kind-field">
+                                <label for="profile_kind_select" class="form-label fw-semibold">
+                                    <i class="fa-solid fa-id-card-clip text-primary me-1"></i> Como você atua? (Tipo de anunciante) *
+                                </label>
+                                <select class="form-select form-select-lg rounded-3" id="profile_kind_select" name="profile_kind" onchange="updateProfileKindContext(this.value)">
+                                    @foreach($profileKinds ?? \App\Models\Ad::PROFILE_KINDS as $kindKey => $kindData)
+                                        <option value="{{ $kindKey }}" @selected(old('profile_kind', 'professional') === $kindKey)>
+                                            {{ $kindData['label'] }} — {{ $kindData['subtitle'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="category_select" class="form-label fw-semibold">Especifique a Subcategoria *</label>
                                 <select class="form-select form-select-lg rounded-3" id="category_select" name="category_name" onchange="updateSuggestedTitle()" required>
@@ -234,10 +398,10 @@
                                 <small class="text-muted d-block mt-1" id="title-help">Dica: seja claro e direto no nome do seu anúncio.</small>
                             </div>
 
-                            <div class="mb-3" id="price-field">
-                                <label for="price" class="form-label fw-semibold">Preço (R$)</label>
+                            <div class="mb-3 d-none" id="price-field">
+                                <label for="price" class="form-label fw-semibold" id="price-label">Preço (R$)</label>
                                 <input type="text" inputmode="decimal" class="form-control form-control-lg rounded-3" id="price" name="price" value="{{ old('price') }}" placeholder="Ex: 80.000,00" oninput="formatPriceInput(this); updatePreview();">
-                                <small class="text-muted">Digite os valores que a pontuação decimal (R$ 80.000,00) será formatada automaticamente.</small>
+                                <small class="text-muted" id="price-help">Digite o valor do produto ou anúncio.</small>
                             </div>
 
                             <div class="store-product-link mb-3 d-none" id="store-product-field">
@@ -274,7 +438,9 @@
                                         </div>
                                         <select class="form-select rounded-3" id="store_id" name="store_id">
                                             @foreach($availableStores as $store)
-                                                @php($storeIsFull = $storeProductLimit !== null && $store->products_count >= $storeProductLimit)
+                                                @php
+                                                    $storeIsFull = $storeProductLimit !== null && $store->products_count >= $storeProductLimit;
+                                                @endphp
                                                 <option
                                                     value="{{ $store->id }}"
                                                     {{ (string) old('store_id', $storesWithCapacity->count() === 1 ? $storesWithCapacity->first()->id : '') === (string) $store->id ? 'selected' : '' }}
@@ -333,6 +499,92 @@
                                 <small class="text-muted">Preencha somente se clientes puderem ir ao local. O endereço aparecerá no perfil com o botão “Como chegar”.</small>
                             </div>
 
+                            <!-- CANAIS DE CONTATO E ATENDIMENTO -->
+                            <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light">
+                                <h6 class="fw-bold text-dark mb-3">
+                                    <i class="fa-solid fa-address-book text-primary me-2"></i> Informações de contato e atendimento
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="whatsapp" class="form-label fw-semibold">
+                                            <i class="fa-brands fa-whatsapp text-success me-1"></i> WhatsApp *
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg rounded-3" id="whatsapp" name="whatsapp" value="{{ old('whatsapp', auth()->user()->whatsapp ?? '') }}" placeholder="(79) 99999-9999" required oninput="updatePreview()">
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="phone" class="form-label fw-semibold">
+                                            <i class="fa-solid fa-phone text-primary me-1"></i> Telefone de Contato *
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg rounded-3" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="(79) 3333-3333" required>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="telegram" class="form-label fw-semibold"><i class="fa-brands fa-telegram text-info me-1"></i> Telegram (opcional)</label>
+                                        <input type="text" class="form-control rounded-3" id="telegram" name="telegram" value="{{ old('telegram') }}" placeholder="@seutelegram ou (79) 99999-9999">
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="instagram" class="form-label fw-semibold"><i class="fa-brands fa-instagram text-danger me-1"></i> Instagram (opcional)</label>
+                                        <input type="text" class="form-control rounded-3" id="instagram" name="instagram" value="{{ old('instagram') }}" placeholder="@seudoinstagram">
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="facebook" class="form-label fw-semibold"><i class="fa-brands fa-facebook text-primary me-1"></i> Facebook (opcional)</label>
+                                        <input type="text" class="form-control rounded-3" id="facebook" name="facebook" value="{{ old('facebook') }}" placeholder="/seudofacebook">
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top">
+                                    <label for="cnpj" class="form-label fw-semibold"><i class="fa-solid fa-id-card text-secondary me-1"></i> CNPJ (opcional)</label>
+                                    <input type="text" class="form-control rounded-3" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" placeholder="00.000.000/0001-00" style="max-width: 320px;">
+                                    <small class="text-muted">Preencha apenas se você tem empresa registrada</small>
+                                </div>
+                            </div>
+
+                            <!-- HORÁRIOS DE ATENDIMENTO (EXCLUSIVO PARA SERVIÇOS) -->
+                            <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light d-none" id="business-hours-field">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0">
+                                            <i class="fa-regular fa-clock text-primary me-2"></i> Horários de Atendimento
+                                        </h6>
+                                        <small class="text-muted">Defina seus horários de trabalho para os clientes. (Padrão: 08:00 às 18:00)</small>
+                                    </div>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill fw-semibold">
+                                        <i class="fa-solid fa-check me-1"></i> Padrão: 08:00 às 18:00
+                                    </span>
+                                </div>
+
+                                <div class="row g-2">
+                                    @php
+                                        $weekDays = [
+                                            'segunda' => ['label' => 'Segunda-feira', 'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'terca'   => ['label' => 'Terça-feira',   'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'quarta'  => ['label' => 'Quarta-feira',  'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'quinta'  => ['label' => 'Quinta-feira',  'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'sexta'   => ['label' => 'Sexta-feira',   'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'sabado'  => ['label' => 'Sábado',        'default_open' => '08:00', 'default_close' => '12:00', 'closed' => false],
+                                            'domingo' => ['label' => 'Domingo',       'default_open' => '08:00', 'default_close' => '18:00', 'closed' => true],
+                                        ];
+                                    @endphp
+
+                                    @foreach($weekDays as $dayKey => $dayInfo)
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="p-2.5 bg-white rounded-3 border">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <strong class="text-dark small">{{ $dayInfo['label'] }}</strong>
+                                                    <div class="form-check form-switch mb-0">
+                                                        <input class="form-check-input" type="checkbox" role="switch" id="closed_{{ $dayKey }}" name="business_hours[{{ $dayKey }}][closed]" value="1" {{ old("business_hours.$dayKey.closed", $dayInfo['closed'] ? '1' : '0') === '1' ? 'checked' : '' }} onchange="toggleDayHours('{{ $dayKey }}')">
+                                                        <label class="form-check-label text-muted" for="closed_{{ $dayKey }}" style="font-size: 0.75rem;">Fechado</label>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1.5" id="hours_wrap_{{ $dayKey }}">
+                                                    <input type="time" class="form-control form-control-sm rounded-2 text-center" name="business_hours[{{ $dayKey }}][open]" value="{{ old("business_hours.$dayKey.open", $dayInfo['default_open']) }}">
+                                                    <span class="text-muted small">às</span>
+                                                    <input type="time" class="form-control form-control-sm rounded-2 text-center" name="business_hours[{{ $dayKey }}][close]" value="{{ old("business_hours.$dayKey.close", $dayInfo['default_close']) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="mb-4">
                                 <label for="description" class="form-label fw-semibold" id="description-label">Sobre o profissional e seus serviços *</label>
                                 <textarea class="form-control rounded-3" id="description" name="description" rows="5" maxlength="1000" placeholder="Descreva os detalhes do seu anúncio ou serviço..." oninput="updateCharCount(this); updatePreview();" required>{{ old('description') }}</textarea>
@@ -372,7 +624,7 @@
                                     </div>
                                     
                                     <!-- Container da Foto Principal com Botão de Remover X -->
-                                <div id="main-photo-preview-box" class="d-none mt-3 position-relative">
+                                    <div id="main-photo-preview-box" class="d-none mt-3 position-relative">
                                         <img id="main-photo-img" src="" class="rounded-3 shadow-sm object-fit-cover" style="max-height: 180px; max-width: 100%;">
                                         <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 translate-middle shadow" style="width: 28px; height: 28px; padding: 0; line-height: 28px;" onclick="removeMainPhoto()" title="Remover Foto">
                                             <i class="fa-solid fa-xmark"></i>
@@ -429,64 +681,8 @@
                             </div>
                         </div>
 
-                        <!-- ================= ETAPA 4: CONTATO ================= -->
+                        <!-- ================= ETAPA 4: PUBLICAR & REVISAR ================= -->
                         <div class="wizard-step d-none" id="wizard-step-4">
-                            <div class="text-center mb-4">
-                                <h3 class="fw-bold text-dark mb-1">Informações de contato</h3>
-                                <p class="text-muted">Como os clientes podem falar com você?</p>
-                            </div>
-
-                            <div class="mb-4">
-                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i> Canais de contato de atendimento</h6>
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-4">
-                                        <label for="whatsapp" class="form-label fw-semibold">WhatsApp *</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="whatsapp" name="whatsapp" value="{{ old('whatsapp', auth()->user()->whatsapp ?? '') }}" placeholder="(79) 99999-9999" required oninput="updatePreview()">
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label for="phone" class="form-label fw-semibold">Telefone de Contato *</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="(79) 3333-3333" required>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label for="telegram" class="form-label fw-semibold"><i class="fa-brands fa-telegram text-info me-1"></i> Telegram (opcional)</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="telegram" name="telegram" value="{{ old('telegram') }}" placeholder="@seutelegram ou (79) 99999-9999">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-share-nodes text-secondary me-2"></i> Redes sociais (opcional)</h6>
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-6">
-                                        <label for="instagram" class="form-label fw-semibold">Instagram</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="instagram" name="instagram" value="{{ old('instagram') }}" placeholder="@seudoinstagram">
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="facebook" class="form-label fw-semibold">Facebook</label>
-                                        <input type="text" class="form-control form-control-lg rounded-3" id="facebook" name="facebook" value="{{ old('facebook') }}" placeholder="/seudofacebook">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-light p-4 rounded-4 border mb-4">
-                                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-id-card text-secondary me-2"></i> Dados comerciais (opcional)</h6>
-                                <label for="cnpj" class="form-label fw-semibold">CNPJ</label>
-                                <input type="text" class="form-control rounded-3" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" placeholder="00.000.000/0001-00">
-                                <small class="text-muted">Preencha apenas se você tem empresa registrada</small>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center pt-3 border-top wizard-actions">
-                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold wizard-action" onclick="goToStep(3)">
-                                    <i class="fa-solid fa-arrow-left me-2"></i> Voltar
-                                </button>
-                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2.5 fw-bold shadow-sm wizard-action" onclick="goToStep(5)">
-                                    Continuar <i class="fa-solid fa-arrow-right ms-2"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- ================= ETAPA 5: PUBLICAR & REVISAR ================= -->
-                        <div class="wizard-step d-none" id="wizard-step-5">
                             <div class="text-center mb-4">
                                 <h3 class="fw-bold text-dark mb-1" id="review-heading">Revise e crie seu perfil profissional</h3>
                                 <p class="text-muted">Confira os detalhes antes de publicar.</p>
@@ -543,7 +739,7 @@
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center pt-3 border-top wizard-actions">
-                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold wizard-action" onclick="goToStep(4)">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold wizard-action" onclick="goToStep(3)">
                                     <i class="fa-solid fa-arrow-left me-2"></i> Voltar
                                 </button>
                                 <div class="text-end wizard-submit-wrap">
@@ -568,6 +764,372 @@
     --publish-blue: #1265f5;
     --publish-violet: #7138ef;
 }
+
+/* CARDS MESTRES (LAYOUT IDÊNTICO AO MOCKUP) */
+.master-choice-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.master-choice-card:hover {
+    border-color: #93c5fd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(18, 101, 245, 0.08) !important;
+}
+.master-choice-card.is-active {
+    border-color: #1265f5 !important;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(18, 101, 245, 0.12) !important;
+}
+.master-choice-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #1265f5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.master-choice-icon.is-items {
+    background: #f1f5f9;
+    color: #475569;
+}
+.master-choice-card.is-active .master-choice-icon {
+    background: #eff6ff;
+    color: #1265f5;
+}
+.master-choice-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 1px;
+    letter-spacing: -0.2px;
+}
+.master-choice-text {
+    font-size: 0.77rem;
+    line-height: 1.3;
+    display: block;
+}
+.master-choice-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.master-choice-card.is-active .master-choice-check {
+    background: #1265f5;
+    color: #ffffff;
+}
+
+/* CARDS DE CATEGORIAS DE ITENS / VENDAS (GRID 3x2 IDÊNTICO AO MOCKUP) */
+.item-choice-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 11px 13px;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    text-align: left;
+    position: relative;
+}
+.item-choice-card:hover {
+    border-color: #93c5fd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(18, 101, 245, 0.08);
+}
+.item-choice-card.is-active,
+.btn-check:checked + .item-choice-card {
+    border-color: #1265f5 !important;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(18, 101, 245, 0.12) !important;
+}
+.item-choice-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1265f5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.item-choice-title {
+    font-size: 0.90rem;
+    font-weight: 700;
+    margin-bottom: 1px;
+    letter-spacing: -0.2px;
+}
+.item-choice-desc {
+    font-size: 0.72rem;
+    line-height: 1.25;
+    display: block;
+}
+.item-choice-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    background: transparent;
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.item-choice-card.is-active .item-choice-check,
+.btn-check:checked + .item-choice-card .item-choice-check {
+    border-color: #1265f5;
+    background: #1265f5;
+    color: #ffffff;
+}
+
+/* CARDS DE ATUAÇÃO EM SERVIÇOS */
+.service-role-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 13px 12px;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.service-role-card:hover {
+    border-color: #1265f5;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(18, 101, 245, 0.08);
+}
+.service-role-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1265f5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+}
+.service-role-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+}
+.service-role-desc {
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
+/* BOX INFORMATIVO AZUL SUAVE */
+.info-help-callout {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+}
+.info-help-icon {
+    color: #1265f5;
+    font-size: 1.25rem;
+}
+
+/* AJUSTES PARA MODO ESCURO */
+html[data-theme="dark"] .master-choice-card,
+[data-bs-theme="dark"] .master-choice-card,
+.dark-theme .master-choice-card {
+    background: var(--card, #1e293b) !important;
+    border-color: var(--border, #334155) !important;
+}
+html[data-theme="dark"] .master-choice-card:hover,
+[data-bs-theme="dark"] .master-choice-card:hover,
+.dark-theme .master-choice-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="dark"] .master-choice-card.is-active,
+[data-bs-theme="dark"] .master-choice-card.is-active,
+.dark-theme .master-choice-card.is-active {
+    background: var(--card, #1e293b) !important;
+    border-color: #1265f5 !important;
+    box-shadow: 0 8px 24px rgba(18, 101, 245, 0.25) !important;
+}
+html[data-theme="dark"] .master-choice-icon,
+[data-bs-theme="dark"] .master-choice-icon,
+.dark-theme .master-choice-icon {
+    background: #0f172a !important;
+    color: #60a5fa !important;
+}
+html[data-theme="dark"] .master-choice-icon.is-items,
+[data-bs-theme="dark"] .master-choice-icon.is-items,
+.dark-theme .master-choice-icon.is-items {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .master-choice-title,
+[data-bs-theme="dark"] .master-choice-title,
+.dark-theme .master-choice-title {
+    color: #ffffff !important;
+}
+html[data-theme="dark"] .master-choice-text,
+[data-bs-theme="dark"] .master-choice-text,
+.dark-theme .master-choice-text {
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .master-choice-check,
+[data-bs-theme="dark"] .master-choice-check,
+.dark-theme .master-choice-check {
+    background: #334155 !important;
+}
+html[data-theme="dark"] .master-choice-card.is-active .master-choice-check,
+[data-bs-theme="dark"] .master-choice-card.is-active .master-choice-check,
+.dark-theme .master-choice-card.is-active .master-choice-check {
+    background: #1265f5 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .item-choice-card,
+[data-bs-theme="dark"] .item-choice-card,
+.dark-theme .item-choice-card {
+    background: var(--card, #1e293b) !important;
+    border-color: var(--border, #334155) !important;
+}
+html[data-theme="dark"] .item-choice-card:hover,
+[data-bs-theme="dark"] .item-choice-card:hover,
+.dark-theme .item-choice-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="dark"] .item-choice-card.is-active,
+[data-bs-theme="dark"] .item-choice-card.is-active,
+.dark-theme .item-choice-card.is-active,
+html[data-theme="dark"] .btn-check:checked + .item-choice-card,
+[data-bs-theme="dark"] .btn-check:checked + .item-choice-card,
+.dark-theme .btn-check:checked + .item-choice-card {
+    background: var(--card, #1e293b) !important;
+    border-color: #1265f5 !important;
+    box-shadow: 0 8px 24px rgba(18, 101, 245, 0.25) !important;
+}
+html[data-theme="dark"] .item-choice-icon,
+[data-bs-theme="dark"] .item-choice-icon,
+.dark-theme .item-choice-icon {
+    background: rgba(18, 101, 245, 0.2) !important;
+    color: #60a5fa !important;
+}
+html[data-theme="dark"] .item-choice-title,
+[data-bs-theme="dark"] .item-choice-title,
+.dark-theme .item-choice-title {
+    color: #ffffff !important;
+}
+html[data-theme="dark"] .item-choice-desc,
+[data-bs-theme="dark"] .item-choice-desc,
+.dark-theme .item-choice-desc {
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .item-choice-check,
+[data-bs-theme="dark"] .item-choice-check,
+.dark-theme .item-choice-check {
+    border-color: #475569 !important;
+}
+html[data-theme="dark"] .item-choice-card.is-active .item-choice-check,
+[data-bs-theme="dark"] .item-choice-card.is-active .item-choice-check,
+.dark-theme .item-choice-card.is-active .item-choice-check,
+html[data-theme="dark"] .btn-check:checked + .item-choice-card .item-choice-check,
+[data-bs-theme="dark"] .btn-check:checked + .item-choice-card .item-choice-check,
+.dark-theme .btn-check:checked + .item-choice-card .item-choice-check {
+    border-color: #1265f5 !important;
+    background: #1265f5 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .service-role-card,
+[data-bs-theme="dark"] .service-role-card,
+.dark-theme .service-role-card {
+    background: var(--card, #1e293b) !important;
+    border-color: var(--border, #334155) !important;
+}
+html[data-theme="dark"] .service-role-card:hover,
+[data-bs-theme="dark"] .service-role-card:hover,
+.dark-theme .service-role-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="dark"] .service-role-icon,
+[data-bs-theme="dark"] .service-role-icon,
+.dark-theme .service-role-icon {
+    background: rgba(18, 101, 245, 0.2) !important;
+    color: #60a5fa !important;
+}
+html[data-theme="dark"] .service-role-title,
+[data-bs-theme="dark"] .service-role-title,
+.dark-theme .service-role-title {
+    color: #ffffff !important;
+}
+html[data-theme="dark"] .service-role-desc,
+[data-bs-theme="dark"] .service-role-desc,
+.dark-theme .service-role-desc {
+    color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .info-help-callout,
+[data-bs-theme="dark"] .info-help-callout,
+.dark-theme .info-help-callout {
+    background: rgba(18, 101, 245, 0.12) !important;
+    border-color: rgba(18, 101, 245, 0.35) !important;
+}
+html[data-theme="dark"] .info-help-callout strong,
+[data-bs-theme="dark"] .info-help-callout strong,
+.dark-theme .info-help-callout strong {
+    color: #ffffff !important;
+}
+html[data-theme="dark"] .info-help-callout span,
+[data-bs-theme="dark"] .info-help-callout span,
+.dark-theme .info-help-callout span {
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .info-help-icon,
+[data-bs-theme="dark"] .info-help-icon,
+.dark-theme .info-help-icon {
+    color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .publish-form-card .bg-light,
+[data-bs-theme="dark"] .publish-form-card .bg-light,
+.dark-theme .publish-form-card .bg-light {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-color: var(--border, #334155) !important;
+}
+
+html[data-theme="dark"] #business-hours-field .bg-white,
+[data-bs-theme="dark"] #business-hours-field .bg-white,
+.dark-theme #business-hours-field .bg-white {
+    background-color: var(--card, #1e293b) !important;
+    border-color: var(--border, #334155) !important;
+}
+
 .publish-toolbar .btn {
     min-height: 38px;
     display: inline-flex;
@@ -1215,20 +1777,154 @@
 
     const fallbackCategoryLists = {
         services: ['Eletricista', 'Encanador', 'Pintor', 'Mecânico', 'Advogado', 'Faxineira / Diarista', 'Marcenaria', 'TI / Informática', 'Frete e Mudanças', 'Restaurante / Pizzaria', 'Pedreiro', 'Jardineiro'],
-        products: ['Celulares & Telefonia', 'Computadores & Informática', 'Eletrodomésticos & Eletrônicos', 'Móveis, Casa & Decoração', 'Moda, Roupas & Calçados', 'Beleza, Cosméticos & Perfumaria', 'Esportes, Fitness & Ciclismo', 'Automotivo & Acessórios'],
-        real_estate: ['Casas para Venda', 'Casas para Aluguel', 'Apartamentos para Venda', 'Apartamentos para Aluguel', 'Terrenos, Lotes & Chácaras', 'Salas Comerciais, Lojas & Galpões', 'Aluguel por Temporada & Pousadas'],
-        vehicles: ['Carros & Utilitários', 'Motos & Ciclomotores', 'Caminhões, Ônibus & Vans', 'Náutica, Barcos & Lanchas', 'Peças, Pneus & Acessórios'],
-        jobs: ['Vagas Operacionais & Serviços Gerais', 'Vagas Comerciais & Vendas', 'Vagas em Tecnologia & TI', 'Estágios & Jovem Aprendiz', 'Freelancers, Bicos & Autônomos'],
-        agro: ['Gado, Cavalos & Pecuária', 'Tratores, Máquinas & Implementos', 'Sementes, Mudas & Adubos', 'Produtos da Roça & Hortifrúti']
+        products: [
+            'Celulares & Telefonia',
+            'Computadores & Informática',
+            'Eletrodomésticos & Eletrônicos',
+            'Móveis, Casa & Decoração',
+            'Moda, Roupas & Calçados',
+            'Beleza, Cosméticos & Perfumaria',
+            'Produtos Agrícolas & Agropecuária (Sementes, Mudas e Insumos)',
+            'Produtos da Roça & Hortifrúti',
+            'Gado, Animais & Pecuária',
+            'Ferramentas, Jardim & Indústria',
+            'Alimentos, Bebidas & Supermercado',
+            'Esportes, Fitness & Ciclismo',
+            'Automotivo & Acessórios',
+            'Artesanato, Antiguidades & Colecionáveis',
+            'Outros Produtos'
+        ],
+        real_estate: ['Casas para Venda', 'Casas para Aluguel', 'Apartamentos para Venda', 'Apartamentos para Aluguel', 'Terrenos, Lotes & Chácaras', 'Sítios, Fazendas & Agronegócio', 'Salas Comerciais, Lojas & Galpões', 'Aluguel por Temporada & Pousadas'],
+        vehicles: ['Carros & Utilitários', 'Motos & Ciclomotores', 'Caminhões, Ônibus & Vans', 'Tratores, Máquinas & Implementos Agrícolas', 'Náutica, Barcos & Lanchas', 'Peças, Pneus & Acessórios'],
+        jobs: ['Vagas Operacionais & Serviços Gerais', 'Vagas Comerciais & Vendas', 'Vagas em Tecnologia & TI', 'Vagas no Campo & Agro', 'Estágios & Jovem Aprendiz', 'Freelancers, Bicos & Autônomos'],
+        agro: ['Produtos Agrícolas & Agropecuária', 'Sementes, Mudas & Adubos', 'Produtos da Roça & Hortifrúti', 'Gado, Cavalos & Pecuária', 'Tratores, Máquinas & Implementos']
     };
+
+    function selectPublishMode(mode) {
+        const cardServices = document.getElementById('card-choice-services');
+        const cardItems = document.getElementById('card-choice-items');
+        const sectionServices = document.getElementById('section-services-flow');
+        const sectionItems = document.getElementById('section-items-flow');
+
+        if (!cardServices || !cardItems || !sectionServices || !sectionItems) return;
+
+        if (mode === 'services') {
+            cardServices.classList.add('is-active');
+            cardItems.classList.remove('is-active');
+            sectionServices.classList.remove('d-none');
+            sectionItems.classList.add('d-none');
+        } else {
+            cardItems.classList.add('is-active');
+            cardServices.classList.remove('is-active');
+            sectionItems.classList.remove('d-none');
+            sectionServices.classList.add('d-none');
+            
+            const activeModule = document.querySelector('input[name="module"]:checked')?.value;
+            if (!activeModule || activeModule === 'services') {
+                const prodRadio = document.getElementById('mod_products');
+                if (prodRadio) {
+                    prodRadio.checked = true;
+                    selectModule('products');
+                }
+            }
+        }
+    }
+
+    function toggleDayHours(dayKey) {
+        const checkbox = document.getElementById('closed_' + dayKey);
+        const hoursWrap = document.getElementById('hours_wrap_' + dayKey);
+        if (checkbox && hoursWrap) {
+            hoursWrap.style.opacity = checkbox.checked ? '0.35' : '1';
+            hoursWrap.querySelectorAll('input').forEach(input => {
+                input.disabled = checkbox.checked;
+            });
+        }
+    }
 
     function chooseProfessionalProfile(profileKind = 'professional') {
         const profileKindInput = document.getElementById('service-profile-kind');
+        const profileKindSelect = document.getElementById('profile_kind_select');
         const serviceOption = document.getElementById('mod_services');
-        profileKindInput.value = profileKind;
-        serviceOption.checked = true;
+        if (profileKindInput) profileKindInput.value = profileKind;
+        if (profileKindSelect) profileKindSelect.value = profileKind;
+        if (serviceOption) serviceOption.checked = true;
         selectModule('services');
+        updateProfileKindContext(profileKind);
         goToStep(2);
+    }
+
+    function updatePriceFieldConfig(modKey, profileKind = null) {
+        const priceField = document.getElementById('price-field');
+        const priceInput = document.getElementById('price');
+        const priceLabel = document.getElementById('price-label');
+        const priceHelp = document.getElementById('price-help');
+
+        if (!priceField || !priceInput) return;
+
+        const isService = modKey === 'services';
+        const isHiringCompany = profileKind === 'hiring_company';
+        const isRealEstateAgency = profileKind === 'real_estate_agency';
+        const isCulturalArtist = profileKind === 'cultural_artist';
+
+        // Ocultar preço para TODOS os perfis de serviços/empresas contratantes/imobiliárias
+        if (isService || isHiringCompany || isRealEstateAgency || isCulturalArtist) {
+            priceField.classList.add('d-none');
+            priceInput.value = '';
+            return;
+        }
+
+        priceField.classList.remove('d-none');
+
+        if (modKey === 'jobs') {
+            if (priceLabel) priceLabel.textContent = 'Salário / Remuneração oferecida (R$ - opcional)';
+            priceInput.placeholder = 'Ex: 2.500,00 (deixe em branco se a combinar)';
+            if (priceHelp) priceHelp.textContent = 'Informe o salário ou remuneração da vaga, ou deixe em branco se for a combinar.';
+        } else if (modKey === 'real_estate') {
+            if (priceLabel) priceLabel.textContent = 'Valor do Imóvel / Aluguel (R$)';
+            priceInput.placeholder = 'Ex: 250.000,00 ou 1.200,00';
+            if (priceHelp) priceHelp.textContent = 'Valor de venda ou mensalidade do aluguel.';
+        } else if (modKey === 'vehicles') {
+            if (priceLabel) priceLabel.textContent = 'Valor do Veículo (R$)';
+            priceInput.placeholder = 'Ex: 45.000,00';
+            if (priceHelp) priceHelp.textContent = 'Valor de venda do veículo ou máquina.';
+        } else {
+            // products
+            if (priceLabel) priceLabel.textContent = 'Preço do Produto (R$)';
+            priceInput.placeholder = 'Ex: 150,00';
+            if (priceHelp) priceHelp.textContent = 'Digite o valor de venda do produto.';
+        }
+    }
+
+    function updateProfileKindContext(profileKind) {
+        const titleLabel = document.getElementById('title-label');
+        const descLabel = document.getElementById('description-label');
+        const detailsHeading = document.getElementById('details-heading');
+        const detailsSubtitle = document.getElementById('details-subtitle');
+
+        if (profileKind === 'hiring_company') {
+            if (detailsHeading) detailsHeading.textContent = 'Informações da empresa e da vaga';
+            if (detailsSubtitle) detailsSubtitle.textContent = 'Apresente sua empresa e publique oportunidades de emprego.';
+            if (titleLabel) titleLabel.textContent = 'Nome da empresa contratante / Vaga *';
+            if (descLabel) descLabel.textContent = 'Sobre a empresa e requisitos das oportunidades *';
+        } else if (profileKind === 'real_estate_agency') {
+            if (detailsHeading) detailsHeading.textContent = 'Informações da Imobiliária';
+            if (detailsSubtitle) detailsSubtitle.textContent = 'Apresente sua imobiliária e carteira de serviços.';
+            if (titleLabel) titleLabel.textContent = 'Nome da Imobiliária / Corretora *';
+            if (descLabel) descLabel.textContent = 'Sobre a imobiliária e serviços oferecidos *';
+        } else if (profileKind === 'cultural_artist') {
+            if (detailsHeading) detailsHeading.textContent = 'Perfil do Artista / Projeto Cultural';
+            if (detailsSubtitle) detailsSubtitle.textContent = 'Apresente sua arte, projetos e portfólio cultural.';
+            if (titleLabel) titleLabel.textContent = 'Nome artístico / Grupo / Projeto *';
+            if (descLabel) descLabel.textContent = 'Sobre a trajetória artística e apresentações *';
+        } else {
+            if (detailsHeading) detailsHeading.textContent = 'Informações do seu perfil profissional';
+            if (detailsSubtitle) detailsSubtitle.textContent = 'Apresente seu trabalho para que os clientes encontrem você.';
+            if (titleLabel) titleLabel.textContent = 'Nome do perfil profissional *';
+            if (descLabel) descLabel.textContent = 'Sobre o profissional e seus serviços *';
+        }
+
+        const modKey = document.querySelector('input[name="module"]:checked')?.value || 'services';
+        updatePriceFieldConfig(modKey, profileKind);
     }
 
     function selectModule(modKey, preserveTitle = false) {
@@ -1252,6 +1948,12 @@
         const badgeCat = document.getElementById('badge-cat-name');
         if (badgeCat) {
             badgeCat.textContent = moduleNames[modKey] || '🛠️ Serviço';
+        }
+
+        document.querySelectorAll('.item-choice-card').forEach(card => card.classList.remove('is-active'));
+        const activeLabel = document.getElementById('label-mod-' + modKey);
+        if (activeLabel) {
+            activeLabel.classList.add('is-active');
         }
 
         updateModuleLanguage(modKey);
@@ -1296,6 +1998,8 @@
     function updateModuleLanguage(modKey) {
         const isService = modKey === 'services';
         const isProduct = modKey === 'products';
+        const profileKindSelect = document.getElementById('profile_kind_select');
+        const profileKind = profileKindSelect ? profileKindSelect.value : null;
 
         const titleInput = document.getElementById('title');
         if (titleInput) {
@@ -1307,24 +2011,32 @@
             descInput.placeholder = descriptionPlaceholders[modKey] || descriptionPlaceholders.products;
         }
 
-        document.getElementById('details-heading').textContent = isService
-            ? 'Informações do seu perfil profissional'
-            : 'Informações do anúncio';
-        document.getElementById('details-subtitle').textContent = isService
-            ? 'Apresente seu trabalho para que os clientes encontrem você.'
-            : 'Preencha os detalhes do item que deseja anunciar.';
-        document.getElementById('title-label').textContent = isService
-            ? 'Nome do perfil profissional *'
-            : 'Título do anúncio *';
-        document.getElementById('title-help').textContent = isService
-            ? 'Dica: seja claro e direto no nome do seu perfil.'
-            : 'Dica: descreva claramente o que está anunciando.';
-        document.getElementById('description-label').textContent = isService
-            ? 'Sobre o profissional e seus serviços *'
-            : 'Descrição do anúncio *';
-        document.getElementById('price-field').classList.toggle('d-none', isService);
+        if (isService && profileKind) {
+            updateProfileKindContext(profileKind);
+        } else {
+            document.getElementById('details-heading').textContent = isService
+                ? 'Informações do seu perfil profissional'
+                : 'Informações do anúncio';
+            document.getElementById('details-subtitle').textContent = isService
+                ? 'Apresente seu trabalho para que os clientes encontrem você.'
+                : 'Preencha os detalhes do item que deseja anunciar.';
+            document.getElementById('title-label').textContent = isService
+                ? 'Nome do perfil profissional *'
+                : 'Título do anúncio *';
+            document.getElementById('title-help').textContent = isService
+                ? 'Dica: seja claro e direto no nome do seu perfil.'
+                : 'Dica: descreva claramente o que está anunciando.';
+            document.getElementById('description-label').textContent = isService
+                ? 'Sobre o profissional e seus serviços *'
+                : 'Descrição do anúncio *';
+        }
+
+        updatePriceFieldConfig(modKey, profileKind);
+        document.getElementById('profile-kind-field').classList.toggle('d-none', !isService);
         document.getElementById('region-field').classList.toggle('d-none', !isService);
         document.getElementById('public-address-field').classList.toggle('d-none', !isService);
+        const businessHoursField = document.getElementById('business-hours-field');
+        if (businessHoursField) businessHoursField.classList.toggle('d-none', !isService);
         document.getElementById('store-product-field').classList.toggle('d-none', !isProduct);
         document.getElementById('review-region-item').classList.toggle('d-none', !isService);
         document.getElementById('main-photo-label').textContent = isService
@@ -1418,8 +2130,9 @@
         
         currentStep = stepNumber;
 
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 4; i++) {
             const item = document.getElementById(`step-nav-${i}`);
+            if (!item) continue;
             item.classList.remove('active', 'completed');
             if (i < stepNumber) {
                 item.classList.add('completed');
@@ -1432,13 +2145,18 @@
             }
         }
 
-        const progressPercent = ((stepNumber - 1) / 4) * 100;
+        const progressPercent = ((stepNumber - 1) / 3) * 100;
         const progressLine = document.getElementById('step-progress-line');
         if (progressLine) {
             progressLine.style.width = `${progressPercent}%`;
         }
 
-        if (stepNumber === 5) {
+        const stepPill = document.getElementById('publish-step-pill');
+        if (stepPill) {
+            stepPill.textContent = `Etapa ${stepNumber} de 4`;
+        }
+
+        if (stepNumber === 4) {
             updateReviewSummary();
         }
 
@@ -1760,6 +2478,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        if (initialModule && initialModule !== 'services') {
+            selectPublishMode('items');
+        } else {
+            selectPublishMode('services');
+        }
+
         selectModule(initialModule, true);
         if (initialModule === 'services') {
             requestAnimationFrame(() => goToStep(2));

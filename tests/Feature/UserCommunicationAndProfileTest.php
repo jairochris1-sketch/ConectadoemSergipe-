@@ -46,7 +46,7 @@ class UserCommunicationAndProfileTest extends TestCase
         $this->actingAs($user)
             ->get(route('user.panel'))
             ->assertOk()
-            ->assertSee('class="panel-quick-icon"', false)
+            ->assertSee('user-sidebar-shortcut-link', false)
             ->assertSee(route('chat.index'), false)
             ->assertSee('href="#notificacoes"', false)
             ->assertSee(route('user.notifications.open', $notification), false)
@@ -101,6 +101,124 @@ class UserCommunicationAndProfileTest extends TestCase
             ->assertRedirect(route('chat.index', ['with' => $sender->id]));
 
         $this->assertDatabaseCount('messages', 2);
+    }
+
+    public function test_chat_blocks_messages_with_links_and_phone_numbers(): void
+    {
+        $sender = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        // Tentativa de envio com link
+        $this->actingAs($sender)
+            ->post(route('chat.send'), [
+                'receiver_id' => $receiver->id,
+                'content' => 'Acesse meu site https://exemplo.com para ver os preços.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        // Tentativa de envio com www
+        $this->actingAs($sender)
+            ->post(route('chat.send'), [
+                'receiver_id' => $receiver->id,
+                'content' => 'Visite www.meusite.com.br agora.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        // Tentativa de envio com telefone com DDD
+        $this->actingAs($sender)
+            ->post(route('chat.send'), [
+                'receiver_id' => $receiver->id,
+                'content' => 'Me chama no WhatsApp (79) 99999-8888 para fechar.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        // Tentativa de envio com sequência de dígitos de telefone
+        $this->actingAs($sender)
+            ->post(route('chat.send'), [
+                'receiver_id' => $receiver->id,
+                'content' => 'Meu contato direto é 79998887766.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        // Nenhuma mensagem proibida deve ser salva
+        $this->assertDatabaseCount('messages', 0);
+    }
+
+    public function test_user_can_block_and_unblock_another_user_in_chat(): void
+    {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+
+        // Bloquear usuário B
+        $this->actingAs($userA)
+            ->post(route('chat.block', $userB))
+            ->assertRedirect(route('chat.index', ['with' => $userB->id]))
+            ->assertSessionHas('success');
+
+        $this->assertTrue($userA->isBlocking($userB->id));
+        $this->assertTrue($userB->isBlockedBy($userA->id));
+
+        // Usuário A tenta enviar mensagem para B (bloqueado)
+        $this->actingAs($userA)
+            ->post(route('chat.send'), [
+                'receiver_id' => $userB->id,
+                'content' => 'Tentativa de mensagem para usuário bloqueado.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        // Usuário B tenta enviar mensagem para A (que o bloqueou)
+        $this->actingAs($userB)
+            ->post(route('chat.send'), [
+                'receiver_id' => $userA->id,
+                'content' => 'Tentativa de resposta de usuário bloqueado.',
+            ])
+            ->assertSessionHasErrors('content');
+
+        $this->assertDatabaseCount('messages', 0);
+
+        // Desbloquear usuário B
+        $this->actingAs($userA)
+            ->post(route('chat.unblock', $userB))
+            ->assertRedirect(route('chat.index', ['with' => $userB->id]))
+            ->assertSessionHas('success');
+
+        $this->assertFalse($userA->fresh()->isBlocking($userB->id));
+
+        // Agora o envio funciona normalmente
+        $this->actingAs($userA)
+            ->post(route('chat.send'), [
+                'receiver_id' => $userB->id,
+                'content' => 'Mensagem permitida após desbloqueio.',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseCount('messages', 1);
+    }
+
+    public function test_user_can_report_another_user_in_chat(): void
+    {
+        $reporter = User::factory()->create();
+        $reported = User::factory()->create();
+
+        $this->actingAs($reporter)
+            ->post(route('chat.report', $reported), [
+                'reason' => 'scam',
+                'details' => 'Tentou aplicar golpe durante a conversa.',
+                'block_too' => 1,
+            ])
+            ->assertRedirect(route('chat.index', ['with' => $reported->id]))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('reports', [
+            'advertiser_id' => $reported->id,
+            'reporter_user_id' => $reporter->id,
+            'subject_type' => 'user_chat',
+            'reason' => 'scam',
+            'status' => 'open',
+        ]);
+
+        // Como marcou block_too, o usuário também foi bloqueado
+        $this->assertTrue($reporter->fresh()->isBlocking($reported->id));
     }
 
     public function test_user_can_disable_and_enable_notifications(): void

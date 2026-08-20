@@ -21,9 +21,7 @@
 <article class="sdc-card services-directory-card">
     {{-- Banner Cover Superior --}}
     <div class="sdc-banner" style="background-image: url('{{ asset($coverImage) }}');">
-        <span class="sdc-banner-badge">
-            <i class="fa-solid fa-star"></i> Em destaque
-        </span>
+        <x-featured-badge :provider="$provider" class="sdc-banner-badge" />
     </div>
 
     {{-- Corpo do Card --}}
@@ -31,17 +29,21 @@
         {{-- Avatar Sobreposto + Sinalização de Online (Bolinha verde/cinza de status) --}}
         <a href="{{ route('provider.show', $provider->slug) }}" class="sdc-avatar-wrap services-directory-avatar">
             @if($profileImage)
-                <img src="{{ asset($profileImage) }}" alt="{{ $provider->title }}" loading="lazy" class="sdc-avatar-img">
+                <img src="{{ asset($profileImage) }}" alt="{{ $provider->title }}" loading="lazy" class="sdc-avatar-img protected-media" draggable="false" oncontextmenu="return false;">
             @else
-                <span class="sdc-avatar-initials">{{ strtoupper(substr($provider->title, 0, 1)) }}</span>
+                <span class="sdc-avatar-initials d-flex align-items-center justify-content-center text-white" style="background: linear-gradient(135deg, #1265f5 0%, #004ecc 100%);">
+                    <i class="{{ $provider->category_icon }}" style="font-size: 1.55rem;"></i>
+                </span>
             @endif
             @if($isAvailableNow)
                 <span class="sdc-avatar-dot" title="Disponível agora"></span>
             @endif
         </a>
 
-        {{-- Categoria --}}
-        <span class="sdc-category">{{ $provider->display_category }}</span>
+        {{-- Categoria com Ícone --}}
+        <span class="sdc-category">
+            <i class="{{ $provider->category_icon }} me-1"></i>{{ $provider->display_category }}
+        </span>
 
         {{-- Título --}}
         <h2 class="sdc-title">

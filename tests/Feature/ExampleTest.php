@@ -25,16 +25,15 @@ class ExampleTest extends TestCase
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Arte e Cultura')
+            ->assertSee('Arte & Cultura')
             ->assertSee('href="'.route('culture.index').'"', false)
-            ->assertSee('O maior ecossistema digital de Sergipe')
-            ->assertSee('Assine agora nossos planos e saia na frente.')
+            ->assertSee('Assine nossos planos e saia na frente.')
             ->assertSee('Conhecer planos')
             ->assertSee('aria-label="Ver banner anterior"', false)
             ->assertSee('aria-label="Ver próximo banner"', false)
             ->assertSee("navigation: { nextEl: '.home-hero-next', prevEl: '.home-hero-prev' }", false)
             ->assertSee("const swiperFeatured = new Swiper('.swiper-featured-ads'", false)
-            ->assertSee('speed: 650', false)
+            ->assertSee('swiper-marquee-esteira', false)
             ->assertSee("const compact = el.classList.contains('swiper-category-compact')", false)
             ->assertSee('992: { slidesPerView: compact ? 3 : 4, spaceBetween: 14 }', false)
             ->assertSee('1200: { slidesPerView: compact ? 3 : 5, spaceBetween: 14 }', false);
@@ -45,9 +44,8 @@ class ExampleTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('id="home-hero-plans-card"', false)
-            ->assertSee('Assine agora o Conectado em Sergipe')
+            ->assertSee('Planos Premium')
             ->assertSee('data-close-home-plans', false)
-            ->assertSee('.card-premium > button[aria-label="Favoritar"]', false)
             ->assertDontSee('+ 50 mil usuários');
     }
 

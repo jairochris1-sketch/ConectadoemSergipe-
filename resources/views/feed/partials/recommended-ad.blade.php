@@ -36,7 +36,7 @@
             <h2>{{ $feedAd->title }}</h2>
             <p>{{ \Illuminate\Support\Str::limit($feedAd->description, 125) }}</p>
             <div class="community-ad-footer">
-                <span class="community-ad-city"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ $feedAd->city ?: 'Sergipe' }}</span>
+                <span class="community-ad-city city-badge"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ $feedAd->city ?: 'Sergipe' }}</span>
                 <span class="community-ad-footer-actions">
                     @if((float) $feedAd->price > 0)
                         <strong>{{ $feedAd->formatted_price }}</strong>

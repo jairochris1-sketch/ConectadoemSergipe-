@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -57,25 +59,34 @@ class AuthController extends Controller
             'phone' => $this->normalizePhone($request->phone),
         ]);
 
-        $request->validate(
-            [
-                'name' => 'required|string|max:255',
-                'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._]+$/', 'unique:users,username'],
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6|confirmed',
-                'phone' => 'required|digits_between:10,11|unique:users,phone',
-                'city' => 'nullable|string|max:100',
-                'terms_accepted' => 'accepted',
-            ],
-            [
-                'username.required' => 'Escolha um @usuário para sua conta.',
-                'username.min' => 'O @usuário deve ter pelo menos 3 caracteres.',
-                'username.max' => 'O @usuário pode ter no máximo 30 caracteres.',
-                'username.regex' => 'O @usuário pode conter apenas letras, números, ponto ou sublinhado.',
-                'username.unique' => 'O @usuário informado já está em uso. Escolha outro nome de usuário.',
-                'terms_accepted.accepted' => 'Você precisa aceitar os Termos de Uso para criar sua conta.',
-            ]
-        );
+        try {
+            $request->validate(
+                [
+                    'name' => 'required|string|max:255',
+                    'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._]+$/', 'unique:users,username'],
+                    'email' => 'required|string|email|max:255|unique:users',
+                    'password' => 'required|string|min:6|confirmed',
+                    'phone' => 'required|digits_between:10,11|unique:users,phone',
+                    'city' => 'nullable|string|max:100',
+                    'terms_accepted' => 'accepted',
+                ],
+                [
+                    'username.required' => 'Escolha um @usuário para sua conta.',
+                    'username.min' => 'O @usuário deve ter pelo menos 3 caracteres.',
+                    'username.max' => 'O @usuário pode ter no máximo 30 caracteres.',
+                    'username.regex' => 'O @usuário pode conter apenas letras, números, ponto ou sublinhado.',
+                    'username.unique' => 'O @usuário informado já está em uso. Escolha outro nome de usuário.',
+                    'terms_accepted.accepted' => 'Você precisa aceitar os Termos de Uso para criar sua conta.',
+                ]
+            );
+        } catch (ValidationException $e) {
+            if ($e->validator->errors()->has('username')) {
+                $suggestions = $this->generateUsernameSuggestions($request->name, $request->username);
+                session()->flash('username_suggestions', $suggestions);
+            }
+
+            throw $e;
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -110,6 +121,121 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('ad.create')->with('success', 'Conta criada com sucesso! Você já pode publicar o seu anúncio.');
+    }
+
+    public function suggestUsernames(Request $request)
+    {
+        $name = (string) $request->query('name', '');
+        $username = (string) $request->query('username', '');
+
+        $suggestions = $this->generateUsernameSuggestions($name, $username);
+
+        return response()->json([
+            'suggestions' => $suggestions,
+        ]);
+    }
+
+    public function generateUsernameSuggestions(?string $name, ?string $baseUsername): array
+    {
+        $cleanBase = preg_replace('/[^a-z0-9._]/', '', mb_strtolower(trim($baseUsername ?? '')));
+        $cleanName = Str::ascii(mb_strtolower(trim($name ?? '')));
+        $cleanName = preg_replace('/[^a-z0-9\s]/', '', $cleanName);
+        $nameParts = array_values(array_filter(explode(' ', $cleanName)));
+        $firstName = $nameParts[0] ?? '';
+        $lastName = count($nameParts) > 1 ? end($nameParts) : '';
+
+        $root = !empty($cleanBase) ? $cleanBase : (!empty($firstName) ? $firstName : 'usuario');
+        $root = preg_replace('/[._]+$/', '', $root);
+        $rootAlpha = preg_replace('/[0-9._]+$/', '', $root);
+        if (strlen($rootAlpha) < 3) {
+            $rootAlpha = $root;
+        }
+
+        // Categorias distintas para garantir diversidade real nas sugestões
+        $categoryName = [];
+        $categoryRegional = [];
+        $categoryWord = [];
+        $categoryNumber = [];
+
+        // 1. Combinação Nome + Sobrenome
+        if ($firstName && $lastName) {
+            $categoryName[] = "{$firstName}.{$lastName}";
+            $categoryName[] = "{$firstName}_{$lastName}";
+        }
+
+        // 2. Identidade Regional (Sergipe / SE)
+        $categoryRegional[] = "{$rootAlpha}.se";
+        $categoryRegional[] = "{$rootAlpha}_se";
+        $categoryRegional[] = "{$rootAlpha}_sergipe";
+        if ($root !== $rootAlpha) {
+            $categoryRegional[] = "{$root}.se";
+        }
+        if ($firstName && $lastName) {
+            $categoryRegional[] = "{$firstName}.{$lastName}.se";
+        }
+
+        // 3. Palavras e Sufixos Não-Numéricos Distintivos
+        $categoryWord[] = "{$rootAlpha}_oficial";
+        $categoryWord[] = "{$rootAlpha}_conectado";
+        $categoryWord[] = "{$rootAlpha}_pro";
+        $categoryWord[] = "{$rootAlpha}_vip";
+        $categoryWord[] = "{$rootAlpha}_brasil";
+
+        // 4. Numeração e Ano Distintivos
+        $categoryNumber[] = "{$rootAlpha}" . date('y');
+        $categoryNumber[] = "{$rootAlpha}_" . date('Y');
+        $categoryNumber[] = "{$rootAlpha}" . rand(10, 99);
+        $categoryNumber[] = "{$rootAlpha}." . rand(10, 99);
+        $categoryNumber[] = "{$rootAlpha}" . rand(100, 999);
+
+        $buckets = [$categoryName, $categoryRegional, $categoryWord, $categoryNumber];
+
+        $suggestions = [];
+        $normalize = function ($cand) {
+            $cand = substr($cand, 0, 30);
+            if (strlen($cand) >= 3 && preg_match('/^[a-z0-9._]+$/', $cand)) {
+                return $cand;
+            }
+            return null;
+        };
+
+        // 1ª passada: seleciona 1 candidato disponível de cada categoria para garantir variedade
+        foreach ($buckets as $bucket) {
+            foreach ($bucket as $item) {
+                $cand = $normalize($item);
+                if ($cand && !User::where('username', $cand)->exists() && !in_array($cand, $suggestions, true)) {
+                    $suggestions[] = $cand;
+                    break;
+                }
+            }
+        }
+
+        // 2ª passada: preenche até 4 se algum bucket anterior não teve opções válidas
+        if (count($suggestions) < 4) {
+            foreach ($buckets as $bucket) {
+                foreach ($bucket as $item) {
+                    $cand = $normalize($item);
+                    if ($cand && !User::where('username', $cand)->exists() && !in_array($cand, $suggestions, true)) {
+                        $suggestions[] = $cand;
+                        if (count($suggestions) >= 4) {
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback garantido
+        $i = 1;
+        while (count($suggestions) < 4 && $i <= 100) {
+            $cand = substr($root, 0, 24) . $i;
+            if (!User::where('username', $cand)->exists() && !in_array($cand, $suggestions, true)) {
+                $suggestions[] = $cand;
+            }
+            $i++;
+        }
+
+        return $suggestions;
     }
 
     public function showForgotPassword()

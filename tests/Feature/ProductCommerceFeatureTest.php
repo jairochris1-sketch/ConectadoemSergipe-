@@ -155,6 +155,36 @@ class ProductCommerceFeatureTest extends TestCase
             ->assertSee('Sim, possui garantia de doze meses.');
     }
 
+    public function test_product_favorite_button_also_respects_twenty_item_limit(): void
+    {
+        $customer = User::factory()->create();
+        $store = $this->createStore();
+        $product = $this->createProduct($store);
+
+        foreach (range(1, 20) as $index) {
+            $savedAd = Ad::create([
+                'user_id' => $store->user_id,
+                'module' => 'real_estate',
+                'title' => "Imóvel favorito {$index}",
+                'slug' => "imovel-favorito-{$index}-".uniqid(),
+                'description' => 'Anúncio usado para preencher o limite de favoritos.',
+                'price' => 100000,
+                'city' => 'Aracaju',
+                'status' => 'active',
+            ]);
+            $customer->favorites()->attach($savedAd->id, ['created_at' => now()]);
+        }
+
+        $this->actingAs($customer)
+            ->post(route('products.favorite.toggle', $product))
+            ->assertSessionHasErrors([
+                'favorite' => 'Você atingiu o limite de 20 favoritos. Apague um favorito para salvar um novo.',
+            ]);
+
+        $this->assertFalse($customer->favorites()->whereKey($product->id)->exists());
+        $this->assertDatabaseCount('favorites', 20);
+    }
+
     public function test_technical_specs_video_and_variation_image_are_rendered(): void
     {
         $store = $this->createStore();

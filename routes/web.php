@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdController;
+use App\Http\Controllers\AdFavoriteController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommunityHelpController;
 use App\Http\Controllers\AdminCultureController;
@@ -36,11 +37,24 @@ use App\Http\Controllers\StorePromotionController;
 use App\Http\Controllers\CultureWorkController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\CommunityHelpRequestController;
+use App\Http\Controllers\AdminSupportController;
+use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', LandingPageController::class)->name('landing');
-Route::get('/plataforma', [HomeController::class, 'index'])->name('home');
+// Rotas do Chat de Suporte Online (Público / Widget)
+Route::get('/suporte/departamentos', [SupportChatController::class, 'getDepartments'])->name('support.departments');
+Route::post('/suporte/iniciar', [SupportChatController::class, 'startTicket'])->middleware('throttle:15,1')->name('support.start');
+Route::get('/suporte/{ticket}/status', [SupportChatController::class, 'getTicketStatus'])->name('support.status');
+Route::post('/suporte/{ticket}/mensagem', [SupportChatController::class, 'sendMessage'])->middleware('throttle:60,1')->name('support.send_message');
+Route::post('/suporte/{ticket}/encerrar', [SupportChatController::class, 'closeTicket'])->name('support.close');
+Route::post('/suporte/{ticket}/avaliar', [SupportChatController::class, 'rateTicket'])->name('support.rate');
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/bem-vindo', LandingPageController::class)->name('landing');
+Route::get('/plataforma', fn () => redirect()->route('home'))->name('home.redirect');
+Route::get('/lojas-e-vendas', [HomeController::class, 'storesAndSalesPage'])->name('stores-sales.index');
+Route::get('/destaques', [HomeController::class, 'highlights'])->name('highlights.index');
 Route::get('/comunidade', [FeedController::class, 'index'])->name('feed.index');
 Route::get('/comunidade/pedidos', [CommunityHelpRequestController::class, 'index'])
     ->name('community-help.index');
@@ -103,14 +117,21 @@ Route::get('/denuncia/{publicId}/obrigado', [ReportController::class, 'thankYou'
 // Gerenciamento de Anúncios CRUD
 Route::middleware(['auth', 'not_suspended'])->group(function () {
     Route::post('/prestador/{ad}/agendar', [ServiceBookingController::class, 'storeAppointment'])->name('service-booking.store');
+    Route::get('/prestador/{ad}/agendamentos/{appointment}/enviar-whatsapp/{event}', [ServiceBookingController::class, 'whatsappConfirmation'])->name('service-booking.whatsapp');
     Route::get('/meus-servicos/{ad}/agenda', [ServiceBookingController::class, 'manage'])->name('service-booking.manage');
     Route::patch('/meus-servicos/{ad}/agenda/status', [ServiceBookingController::class, 'toggle'])->name('service-booking.toggle');
     Route::patch('/meus-servicos/{ad}/vitrine', [ServiceBookingController::class, 'linkStore'])->name('service-booking.store-link');
     Route::post('/meus-servicos/{ad}/procedimentos', [ServiceBookingController::class, 'storeProcedure'])->name('service-booking.procedures.store');
+    Route::put('/meus-servicos/{ad}/procedimentos/{procedure}', [ServiceBookingController::class, 'updateProcedure'])->name('service-booking.procedures.update');
     Route::delete('/meus-servicos/{ad}/procedimentos/{procedure}', [ServiceBookingController::class, 'destroyProcedure'])->name('service-booking.procedures.destroy');
     Route::post('/meus-servicos/{ad}/profissionais', [ServiceBookingController::class, 'storeStaff'])->name('service-booking.staff.store');
     Route::put('/meus-servicos/{ad}/profissionais/{staff}', [ServiceBookingController::class, 'updateStaff'])->name('service-booking.staff.update');
     Route::patch('/meus-servicos/{ad}/agendamentos/{appointment}', [ServiceBookingController::class, 'updateAppointment'])->name('service-booking.appointments.update');
+    Route::post('/meus-servicos/{ad}/agendamentos/manual', [ServiceBookingController::class, 'storeManualAppointment'])->name('service-booking.appointments.manual');
+    Route::post('/meus-servicos/{ad}/bloqueios', [ServiceBookingController::class, 'storeScheduleBlock'])->name('service-booking.blocks.store');
+    Route::delete('/meus-servicos/{ad}/bloqueios/{block}', [ServiceBookingController::class, 'destroyScheduleBlock'])->name('service-booking.blocks.destroy');
+    Route::patch('/prestador/{ad}/agendamentos/{appointment}/cancelar', [ServiceBookingController::class, 'cancelCustomerAppointment'])->name('service-booking.customer.cancel');
+    Route::patch('/prestador/{ad}/agendamentos/{appointment}/remarcar', [ServiceBookingController::class, 'rescheduleCustomerAppointment'])->name('service-booking.customer.reschedule');
     Route::post('/meus-servicos/{ad}/financeiro', [ServiceBookingController::class, 'storeFinancialEntry'])->name('service-booking.financial.store');
     Route::put('/meus-servicos/{ad}/pagamentos', [ServicePaymentSettingsController::class, 'update'])->name('service-payments.settings.update');
     Route::post('/meus-servicos/{ad}/pagamentos/verificar', [ServicePaymentSettingsController::class, 'verify'])->name('service-payments.settings.verify');
@@ -138,6 +159,8 @@ Route::middleware(['auth', 'not_suspended'])->group(function () {
     Route::post('/anuncio/{ad}/posicao-capa', [AdController::class, 'updateCoverPosition'])->name('ad.cover_position');
     Route::put('/anuncio/{id}/atualizar', [AdController::class, 'update'])->name('ad.update');
     Route::delete('/anuncio/{id}/excluir', [AdController::class, 'destroy'])->name('ad.destroy');
+    Route::post('/anuncios/{ad}/favorito', [AdFavoriteController::class, 'store'])->middleware('throttle:30,1')->name('ads.favorite.store');
+    Route::delete('/anuncios/{ad}/favorito', [AdFavoriteController::class, 'destroy'])->middleware('throttle:30,1')->name('ads.favorite.destroy');
     Route::post('/produtos/{product}/favorito', [ProductFavoriteController::class, 'toggle'])->middleware('throttle:20,1')->name('products.favorite.toggle');
     Route::post('/produtos/{product}/perguntas', [ProductQuestionController::class, 'store'])->middleware('throttle:5,1')->name('products.questions.store');
     Route::post('/perguntas/{question}/resposta', [ProductQuestionController::class, 'answer'])->middleware('throttle:10,1')->name('products.questions.answer');
@@ -213,6 +236,9 @@ Route::middleware(['auth', 'not_suspended'])->group(function () {
     // Chat de Mensagens
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/enviar', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::post('/chat/{user}/bloquear', [ChatController::class, 'blockUser'])->name('chat.block');
+    Route::post('/chat/{user}/desbloquear', [ChatController::class, 'unblockUser'])->name('chat.unblock');
+    Route::post('/chat/{user}/denunciar', [ChatController::class, 'reportUser'])->name('chat.report');
 });
 
 // Painel Administrativo Exclusivo e Completo
@@ -284,6 +310,17 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     // Trocar plano de usuário + override individual
     Route::post('/usuarios/{user}/plano', [AdminPlanController::class, 'assignUserPlan'])->name('admin.users.assign_plan');
     Route::post('/usuarios/{user}/override', [AdminPlanController::class, 'setUserOverride'])->name('admin.users.feature_override');
+
+    // Central de Multiatendimento & Suporte ao Vivo (Filas, Atendentes, Chat)
+    Route::get('/suporte', [AdminSupportController::class, 'index'])->name('admin.support.index');
+    Route::get('/suporte/fila-data', [AdminSupportController::class, 'getQueueData'])->name('admin.support.queue_data');
+    Route::get('/suporte/ticket/{ticket}', [AdminSupportController::class, 'getTicketDetails'])->name('admin.support.ticket_details');
+    Route::post('/suporte/atender/{ticket}', [AdminSupportController::class, 'claimTicket'])->name('admin.support.claim');
+    Route::post('/suporte/transferir/{ticket}', [AdminSupportController::class, 'transferTicket'])->name('admin.support.transfer');
+    Route::post('/suporte/mensagem/{ticket}', [AdminSupportController::class, 'sendMessage'])->name('admin.support.send_message');
+    Route::post('/suporte/encerrar/{ticket}', [AdminSupportController::class, 'closeTicket'])->name('admin.support.close');
+    Route::get('/suporte/respostas-rapidas', [AdminSupportController::class, 'cannedResponses'])->name('admin.support.canned_responses');
+    Route::post('/suporte/respostas-rapidas', [AdminSupportController::class, 'storeCannedResponse'])->name('admin.support.store_canned');
 });
 
 // Autenticação / Registro / Recuperação de Senha
@@ -294,6 +331,7 @@ Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('a
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('/cadastro', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/cadastro/sugestoes-usuario', [AuthController::class, 'suggestUsernames'])->name('register.suggest-usernames');
 Route::post('/cadastro', [AuthController::class, 'register']);
 
 Route::get('/esqueci-senha', [AuthController::class, 'showForgotPassword'])->name('password.request');

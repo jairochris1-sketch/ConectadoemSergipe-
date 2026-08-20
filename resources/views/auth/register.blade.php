@@ -49,6 +49,28 @@
                                 {{ $message }}
                             </div>
                         @enderror
+
+                        @php
+                            $suggestions = session('username_suggestions', []);
+                        @endphp
+                        <div id="username-suggestions-wrapper" class="username-suggestions-wrapper mt-2 p-2.5 rounded-3 border {{ empty($suggestions) ? 'd-none' : '' }}" aria-live="polite">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="small fw-semibold d-flex align-items-center gap-1.5 username-suggestions-title" style="font-size: 0.78rem;">
+                                    <i class="fa-solid fa-lightbulb text-warning" aria-hidden="true"></i>
+                                    Sugestões disponíveis para você:
+                                </span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1.5" id="username-suggestions-list">
+                                @foreach($suggestions as $suggestion)
+                                    <button type="button" class="btn btn-sm username-suggestion-btn py-1 px-2.5 rounded-pill d-inline-flex align-items-center gap-1" data-suggested-username="{{ $suggestion }}" style="font-size: 0.78rem;">
+                                        <span class="text-muted fw-normal">@</span><span class="fw-bold">{{ $suggestion }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                            <small class="text-muted d-block mt-1.5 username-suggestions-hint" style="font-size: 0.72rem;">
+                                <i class="fa-solid fa-arrow-pointer me-1" aria-hidden="true"></i>Clique em uma sugestão para preencher automaticamente.
+                            </small>
+                        </div>
                     </div>
 
                     <div class="mb-2.5">
@@ -68,12 +90,31 @@
                         </div>
                     </div>
 
-                    <div class="row g-2 mb-3">
+                    <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <input type="password" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.85rem;" id="password" name="password" required autocomplete="new-password" placeholder="Senha">
+                            <div class="position-relative auth-password-input-group">
+                                <input type="password" class="form-control bg-light rounded-3 py-2 text-dark auth-password-field" style="font-size: 0.85rem;" id="password" name="password" required autocomplete="new-password" placeholder="Senha">
+                                <button type="button" class="auth-toggle-password-btn" data-target="password" aria-label="Mostrar senha" title="Mostrar senha" tabindex="-1">
+                                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <input type="password" class="form-control bg-light rounded-3 py-2 text-dark" style="font-size: 0.85rem;" id="password_confirmation" name="password_confirmation" required autocomplete="new-password" placeholder="Confirmação">
+                            <div class="position-relative auth-password-input-group">
+                                <input type="password" class="form-control bg-light rounded-3 py-2 text-dark auth-password-field" style="font-size: 0.85rem;" id="password_confirmation" name="password_confirmation" required autocomplete="new-password" placeholder="Confirmação">
+                                <button type="button" class="auth-toggle-password-btn" data-target="password_confirmation" aria-label="Mostrar confirmação da senha" title="Mostrar confirmação da senha" tabindex="-1">
+                                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="password-secure-notice" class="password-secure-notice d-none mb-3" role="alert" aria-live="polite">
+                        <div class="d-flex align-items-center gap-2 p-2.5 rounded-3">
+                            <i class="fa-solid fa-triangle-exclamation flex-shrink-0 text-warning" aria-hidden="true"></i>
+                            <span class="small fw-semibold">
+                                Atenção! Memorize ou guarde sua senha em um local seguro.
+                            </span>
                         </div>
                     </div>
 
@@ -239,6 +280,150 @@ html[data-theme="dark"] .auth-theme-brand-logo-dark {
     opacity: .55;
 }
 
+.auth-password-input-group {
+    position: relative;
+    width: 100%;
+}
+
+.auth-password-field {
+    padding-right: 36px !important;
+}
+
+.auth-toggle-password-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: #6b7280;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.auth-toggle-password-btn:hover,
+.auth-toggle-password-btn:focus-visible {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.08);
+    outline: none;
+}
+
+html[data-theme="dark"] .auth-toggle-password-btn {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .auth-toggle-password-btn:hover,
+html[data-theme="dark"] .auth-toggle-password-btn:focus-visible {
+    color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.12);
+}
+
+.password-secure-notice {
+    animation: fadeInSecureNotice 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.password-secure-notice > div {
+    background-color: #fff9e6;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="dark"] .password-secure-notice > div {
+    background-color: rgba(255, 193, 7, 0.12);
+    border-color: rgba(255, 193, 7, 0.28);
+    color: #ffd24d;
+}
+
+.username-suggestions-wrapper {
+    background-color: #f8fafc;
+    border-color: #e2e8f0 !important;
+    animation: fadeInSecureNotice 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.username-suggestions-title {
+    color: #334155;
+}
+
+.username-suggestion-btn {
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.username-suggestion-btn:hover,
+.username-suggestion-btn:focus-visible {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+}
+
+.username-suggestion-btn:hover .text-muted,
+.username-suggestion-btn:focus-visible .text-muted {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.username-suggestion-btn.is-selected {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+.username-suggestion-btn.is-selected .text-muted {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="dark"] .username-suggestions-wrapper {
+    background-color: #1e293b;
+    border-color: #334155 !important;
+}
+
+html[data-theme="dark"] .username-suggestions-title {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .username-suggestion-btn {
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
+    background: #0f172a !important;
+}
+
+html[data-theme="dark"] .username-suggestion-btn:hover,
+html[data-theme="dark"] .username-suggestion-btn:focus-visible,
+html[data-theme="dark"] .username-suggestion-btn.is-selected {
+    background: #2563eb !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .username-suggestions-hint {
+    color: #94a3b8 !important;
+}
+
+@keyframes fadeInSecureNotice {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -248,16 +433,123 @@ html[data-theme="dark"] .auth-theme-brand-logo-dark {
 document.addEventListener('DOMContentLoaded', () => {
     const termsCheckbox = document.getElementById('terms_accepted');
     const submitButton = document.querySelector('[data-register-submit]');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('password_confirmation');
+    const secureNotice = document.getElementById('password-secure-notice');
+    const usernameInput = document.getElementById('username');
+    const suggestionsWrapper = document.getElementById('username-suggestions-wrapper');
+    const suggestionsList = document.getElementById('username-suggestions-list');
 
-    if (!termsCheckbox || !submitButton) return;
+    if (termsCheckbox && submitButton) {
+        const updateSubmitState = () => {
+            submitButton.disabled = !termsCheckbox.checked;
+            submitButton.setAttribute('aria-disabled', submitButton.disabled ? 'true' : 'false');
+        };
 
-    const updateSubmitState = () => {
-        submitButton.disabled = !termsCheckbox.checked;
-        submitButton.setAttribute('aria-disabled', submitButton.disabled ? 'true' : 'false');
-    };
+        termsCheckbox.addEventListener('change', updateSubmitState);
+        updateSubmitState();
+    }
 
-    termsCheckbox.addEventListener('change', updateSubmitState);
-    updateSubmitState();
+    // 1. Alerta de memorizar/guardar senha (some após 7 segundos)
+    let secureNoticeTimeout = null;
+
+    if (passwordInput && confirmInput && secureNotice) {
+        const updatePasswordNotice = () => {
+            const password = passwordInput.value;
+            const confirmation = confirmInput.value;
+
+            if (confirmation.length > 0 && password.length > 0 && confirmation === password) {
+                secureNotice.classList.remove('d-none');
+
+                if (secureNoticeTimeout) {
+                    clearTimeout(secureNoticeTimeout);
+                }
+
+                secureNoticeTimeout = setTimeout(() => {
+                    secureNotice.classList.add('d-none');
+                }, 7000);
+            } else {
+                if (secureNoticeTimeout) {
+                    clearTimeout(secureNoticeTimeout);
+                }
+                secureNotice.classList.add('d-none');
+            }
+        };
+
+        passwordInput.addEventListener('input', updatePasswordNotice);
+        confirmInput.addEventListener('input', updatePasswordNotice);
+        confirmInput.addEventListener('change', updatePasswordNotice);
+    }
+
+    // 2. Olhinho para revelar/ocultar senha (volta a ocultar após 7 segundos)
+    const togglePasswordButtons = document.querySelectorAll('.auth-toggle-password-btn');
+    const autoHideTimeouts = {};
+
+    togglePasswordButtons.forEach((button) => {
+        const targetId = button.getAttribute('data-target');
+        const targetInput = document.getElementById(targetId);
+        const icon = button.querySelector('i');
+
+        if (!targetInput || !icon) return;
+
+        button.addEventListener('click', () => {
+            const isCurrentlyPassword = targetInput.type === 'password';
+
+            if (isCurrentlyPassword) {
+                targetInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                button.setAttribute('aria-label', 'Ocultar senha');
+                button.setAttribute('title', 'Ocultar senha');
+
+                if (autoHideTimeouts[targetId]) {
+                    clearTimeout(autoHideTimeouts[targetId]);
+                }
+
+                autoHideTimeouts[targetId] = setTimeout(() => {
+                    targetInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                    button.setAttribute('aria-label', 'Mostrar senha');
+                    button.setAttribute('title', 'Mostrar senha');
+                }, 7000);
+            } else {
+                targetInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                button.setAttribute('aria-label', 'Mostrar senha');
+                button.setAttribute('title', 'Mostrar senha');
+
+                if (autoHideTimeouts[targetId]) {
+                    clearTimeout(autoHideTimeouts[targetId]);
+                }
+            }
+        });
+    });
+
+    // 3. Sugestões de username
+    if (usernameInput && suggestionsWrapper && suggestionsList) {
+        suggestionsList.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-suggested-username]');
+            if (!btn) return;
+
+            const selectedUser = btn.getAttribute('data-suggested-username');
+            if (selectedUser) {
+                usernameInput.value = selectedUser;
+                usernameInput.classList.remove('is-invalid');
+
+                const errorFeedback = document.getElementById('username-error');
+                if (errorFeedback) {
+                    errorFeedback.style.display = 'none';
+                }
+
+                // Fecha a caixa de sugestões automaticamente
+                suggestionsWrapper.classList.add('d-none');
+
+                usernameInput.focus();
+            }
+        });
+    }
 });
 </script>
 @endsection

@@ -35,9 +35,11 @@
             <img
                 id="{{ $providerGalleryId }}Main"
                 src="{{ $providerGalleryImages->first() }}"
-                class="provider-airbnb-main-image"
+                class="provider-airbnb-main-image protected-media"
                 alt="Trabalho principal de {{ $provider->title }}"
                 fetchpriority="high"
+                draggable="false"
+                oncontextmenu="return false;"
             >
             <span class="provider-airbnb-main-label"><i class="fa-solid fa-star me-1"></i>Trabalho em destaque</span>
             @if($providerGalleryImages->count() > 1)
@@ -54,7 +56,7 @@
         <div class="provider-airbnb-thumbnails" aria-label="Miniaturas do portfólio">
             @foreach($providerGalleryImages as $index => $imageUrl)
                 <button type="button" class="provider-airbnb-thumb {{ $index === 0 ? 'active' : '' }}" data-gallery-thumb-index="{{ $index }}" aria-label="Exibir foto {{ $index + 1 }}">
-                    <img src="{{ $imageUrl }}" alt="Trabalho {{ $index + 1 }}" loading="{{ $index < 6 ? 'eager' : 'lazy' }}">
+                    <img src="{{ $imageUrl }}" class="protected-media" alt="Trabalho {{ $index + 1 }}" loading="{{ $index < 6 ? 'eager' : 'lazy' }}" draggable="false" oncontextmenu="return false;">
                 </button>
             @endforeach
         </div>
@@ -69,11 +71,14 @@
                 <span class="provider-gallery-counter ms-auto me-3" data-modal-counter></span>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <div class="modal-body d-flex align-items-center justify-content-center position-relative p-2 p-md-4">
+            <div class="modal-body d-flex align-items-center justify-content-center position-relative p-2 p-md-4 protected-media-container">
                 <button type="button" class="provider-gallery-nav provider-gallery-prev" data-modal-prev aria-label="Foto anterior">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <img src="{{ $providerGalleryImages->first() }}" class="provider-gallery-modal-image" data-modal-image alt="Foto ampliada do portfólio">
+                <div class="position-relative d-inline-flex align-items-center justify-content-center" style="max-width: 100%; max-height: 100%;">
+                    <img src="{{ $providerGalleryImages->first() }}" class="provider-gallery-modal-image protected-media" data-modal-image alt="Foto ampliada do portfólio" draggable="false" oncontextmenu="return false;">
+                    <span class="protected-media-badge"><i class="fa-solid fa-shield-halved text-primary"></i> Conectado em Sergipe</span>
+                </div>
                 <button type="button" class="provider-gallery-nav provider-gallery-next" data-modal-next aria-label="Próxima foto">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
@@ -81,7 +86,7 @@
             <div class="modal-footer border-secondary justify-content-start overflow-auto flex-nowrap">
                 @foreach($providerGalleryImages as $index => $imageUrl)
                     <button type="button" class="provider-gallery-modal-thumb flex-shrink-0" data-modal-thumb="{{ $index }}">
-                        <img src="{{ $imageUrl }}" alt="Foto {{ $index + 1 }}" loading="lazy">
+                        <img src="{{ $imageUrl }}" class="protected-media" alt="Foto {{ $index + 1 }}" loading="lazy" draggable="false" oncontextmenu="return false;">
                     </button>
                 @endforeach
             </div>
@@ -146,6 +151,31 @@
         .provider-airbnb-thumb img { object-fit: cover; }
         .provider-airbnb-thumb:hover img { transform: scale(1.025); }
         .provider-airbnb-main-image.is-changing { opacity: .18; }
+        .provider-gallery-main-nav {
+            position: absolute;
+            z-index: 5;
+            top: 50%;
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid rgba(15, 23, 42, .12);
+            border-radius: 50%;
+            color: #0d6efd;
+            background: rgba(255, 255, 255, .92);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .2);
+            transform: translateY(-50%);
+            transition: transform .2s ease, background-color .2s ease;
+        }
+        .provider-gallery-main-nav:hover,
+        .provider-gallery-main-nav:focus-visible {
+            color: #0a58ca;
+            background: #fff;
+            transform: translateY(-50%) scale(1.06);
+        }
+        .provider-gallery-main-prev { left: 18px; }
+        .provider-gallery-main-next { right: 18px; }
         .provider-airbnb-main-label {
             position: absolute;
             z-index: 3;
@@ -275,6 +305,9 @@
                 font-size: .7rem;
             }
             .provider-gallery-dots { bottom: 8px; }
+            .provider-gallery-main-nav { width: 36px; height: 36px; }
+            .provider-gallery-main-prev { left: 9px; }
+            .provider-gallery-main-next { right: 9px; }
             .provider-gallery-modal-image {
                 max-width: calc(100vw - 24px);
                 max-height: calc(100vh - 190px);
@@ -307,6 +340,8 @@
             const galleryCard = gallery.closest('.provider-airbnb-card');
             const galleryThumbs = Array.from(galleryCard.querySelectorAll('[data-gallery-thumb-index]'));
             const galleryDots = Array.from(gallery.querySelectorAll('[data-gallery-dot]'));
+            const galleryPrev = gallery.querySelector('[data-gallery-prev]');
+            const galleryNext = gallery.querySelector('[data-gallery-next]');
             const modal = gallery.closest('.provider-airbnb-card').nextElementSibling;
             const modalImage = modal.querySelector('[data-modal-image]');
             const modalCounter = modal.querySelector('[data-modal-counter]');
@@ -365,6 +400,20 @@
                 setMain(Number(thumb.dataset.galleryThumbIndex));
                 startRotation();
             }));
+            galleryPrev?.addEventListener('click', () => {
+                setMain(currentIndex - 1);
+                startRotation();
+            });
+            galleryNext?.addEventListener('click', () => {
+                setMain(currentIndex + 1);
+                startRotation();
+            });
+            mainButton.addEventListener('keydown', (event) => {
+                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+                event.preventDefault();
+                setMain(currentIndex + (event.key === 'ArrowLeft' ? -1 : 1));
+                startRotation();
+            });
             mainButton.addEventListener('click', () => {
                 showModalImage(currentIndex);
                 bootstrap.Modal.getOrCreateInstance(modal).show();

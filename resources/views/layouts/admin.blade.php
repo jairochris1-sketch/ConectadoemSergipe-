@@ -256,6 +256,9 @@
             <a href="{{ route('admin.culture.index') }}" class="nav-link {{ request()->is('admin/cultura*') ? 'active' : '' }}">
                 <i class="fa-solid fa-masks-theater text-warning"></i> Cultura
             </a>
+            <a href="{{ route('admin.support.index') }}" class="nav-link {{ request()->is('admin/suporte*') ? 'active' : '' }}" style="position:relative;">
+                <i class="fa-solid fa-headset text-success"></i> Suporte ao Vivo
+            </a>
             <a href="{{ route('admin.categories') }}" class="nav-link {{ request()->is('admin/categorias*') ? 'active' : '' }}">
                 <i class="fa-solid fa-list-check text-success"></i> Categorias
             </a>

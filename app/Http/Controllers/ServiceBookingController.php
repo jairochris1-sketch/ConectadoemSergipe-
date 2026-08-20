@@ -8,8 +8,11 @@ use App\Models\ServiceAppointment;
 use App\Models\ServiceClientSubscription;
 use App\Models\ServicePaymentSetting;
 use App\Models\ServiceProcedure;
+use App\Models\ServiceScheduleBlock;
 use App\Models\ServiceStaff;
 use App\Models\ServiceSubscriptionPayment;
+use App\Models\ServiceSubscriptionUsage;
+use App\Models\User;
 use App\Support\ServiceBookingCatalog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -28,6 +31,7 @@ class ServiceBookingController extends Controller
             'serviceStaff.procedures',
             'serviceStaff.availabilities',
             'serviceSubscriptionPlans.procedures',
+            'serviceScheduleBlocks.staff',
             'store',
         ]);
         $ownerStores = $ad->user->stores()->orderBy('name')->get();
@@ -41,6 +45,21 @@ class ServiceBookingController extends Controller
         $appointments = $ad->serviceAppointments()
             ->with(['procedure', 'staff', 'customer', 'clientSubscription.plan'])
             ->orderByDesc('starts_at')
+            ->limit(100)
+            ->get();
+        $scheduleBlocks = $ad->serviceScheduleBlocks()
+            ->with('staff')
+            ->where('ends_at', '>=', now('America/Fortaleza')->startOfDay())
+            ->orderBy('starts_at')
+            ->limit(100)
+            ->get();
+        $clientSubscriptions = $ad->serviceClientSubscriptions()
+            ->with([
+                'customer',
+                'plan',
+                'payments' => fn ($query) => $query->latest('due_date')->limit(12),
+            ])
+            ->latest('id')
             ->limit(100)
             ->get();
         $entries = $ad->serviceFinancialEntries()->latest('occurred_on')->latest('id')->limit(100)->get();
@@ -94,7 +113,7 @@ class ServiceBookingController extends Controller
             return ['month' => ucfirst($start->translatedFormat('M/Y')), 'revenue' => $services + $income + $products + $subscriptions, 'costs' => $costs, 'balance' => $services + $income + $products + $subscriptions - $costs];
         });
 
-        return view('service-booking.manage', compact('ad', 'appointments', 'entries', 'financial', 'financialHistory', 'ownerStores', 'paymentSetting'));
+        return view('service-booking.manage', compact('ad', 'appointments', 'entries', 'financial', 'financialHistory', 'ownerStores', 'paymentSetting', 'scheduleBlocks', 'clientSubscriptions'));
     }
 
     public function toggle(Request $request, Ad $ad)
@@ -121,6 +140,7 @@ class ServiceBookingController extends Controller
         $this->authorizeManagement($ad, $request);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'description' => ['required', 'string', 'max:1000'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'duration_minutes' => ['required', 'integer', Rule::in([15, 20, 30, 40, 45, 60, 75, 90, 120, 150, 180, 240])],
         ]);
@@ -141,6 +161,21 @@ class ServiceBookingController extends Controller
         }
 
         return back()->with('success', 'Procedimento removido da agenda.');
+    }
+
+    public function updateProcedure(Request $request, Ad $ad, ServiceProcedure $procedure)
+    {
+        $this->authorizeManagement($ad, $request);
+        abort_unless($procedure->ad_id === $ad->id, 404);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['required', 'string', 'max:1000'],
+            'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'duration_minutes' => ['required', 'integer', Rule::in([15, 20, 30, 40, 45, 60, 75, 90, 120, 150, 180, 240])],
+        ]);
+        $procedure->update($data);
+
+        return back()->with('success', 'Procedimento atualizado.');
     }
 
     public function storeStaff(Request $request, Ad $ad)
@@ -205,17 +240,29 @@ class ServiceBookingController extends Controller
                 ->latest('id')
                 ->get()
             : collect();
-        $procedure = $ad->serviceProcedures->firstWhere('id', (int) $request->query('procedure'));
-        $staff = $ad->serviceStaff->firstWhere('id', (int) $request->query('staff'));
+        $customerAppointments = $request->user()
+            ? $ad->serviceAppointments()
+                ->where('customer_user_id', $request->user()->id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->where('starts_at', '>', now('America/Fortaleza'))
+                ->with(['procedure', 'staff'])
+                ->orderBy('starts_at')
+                ->get()
+            : collect();
+        $rescheduleAppointment = $customerAppointments->firstWhere('id', (int) $request->query('reschedule'));
+        $procedure = $rescheduleAppointment?->procedure
+            ?? $ad->serviceProcedures->firstWhere('id', (int) $request->query('procedure'));
+        $staff = $rescheduleAppointment?->staff
+            ?? $ad->serviceStaff->firstWhere('id', (int) $request->query('staff'));
         $date = $request->query('date', now('America/Fortaleza')->addDay()->toDateString());
         $slots = ($procedure && $staff && $staff->procedures->contains($procedure))
-            ? $this->availableSlots($ad, $staff, $procedure, $date)
+            ? $this->availableSlots($ad, $staff, $procedure, $date, $rescheduleAppointment?->id)
             : [];
         $coveringSubscription = ($procedure && $request->user())
             ? $this->availableSubscriptionFor($ad, $request->user()->id, $procedure, Carbon::parse($date, 'America/Fortaleza'))
             : null;
 
-        return view('service-booking.book', compact('ad', 'procedure', 'staff', 'date', 'slots', 'subscriptionPlans', 'customerSubscriptions', 'coveringSubscription'));
+        return view('service-booking.book', compact('ad', 'procedure', 'staff', 'date', 'slots', 'subscriptionPlans', 'customerSubscriptions', 'coveringSubscription', 'customerAppointments', 'rescheduleAppointment'));
     }
 
     public function storeAppointment(Request $request, Ad $ad)
@@ -232,11 +279,12 @@ class ServiceBookingController extends Controller
         $staff = $ad->serviceStaff()->where('active', true)->findOrFail($data['staff_id']);
         abort_unless($staff->procedures()->whereKey($procedure->id)->exists(), 422);
         $start = Carbon::parse($data['starts_at'], 'America/Fortaleza');
-        $slot = $start->format('H:i');
-        abort_unless(in_array($slot, $this->availableSlots($ad, $staff, $procedure, $start->toDateString()), true), 422, 'Este horário não está mais disponível.');
+        $this->assertSlotAvailable($ad, $staff, $procedure, $start);
         $end = $start->copy()->addMinutes($procedure->duration_minutes);
 
         $appointment = DB::transaction(function () use ($ad, $procedure, $staff, $request, $data, $start, $end) {
+            ServiceStaff::query()->lockForUpdate()->findOrFail($staff->id);
+            $this->assertSlotAvailable($ad, $staff, $procedure, $start);
             $conflict = ServiceAppointment::query()
                 ->where('service_staff_id', $staff->id)
                 ->whereNotIn('status', ['cancelled'])
@@ -281,9 +329,23 @@ class ServiceBookingController extends Controller
             'action_url' => route('service-booking.manage', $ad),
         ]);
 
-        return redirect()->route('service-booking.book', $ad)->with('success', $appointment->service_client_subscription_id
-            ? 'Agendamento solicitado e benefício do plano reservado. Aguarde a confirmação do profissional.'
-            : 'Agendamento solicitado. Aguarde a confirmação do profissional.');
+        return redirect()->route('service-booking.whatsapp', [$ad, $appointment, 'requested']);
+    }
+
+    public function whatsappConfirmation(Request $request, Ad $ad, ServiceAppointment $appointment, string $event)
+    {
+        abort_unless($appointment->ad_id === $ad->id && $appointment->customer_user_id === $request->user()?->id, 403);
+        abort_unless(in_array($event, ['requested', 'cancelled', 'rescheduled'], true), 404);
+        $appointment->loadMissing(['procedure', 'staff', 'clientSubscription.plan']);
+        $phone = $this->normalizeBrazilianWhatsapp($ad->publicWhatsapp());
+        $messages = [
+            'requested' => "Olá! Sou {$appointment->customer_name}. Acabei de solicitar pelo Conectado em Sergipe o procedimento {$appointment->procedure->name}, com {$appointment->staff->name}, para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
+            'cancelled' => "Olá! Sou {$appointment->customer_name}. Informo que cancelei pelo Conectado em Sergipe o procedimento {$appointment->procedure->name} que estava marcado para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}.",
+            'rescheduled' => "Olá! Sou {$appointment->customer_name}. Solicitei pelo Conectado em Sergipe a remarcação do procedimento {$appointment->procedure->name} para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
+        ];
+        $whatsappUrl = $phone ? 'https://wa.me/'.$phone.'?text='.rawurlencode($messages[$event]) : null;
+
+        return view('service-booking.whatsapp-confirmation', compact('ad', 'appointment', 'event', 'whatsappUrl'));
     }
 
     public function updateAppointment(Request $request, Ad $ad, ServiceAppointment $appointment)
@@ -328,7 +390,132 @@ class ServiceBookingController extends Controller
         return back()->with('success', $data['type'] === 'expense' ? 'Custo registrado.' : 'Receita registrada.');
     }
 
-    private function availableSlots(Ad $ad, ServiceStaff $staff, ServiceProcedure $procedure, string $date): array
+    public function storeScheduleBlock(Request $request, Ad $ad)
+    {
+        $this->authorizeManagement($ad, $request);
+        $data = $request->validate([
+            'service_staff_id' => ['nullable', 'integer', Rule::exists('service_staff', 'id')->where('ad_id', $ad->id)],
+            'starts_at' => ['required', 'date'],
+            'ends_at' => ['required', 'date', 'after:starts_at'],
+            'reason' => ['nullable', 'string', 'max:180'],
+        ]);
+        $ad->serviceScheduleBlocks()->create($data);
+
+        return back()->with('success', 'Bloqueio incluído na agenda.');
+    }
+
+    public function destroyScheduleBlock(Request $request, Ad $ad, ServiceScheduleBlock $block)
+    {
+        $this->authorizeManagement($ad, $request);
+        abort_unless($block->ad_id === $ad->id, 404);
+        $block->delete();
+
+        return back()->with('success', 'Bloqueio removido da agenda.');
+    }
+
+    public function storeManualAppointment(Request $request, Ad $ad)
+    {
+        $this->authorizeManagement($ad, $request);
+        $data = $request->validate([
+            'procedure_id' => ['required', 'integer', Rule::exists('service_procedures', 'id')->where('ad_id', $ad->id)],
+            'staff_id' => ['required', 'integer', Rule::exists('service_staff', 'id')->where('ad_id', $ad->id)],
+            'starts_at' => ['required', 'date', 'after:now'],
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_phone' => ['nullable', 'string', 'max:20'],
+            'customer_email' => ['nullable', 'email', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+        $procedure = $ad->serviceProcedures()->where('active', true)->findOrFail($data['procedure_id']);
+        $staff = $ad->serviceStaff()->where('active', true)->findOrFail($data['staff_id']);
+        abort_unless($staff->procedures()->whereKey($procedure->id)->exists(), 422);
+        $start = Carbon::parse($data['starts_at'], 'America/Fortaleza');
+        $this->assertSlotAvailable($ad, $staff, $procedure, $start, null, false);
+        $customer = empty($data['customer_email']) ? null : User::where('email', $data['customer_email'])->first();
+
+        DB::transaction(function () use ($ad, $procedure, $staff, $start, $data, $customer): void {
+            ServiceStaff::query()->lockForUpdate()->findOrFail($staff->id);
+            $this->assertSlotAvailable($ad, $staff, $procedure, $start, null, false);
+            $ad->serviceAppointments()->create([
+                'service_procedure_id' => $procedure->id,
+                'service_staff_id' => $staff->id,
+                'customer_user_id' => $customer?->id,
+                'customer_name' => $data['customer_name'],
+                'customer_phone' => preg_replace('/\D+/', '', (string) ($data['customer_phone'] ?? '')) ?: null,
+                'starts_at' => $start,
+                'ends_at' => $start->copy()->addMinutes($procedure->duration_minutes),
+                'service_price' => $procedure->price,
+                'status' => 'confirmed',
+                'notes' => $data['notes'] ?? null,
+            ]);
+        });
+
+        return back()->with('success', 'Agendamento manual registrado.');
+    }
+
+    public function cancelCustomerAppointment(Request $request, Ad $ad, ServiceAppointment $appointment)
+    {
+        $this->ensureCustomerAppointment($request, $ad, $appointment);
+        abort_if($appointment->starts_at->lte(now('America/Fortaleza')), 422, 'Este atendimento já começou e não pode ser cancelado pelo site.');
+
+        DB::transaction(function () use ($appointment): void {
+            $appointment->update(['status' => 'cancelled']);
+            $appointment->subscriptionUsage?->update(['status' => 'released']);
+        });
+        ReportNotification::sendTo($ad->user_id, [
+            'kind' => 'service_appointment',
+            'message' => $request->user()->name.' cancelou o agendamento de '.$appointment->procedure->name.' em '.$appointment->starts_at->format('d/m/Y H:i').'.',
+            'action_url' => route('service-booking.manage', $ad),
+        ]);
+
+        return redirect()->route('service-booking.whatsapp', [$ad, $appointment, 'cancelled']);
+    }
+
+    public function rescheduleCustomerAppointment(Request $request, Ad $ad, ServiceAppointment $appointment)
+    {
+        $this->ensureCustomerAppointment($request, $ad, $appointment);
+        $this->ensurePublicBooking($ad);
+        $data = $request->validate(['starts_at' => ['required', 'date', 'after:now']]);
+        $appointment->loadMissing(['procedure', 'staff', 'subscriptionUsage']);
+        $start = Carbon::parse($data['starts_at'], 'America/Fortaleza');
+        $this->assertSlotAvailable($ad, $appointment->staff, $appointment->procedure, $start, $appointment->id);
+
+        DB::transaction(function () use ($ad, $appointment, $start, $request): void {
+            ServiceStaff::query()->lockForUpdate()->findOrFail($appointment->service_staff_id);
+            $appointment->subscriptionUsage?->update(['status' => 'released']);
+            $this->assertSlotAvailable($ad, $appointment->staff, $appointment->procedure, $start, $appointment->id);
+            $subscription = $this->availableSubscriptionFor($ad, $request->user()->id, $appointment->procedure, $start, true);
+            $appointment->update([
+                'service_client_subscription_id' => $subscription?->id,
+                'starts_at' => $start,
+                'ends_at' => $start->copy()->addMinutes($appointment->procedure->duration_minutes),
+                'service_price' => $subscription ? 0 : $appointment->procedure->price,
+                'status' => 'pending',
+            ]);
+            if ($subscription) {
+                ServiceSubscriptionUsage::updateOrCreate(
+                    ['service_appointment_id' => $appointment->id],
+                    [
+                        'service_client_subscription_id' => $subscription->id,
+                        'service_procedure_id' => $appointment->procedure->id,
+                        'cycle_start' => $subscription->current_period_start,
+                        'cycle_end' => $subscription->current_period_end,
+                        'units' => 1,
+                        'status' => 'reserved',
+                    ]
+                );
+            }
+        });
+
+        ReportNotification::sendTo($ad->user_id, [
+            'kind' => 'service_appointment',
+            'message' => $request->user()->name.' solicitou a remarcação de '.$appointment->procedure->name.' para '.$start->format('d/m/Y H:i').'.',
+            'action_url' => route('service-booking.manage', $ad),
+        ]);
+
+        return redirect()->route('service-booking.whatsapp', [$ad, $appointment, 'rescheduled']);
+    }
+
+    private function availableSlots(Ad $ad, ServiceStaff $staff, ServiceProcedure $procedure, string $date, ?int $excludeAppointmentId = null, bool $enforceLeadTime = true): array
     {
         try {
             $day = Carbon::createFromFormat('Y-m-d', $date, 'America/Fortaleza')->startOfDay();
@@ -344,18 +531,35 @@ class ServiceBookingController extends Controller
         }
         $cursor = Carbon::parse($date.' '.$availability->starts_at, 'America/Fortaleza');
         $limit = Carbon::parse($date.' '.$availability->ends_at, 'America/Fortaleza');
-        $appointments = $ad->serviceAppointments()->where('service_staff_id', $staff->id)->whereNotIn('status', ['cancelled'])->whereDate('starts_at', $date)->get();
+        $appointments = $ad->serviceAppointments()->where('service_staff_id', $staff->id)->whereNotIn('status', ['cancelled'])
+            ->when($excludeAppointmentId, fn ($query) => $query->where('id', '!=', $excludeAppointmentId))
+            ->whereDate('starts_at', $date)->get();
+        $blocks = $ad->serviceScheduleBlocks()
+            ->where(fn ($query) => $query->whereNull('service_staff_id')->orWhere('service_staff_id', $staff->id))
+            ->where('starts_at', '<', $limit)
+            ->where('ends_at', '>', $cursor)
+            ->get();
         $slots = [];
         while ($cursor->copy()->addMinutes($procedure->duration_minutes)->lte($limit)) {
             $end = $cursor->copy()->addMinutes($procedure->duration_minutes);
             $conflict = $appointments->contains(fn ($item) => $item->starts_at->lt($end) && $item->ends_at->gt($cursor));
-            if (! $conflict && $cursor->gt(now('America/Fortaleza')->addHours(2))) {
+            $blocked = $blocks->contains(fn ($block) => $block->starts_at->lt($end) && $block->ends_at->gt($cursor));
+            $leadTimeOk = ! $enforceLeadTime || $cursor->gt(now('America/Fortaleza')->addHours(2));
+            if (! $conflict && ! $blocked && $leadTimeOk) {
                 $slots[] = $cursor->format('H:i');
             }
             $cursor->addMinutes(10);
         }
 
         return $slots;
+    }
+
+    private function assertSlotAvailable(Ad $ad, ServiceStaff $staff, ServiceProcedure $procedure, Carbon $start, ?int $excludeAppointmentId = null, bool $enforceLeadTime = true): void
+    {
+        $slot = $start->format('H:i');
+        if (! in_array($slot, $this->availableSlots($ad, $staff, $procedure, $start->toDateString(), $excludeAppointmentId, $enforceLeadTime), true)) {
+            abort(422, 'Este horário não está mais disponível.');
+        }
     }
 
     private function availableSubscriptionFor(Ad $ad, int $customerId, ServiceProcedure $procedure, Carbon $date, bool $lock = false): ?ServiceClientSubscription
@@ -401,5 +605,25 @@ class ServiceBookingController extends Controller
     private function ensurePublicBooking(Ad $ad): void
     {
         abort_unless($ad->status === 'active' && $ad->booking_enabled && ServiceBookingCatalog::eligible($ad), 404);
+    }
+
+    private function ensureCustomerAppointment(Request $request, Ad $ad, ServiceAppointment $appointment): void
+    {
+        abort_unless(ServiceBookingCatalog::eligible($ad), 404);
+        abort_unless($appointment->ad_id === $ad->id && $appointment->customer_user_id === $request->user()?->id, 403);
+        abort_unless(in_array($appointment->status, ['pending', 'confirmed'], true), 422, 'Este agendamento não pode mais ser alterado.');
+    }
+
+    private function normalizeBrazilianWhatsapp(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone);
+        if (! $digits) {
+            return null;
+        }
+        if (in_array(strlen($digits), [10, 11], true)) {
+            $digits = '55'.$digits;
+        }
+
+        return in_array(strlen($digits), [12, 13], true) && str_starts_with($digits, '55') ? $digits : null;
     }
 }

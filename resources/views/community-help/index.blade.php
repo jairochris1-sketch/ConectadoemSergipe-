@@ -62,7 +62,7 @@
                     </div>
                     <h2>{{ $item->title }}</h2>
                     <p class="help-card-description">{{ str($item->description)->limit(145) }}</p>
-                    <div class="help-card-meta"><span><i class="fa-solid fa-location-dot"></i> {{ $item->neighborhood }}, {{ $item->city }}</span><span>·</span><span>{{ $categories[$item->category] }}</span></div>
+                    <div class="help-card-meta"><span class="city-badge" style="font-size: 0.72rem; padding: 1px 8px;"><i class="fa-solid fa-location-dot"></i> {{ $item->neighborhood }}, {{ $item->city }}</span><span>·</span><span>{{ $categories[$item->category] }}</span></div>
                     <div class="help-card-footer"><span>{{ $item->published_at?->locale('pt_BR')->diffForHumans() ?? $item->created_at->locale('pt_BR')->diffForHumans() }}</span><span class="help-card-responses"><i class="fa-regular fa-comments"></i> {{ $item->responses_count }} resposta(s) @if(($item->pending_response_reports_count ?? 0) > 0)<strong class="help-report-count"><i class="fa-solid fa-triangle-exclamation"></i> {{ $item->pending_response_reports_count }} denunciada(s)</strong>@endif</span></div>
                 </a>
             @empty

@@ -165,6 +165,12 @@ class ServiceSubscriptionPaymentTest extends TestCase
             'asaas_payment_id' => 'pay_123',
             'status' => 'received',
         ]);
+        $this->actingAs($owner)->get(route('service-booking.manage', $ad))
+            ->assertOk()
+            ->assertSee('Assinantes e pagamentos')
+            ->assertSee('Cliente Teste')
+            ->assertSee('Recebido')
+            ->assertSee('R$ 75,00');
 
         $staff = $ad->serviceStaff()->create(['name' => 'Ana Manicure', 'active' => true]);
         $staff->procedures()->attach($procedure);

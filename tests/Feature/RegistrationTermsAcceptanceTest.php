@@ -47,6 +47,65 @@ class RegistrationTermsAcceptanceTest extends TestCase
         $this->assertAuthenticatedAs(User::where('email', 'novo.usuario@example.com')->firstOrFail());
     }
 
+    public function test_registration_generates_username_suggestions_when_username_is_already_taken(): void
+    {
+        User::factory()->create([
+            'username' => 'jairo.santos',
+            'email' => 'jairo.existente@example.com',
+            'phone' => '79988888888',
+        ]);
+
+        $response = $this->from(route('register'))
+            ->post(route('register'), [
+                'name' => 'Jairo Santos',
+                'username' => 'jairo.santos',
+                'email' => 'outro.jairo@example.com',
+                'phone' => '79977777777',
+                'city' => 'Aracaju',
+                'password' => 'senha-segura-123',
+                'password_confirmation' => 'senha-segura-123',
+                'terms_accepted' => '1',
+            ]);
+
+        $response->assertRedirect(route('register'));
+        $response->assertSessionHasErrors('username');
+        $response->assertSessionHas('username_suggestions');
+
+        $suggestions = session('username_suggestions');
+        $this->assertIsArray($suggestions);
+        $this->assertNotEmpty($suggestions);
+        $this->assertNotContains('jairo.santos', $suggestions);
+    }
+
+    public function test_suggest_usernames_endpoint_returns_valid_available_options(): void
+    {
+        User::factory()->create([
+            'username' => 'mariasilva',
+            'email' => 'maria@example.com',
+            'phone' => '79966666666',
+        ]);
+
+        $response = $this->getJson(route('register.suggest-usernames', [
+            'name' => 'Maria Silva',
+            'username' => 'mariasilva',
+        ]));
+
+        $response->assertOk()
+            ->assertJsonStructure(['suggestions']);
+
+        $suggestions = $response->json('suggestions');
+        $this->assertIsArray($suggestions);
+        $this->assertNotEmpty($suggestions);
+        $this->assertNotContains('mariasilva', $suggestions);
+    }
+
+    public function test_registration_page_contains_password_security_warning(): void
+    {
+        $this->get(route('register'))
+            ->assertOk()
+            ->assertSee('Atenção! Memorize ou guarde sua senha em um local seguro.');
+    }
+
     private function validRegistrationData(): array
     {
         return [

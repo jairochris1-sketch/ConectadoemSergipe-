@@ -19,7 +19,7 @@
                     <header class="help-detail-head">
                         <div class="help-detail-meta"><span class="help-chip {{ $helpRequest->urgency === 'urgent' ? 'is-urgent' : ($helpRequest->urgency === 'today' ? 'is-today' : '') }}"><i class="fa-solid fa-clock"></i> {{ $urgencies[$helpRequest->urgency] }}</span><span class="help-chip">{{ $categories[$helpRequest->category] }}</span><span class="help-status help-status-{{ $helpRequest->status }}">{{ $statusLabels[$helpRequest->status] }}</span></div>
                         <h1>{{ $helpRequest->title }}</h1>
-                        <div class="help-card-meta"><span><i class="fa-solid fa-location-dot"></i> {{ $helpRequest->neighborhood }}, {{ $helpRequest->city }}</span><span>·</span><span>{{ $helpRequest->published_at?->locale('pt_BR')->diffForHumans() ?? $helpRequest->created_at->locale('pt_BR')->diffForHumans() }}</span></div>
+                        <div class="help-card-meta"><span class="city-badge" style="font-size: 0.75rem; padding: 2px 9px;"><i class="fa-solid fa-location-dot"></i> {{ $helpRequest->neighborhood }}, {{ $helpRequest->city }}</span><span>·</span><span>{{ $helpRequest->published_at?->locale('pt_BR')->diffForHumans() ?? $helpRequest->created_at->locale('pt_BR')->diffForHumans() }}</span></div>
                     </header>
                     <div class="help-detail-body">
                         <div class="help-description">{{ $helpRequest->description }}</div>

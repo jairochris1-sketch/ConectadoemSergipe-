@@ -61,8 +61,29 @@ class ImageOptimizer
         }
 
         if ($sourceImage && function_exists('imagewebp')) {
-            // Salva no formato WebP comprimido (Qualidade 80%)
-            imagewebp($sourceImage, $destinationPath, 80);
+            $origWidth = imagesx($sourceImage);
+            $origHeight = imagesy($sourceImage);
+            $maxDim = 1200; // Redimensiona inteligentemente preservando proporção perfeita (1080x1080, etc.)
+
+            if ($origWidth > $maxDim || $origHeight > $maxDim) {
+                if ($origWidth >= $origHeight) {
+                    $newWidth = $maxDim;
+                    $newHeight = max(1, (int) round(($origHeight / $origWidth) * $maxDim));
+                } else {
+                    $newHeight = $maxDim;
+                    $newWidth = max(1, (int) round(($origWidth / $origHeight) * $maxDim));
+                }
+
+                $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+                imagedestroy($sourceImage);
+                $sourceImage = $resizedImage;
+            }
+
+            // Salva no formato WebP comprimido (Qualidade 82%)
+            imagewebp($sourceImage, $destinationPath, 82);
             imagedestroy($sourceImage);
 
             // O arquivo temporário/original é automaticamente descartado pelo PHP ao fim do request

@@ -101,7 +101,7 @@
     @endif
     <div class="container provider-cover-frame">
         <div class="provider-cover" id="providerCoverContainer">
-            <img src="{{ asset($coverImage) }}" id="providerCoverImg" alt="Capa de {{ $provider->city }}" style="object-position: center {{ $provider->cover_position_y ?? 50 }}%;">
+            <img src="{{ asset($coverImage) }}" id="providerCoverImg" class="protected-media" alt="Capa de {{ $provider->city }}" style="object-position: center {{ $provider->cover_position_y ?? 50 }}%;" draggable="false" oncontextmenu="return false;">
             <div class="provider-cover-shade"></div>
             <div class="provider-cover-content">
                 <a href="{{ route('module.services') }}" class="provider-back-button">
@@ -109,11 +109,13 @@
                     <span>Voltar</span>
                 </a>
 
-                <div class="provider-cover-actions">
-                    <button type="button" class="btn-edit-cover shadow-sm" onclick="handleEditCoverBtnClick()" title="Editar ou ajustar foto de capa">
-                        <i class="fa-solid fa-camera me-1"></i> Editar capa
-                    </button>
-                </div>
+                @if($isOwnerOrAdmin)
+                    <div class="provider-cover-actions">
+                        <button type="button" class="btn-edit-cover shadow-sm" onclick="handleEditCoverBtnClick()" title="Editar ou ajustar foto de capa">
+                            <i class="fa-solid fa-camera me-1"></i> Editar capa
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -123,17 +125,19 @@
             <header class="provider-profile-header">
                 <div class="provider-avatar">
                     @if($avatarImage)
-                        <img src="{{ asset($avatarImage) }}" alt="{{ $provider->title }}">
+                        <img src="{{ asset($avatarImage) }}" class="protected-media" alt="{{ $provider->title }}" draggable="false" oncontextmenu="return false;">
                     @else
-                        <span>{{ strtoupper(substr($provider->title, 0, 1)) }}</span>
+                        <span class="d-flex align-items-center justify-content-center text-white"><i class="{{ $provider->category_icon }}" style="font-size: 2.2rem;"></i></span>
                     @endif
                 </div>
 
                 <div class="provider-profile-identity">
                     <div class="provider-badges">
-                        <span class="provider-category-badge">{{ $provider->display_category }}</span>
-                        @if($provider->profile_kind === 'service_company')
-                            <span class="provider-category-badge"><i class="fa-solid fa-building me-1"></i>Empresa de serviços</span>
+                        <span class="provider-category-badge"><i class="{{ $provider->category_icon }} me-1"></i>{{ $provider->display_category }}</span>
+                        @if($provider->profile_kind_label)
+                            <span class="provider-category-badge">
+                                <i class="{{ $provider->profile_kind_icon ?? 'fa-solid fa-id-card-clip' }} me-1"></i>{{ $provider->profile_kind_label }}
+                            </span>
                         @endif
                         @if(! $provider->is_claimed && $provider->claiming_enabled)
                             <span class="provider-category-badge" style="background: var(--warning-bg, #fff3cd); color: var(--warning-text, #856404); border-color: var(--warning-border, #ffeeba);">
@@ -597,8 +601,7 @@
         color: var(--muted);
     }
 
-    .provider-rating,
-    .provider-location {
+    .provider-rating {
         display: inline-flex;
         align-items: center;
         gap: .45rem;
@@ -607,18 +610,33 @@
         text-decoration: none;
     }
 
-    .provider-stars {
+    .provider-location {
         display: inline-flex;
-        gap: .12rem;
-        color: #ffb000;
+        align-items: center;
+        gap: .35rem;
+        color: #075be8 !important;
+        font-size: .82rem;
+        font-weight: 600;
+        background: rgba(7, 91, 232, 0.10);
+        border-radius: 20px;
+        padding: 3px 12px 3px 9px;
+        text-decoration: none;
     }
 
-    .provider-rating strong {
-        color: var(--foreground);
+    [data-bs-theme="dark"] .provider-location,
+    html[data-theme="dark"] .provider-location {
+        color: #7dd3fc !important;
+        background: rgba(125, 211, 252, 0.12);
     }
 
     .provider-location i {
-        color: var(--primary);
+        color: #075be8 !important;
+        font-size: .78rem;
+    }
+
+    [data-bs-theme="dark"] .provider-location i,
+    html[data-theme="dark"] .provider-location i {
+        color: #7dd3fc !important;
     }
 
     .provider-action-list {
@@ -767,19 +785,35 @@
 
     .provider-hours-list {
         display: grid;
-        gap: .75rem;
+        gap: .5rem;
+        max-width: 250px;
     }
 
     .provider-hours-row {
         display: flex;
+        align-items: baseline;
         justify-content: space-between;
-        gap: 1rem;
+        gap: 1.25rem;
         color: var(--foreground);
-        font-size: .92rem;
+        font-size: .88rem;
+        padding-bottom: .3rem;
+        border-bottom: 1px dashed color-mix(in srgb, var(--border) 65%, transparent);
+    }
+
+    .provider-hours-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .provider-hours-row span {
+        color: var(--muted-foreground, #64748b);
+        font-weight: 500;
     }
 
     .provider-hours-row strong {
         text-align: right;
+        font-weight: 700;
+        color: var(--foreground);
     }
 
     .provider-hours-empty {
@@ -907,7 +941,7 @@
 
     @media (max-width: 767.98px) {
         .provider-cover {
-            height: 220px;
+            height: 160px;
         }
 
         .provider-cover-content {
@@ -919,13 +953,18 @@
         }
 
         .provider-back-button {
-            min-height: 38px;
-            padding: .45rem .8rem;
-            font-size: .86rem;
+            min-height: 28px;
+            padding: .28rem .6rem;
+            font-size: .74rem;
+            gap: .35rem;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, .15);
+        }
+        .provider-back-button i {
+            font-size: .7rem;
         }
 
         .provider-profile-container {
-            margin-top: -105px;
+            margin-top: -60px;
             padding-right: .75rem;
             padding-left: .75rem;
         }
@@ -942,8 +981,8 @@
         }
 
         .provider-avatar {
-            width: 132px;
-            margin: -58px auto 0;
+            width: 108px;
+            margin: -50px auto 0;
             border-width: 2px;
             border-radius: 16px;
         }
@@ -1034,6 +1073,7 @@
 @endif
 @endpush
 
+@if($isOwnerOrAdmin)
 <!-- Modal Alerta de Upgrade de Plano (Edição de Capa) -->
 <div class="modal fade" id="coverUpgradeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1089,7 +1129,6 @@
                     </div>
                 </div>
 
-                @if($isOwnerOrAdmin)
                 <div class="border-top pt-3 mt-3">
                     @php
                         $ownerPlan = $provider->user?->normalizedSubscriptionPlan() ?? 'free';
@@ -1123,7 +1162,6 @@
                         </div>
                     </form>
                 </div>
-                @endif
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
@@ -1238,4 +1276,5 @@
     });
 </script>
 @endpush
+@endif
 @endsection

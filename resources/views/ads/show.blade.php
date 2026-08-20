@@ -154,7 +154,7 @@
                     @else
                         <span class="fs-4 fw-bold text-success">A Combinar</span>
                     @endif
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill"><i class="fa-solid fa-location-dot me-1"></i> {{ $ad->city }}, Sergipe</span>
+                    <span class="city-badge px-3 py-2" style="font-size: 0.85rem;"><i class="fa-solid fa-location-dot me-1"></i> {{ $ad->city }}, Sergipe</span>
                     @if($ad->cnpj)
                         <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill"><i class="fa-solid fa-id-card me-1"></i> CNPJ: {{ $ad->cnpj }}</span>
                     @endif

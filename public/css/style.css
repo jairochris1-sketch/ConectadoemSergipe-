@@ -76,6 +76,112 @@
 }
 
 /* =====================================================
+   SISTEMA INTELIGENTE DE ENQUADRAMENTO NOS CARDS
+   (Cover para fotos comuns / Contain + Scale 1.12 + Blur BG para artes e verticais)
+   ===================================================== */
+.card-media,
+.card-media-hybrid {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background: #1b2230;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px 14px 0 0;
+}
+
+html[data-theme="light"] .card-media,
+html[data-theme="light"] .card-media-hybrid,
+[data-bs-theme="light"] .card-media,
+[data-bs-theme="light"] .card-media-hybrid {
+    background: #eef2f7;
+}
+
+.card-media .card-media-bg,
+.card-media-hybrid .card-media-bg {
+    position: absolute;
+    inset: -12px;
+    width: calc(100% + 24px);
+    height: calc(100% + 24px);
+    object-fit: cover;
+    filter: blur(14px);
+    opacity: 0.28;
+    transform: scale(1.1);
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.25s ease;
+}
+
+/* Fundo desfocado ganha destaque quando for arte ou foto vertical */
+.card-media.has-art .card-media-bg,
+.card-media-hybrid.has-art .card-media-bg,
+.card-media:has(.card-media-main.arte) .card-media-bg,
+.card-media-hybrid:has(.card-media-main.arte) .card-media-bg {
+    opacity: 0.45;
+}
+
+html[data-theme="light"] .card-media.has-art .card-media-bg,
+html[data-theme="light"] .card-media-hybrid.has-art .card-media-bg,
+html[data-theme="light"] .card-media:has(.card-media-main.arte) .card-media-bg,
+html[data-theme="light"] .card-media-hybrid:has(.card-media-main.arte) .card-media-bg,
+[data-bs-theme="light"] .card-media.has-art .card-media-bg,
+[data-bs-theme="light"] .card-media-hybrid.has-art .card-media-bg,
+[data-bs-theme="light"] .card-media:has(.card-media-main.arte) .card-media-bg,
+[data-bs-theme="light"] .card-media-hybrid:has(.card-media-main.arte) .card-media-bg {
+    opacity: 0.38;
+    filter: blur(14px) brightness(0.95);
+}
+
+.card-media .card-media-main,
+.card-media-hybrid .card-media-main {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transform: none;
+    transition: transform 0.22s ease, object-fit 0.22s ease;
+}
+
+/* Fotos comuns (carros, motos, casas, paisagens e produtos) */
+.card-media .card-media-main.foto-normal,
+.card-media-hybrid .card-media-main.foto-normal,
+.card-media-main.foto-normal {
+    object-fit: cover;
+    transform: none;
+}
+
+/* Artes, panfletos, informativos e imagens verticais quando aplicável */
+.card-media .card-media-main.arte,
+.card-media-hybrid .card-media-main.arte,
+.card-media-main.arte {
+    object-fit: contain;
+    transform: scale(1.12);
+}
+
+/* Destaques para você e Carrosséis da Home: Imagens completas, altas e preenchidas */
+.swiper-featured-ads .card-media,
+.swiper-featured-ads .card-media-hybrid {
+    height: 155px !important;
+}
+
+.swiper-featured-ads .card-media-main {
+    object-fit: cover !important;
+    transform: none !important;
+}
+
+@media (max-width: 767.98px) {
+    .swiper-featured-ads .card-media,
+    .swiper-featured-ads .card-media-hybrid {
+        height: 130px !important;
+    }
+}
+
+/* =====================================================
    RESET / BASE
    ===================================================== */
 * { box-sizing: border-box; }
@@ -403,17 +509,71 @@ body {
 }
 
 .provider-card-location {
-    min-height: 1.5em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #075be8 !important;
+    font-size: .78rem;
+    font-weight: 600;
+    background: rgba(7, 91, 232, 0.10);
+    border-radius: 20px;
+    padding: 2px 10px 2px 7px;
+    width: fit-content;
+    margin-bottom: 0.75rem !important;
 }
 
 /* Ícones de localização dos cards de todas as categorias */
 .provider-card-location .fa-location-dot,
+.sdc-location .fa-location-dot,
 .services-directory-location .fa-location-dot,
 .home-provider-card .fa-location-dot,
 .home-card-city .fa-location-dot,
 .store-card-city .fa-location-dot,
-.product-location .fa-location-dot {
-    color: #dc3545 !important;
+.product-location .fa-location-dot,
+.city-badge .fa-location-dot {
+    color: #075be8 !important;
+    font-size: .75rem;
+}
+
+/* ============================================
+   CITY BADGE — chip de localização global
+   Usado em todos os cards do site
+   ============================================ */
+.city-badge,
+.home-featured-city {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #075be8 !important;
+    font-size: .78rem;
+    font-weight: 600;
+    background: rgba(7, 91, 232, 0.10);
+    border-radius: 20px;
+    padding: 2px 10px 2px 7px;
+    width: fit-content;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.home-featured-city {
+    margin-top: 4px;
+}
+
+[data-bs-theme="dark"] .city-badge,
+html[data-theme="dark"] .city-badge,
+[data-bs-theme="dark"] .home-featured-city,
+html[data-theme="dark"] .home-featured-city {
+    color: #7dd3fc !important;
+    background: rgba(125, 211, 252, 0.12);
+}
+
+[data-bs-theme="dark"] .city-badge .fa-location-dot,
+html[data-theme="dark"] .city-badge .fa-location-dot,
+[data-bs-theme="dark"] .home-featured-city .fa-location-dot,
+html[data-theme="dark"] .home-featured-city .fa-location-dot {
+    color: #7dd3fc !important;
 }
 
 .provider-card-description {
@@ -474,9 +634,7 @@ body {
     }
 
     .provider-card-location {
-        min-height: 2.5em;
         font-size: 0.7rem !important;
-        line-height: 1.25;
         margin-bottom: 0.65rem !important;
     }
 
@@ -4714,6 +4872,10 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
     text-transform: uppercase;
 }
 
+.user-followed-stores-heading-icon {
+    color: var(--primary);
+}
+
 .user-followed-stores-heading h4 {
     margin: 4px 0;
     color: var(--foreground);
@@ -4861,7 +5023,7 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
 }
 
 .user-followed-stores-empty > i {
-    color: #e93a63;
+    color: var(--primary);
     font-size: 1.45rem;
 }
 
@@ -4873,6 +5035,113 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
 .user-followed-stores-empty p {
     margin: 2px 0 0;
     font-size: .66rem;
+}
+
+.user-favorites-library {
+    padding: 18px;
+    color: var(--foreground);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-favorites-library-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.user-favorites-library-heading span {
+    color: var(--primary);
+    font-size: .7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.user-favorites-library-heading h4 {
+    margin: 4px 0 0;
+    color: var(--foreground);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.user-favorites-library-heading p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: .68rem;
+}
+
+.user-favorites-library-heading > a {
+    color: var(--primary);
+    font-size: .74rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.user-favorite-folder {
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: color-mix(in srgb, var(--card) 94%, var(--primary) 6%);
+}
+
+.user-favorite-folder summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.user-favorite-folder summary::-webkit-details-marker { display: none; }
+.user-favorite-folder summary span { color: var(--foreground); font-size: .82rem; font-weight: 800; }
+.user-favorite-folder summary span i { color: var(--primary); margin-right: 6px; }
+.user-favorite-folder summary small { color: var(--muted); font-size: .68rem; }
+
+.user-favorite-folder-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    padding: 0 12px 12px;
+}
+
+.user-favorite-item {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px;
+    color: var(--foreground);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.user-favorite-item > img,
+.user-favorite-item-placeholder {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    object-fit: cover;
+    border-radius: 9px;
+}
+
+.user-favorite-item-placeholder { display: grid; place-items: center; color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
+.user-favorite-item > span:last-child { min-width: 0; }
+.user-favorite-item strong { display: block; overflow: hidden; color: var(--foreground); font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+.user-favorite-item small { display: block; overflow: hidden; margin-top: 3px; color: var(--muted); font-size: .64rem; text-overflow: ellipsis; white-space: nowrap; }
+.user-favorite-folder-empty { margin: 0; padding: 0 14px 13px; color: var(--muted); font-size: .7rem; }
+
+@media (max-width: 575px) {
+    .user-favorites-library-heading { align-items: flex-start; flex-direction: column; }
+    .user-favorite-folder-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {
@@ -5206,16 +5475,16 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
     }
 
     .swiper-hero {
-        height: 300px !important;
+        height: 190px !important;
     }
 
     .hero-slide-padding {
-        padding-top: 16px !important;
-        padding-bottom: 24px !important;
+        padding-top: 12px !important;
+        padding-bottom: 20px !important;
     }
 
     .hero-container-overlap {
-        margin-top: -24px;
+        margin-top: -85px;
     }
 }
 
@@ -5241,7 +5510,7 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
     }
 
     .swiper-hero {
-        height: 270px !important;
+        height: 190px !important;
     }
 
     .hero-slide-padding {
@@ -5250,7 +5519,7 @@ footer hr { border-color: var(--color-border) !important; opacity: 1; }
     }
 
     .hero-container-overlap {
-        margin-top: -30px;
+        margin-top: -85px;
     }
 
     .swiper-hero h1 {
@@ -6183,3 +6452,67 @@ strong.text-primary {
 .gap-1\.5 { gap: 0.375rem !important; }
 .gap-2\.5 { gap: 0.625rem !important; }
 .gap-3\.5 { gap: 0.875rem !important; }
+
+/* =========================================================
+   PROTEÇÃO DE IMAGENS E MÍDIAS DOS PRESTADORES
+   Impede download fácil, menu de clique direito, arraste
+   e toque longo (long press) em dispositivos móveis.
+   ========================================================= */
+.protected-media,
+.provider-protected-img,
+.provider-airbnb-main-image,
+.provider-airbnb-thumb img,
+.provider-gallery-modal-image,
+.provider-gallery-modal-thumb img,
+.sdc-avatar-img,
+.provider-cover-wrapper img,
+.service-portfolio-img,
+img[data-protected] {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    user-drag: none !important;
+}
+
+.protected-media-container {
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.protected-media-shield {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.protected-media-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 3;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.02em;
+}

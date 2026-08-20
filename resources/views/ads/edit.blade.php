@@ -54,27 +54,42 @@
                                 <input type="text" class="form-control form-control-lg rounded-3" id="public_address" name="public_address" value="{{ old('public_address', $ad->public_address) }}" maxlength="255" placeholder="Ex: Rua das Flores, 120, Centro">
                                 <small class="text-muted">Preencha somente se clientes puderem ir ao local. O endereço aparecerá no perfil com o botão “Como chegar”.</small>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="profile_kind" class="form-label fw-semibold">Tipo de perfil *</label>
-                                <select class="form-select form-select-lg rounded-3" id="profile_kind" name="profile_kind" required>
-                                    <option value="professional" @selected(old('profile_kind', $ad->profile_kind ?: 'professional') === 'professional')>Prestador de serviços</option>
-                                    <option value="service_company" @selected(old('profile_kind', $ad->profile_kind) === 'service_company')>Empresa de serviços</option>
-                                </select>
-                            </div>
                         @endif
 
-                        <div class="mb-3">
-                            <label for="category_name" class="form-label fw-semibold">Categoria *</label>
-                            <select class="form-select form-select-lg rounded-3" id="category_name" name="category_name" required>
-                                @foreach($availableCategories as $categoryName)
-                                    <option value="{{ $categoryName }}" {{ old('category_name', $ad->display_category) === $categoryName ? 'selected' : '' }}>{{ $categoryName }}</option>
-                                @endforeach
-                                @if(!in_array($ad->display_category, $availableCategories, true))
-                                    <option value="{{ $ad->display_category }}" selected>{{ $ad->display_category }}</option>
-                                @endif
-                            </select>
-                        </div>
+                        @if($isService)
+                            <div class="mb-3 p-3 bg-light rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <div>
+                                        <span class="text-muted small d-block">Segmento Profissional</span>
+                                        <strong class="text-dark fs-6">{{ $ad->display_category }}</strong>
+                                        @php
+                                            $kindLabel = \App\Models\Ad::PROFILE_KINDS[$ad->profile_kind]['label'] ?? ($ad->profile_kind ?: 'Prestador de serviços');
+                                        @endphp
+                                        <span class="badge bg-primary bg-opacity-10 text-primary ms-2">{{ $kindLabel }}</span>
+                                    </div>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2.5 py-1.5"><i class="fa-solid fa-lock me-1"></i> Não alterável</span>
+                                </div>
+                                <small class="text-muted d-block mt-2" style="font-size: 0.82rem;">
+                                    <i class="fa-solid fa-circle-info me-1 text-primary"></i> O tipo de serviço e categoria são fixos para preservar o histórico de avaliações, filtros de busca e reputação.
+                                </small>
+                            </div>
+                            <input type="hidden" name="profile_kind" value="{{ old('profile_kind', $ad->profile_kind ?: 'professional') }}">
+                            <input type="hidden" name="category_name" value="{{ old('category_name', $ad->display_category) }}">
+                        @else
+                            <div class="mb-3 p-3 bg-light rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <div>
+                                        <span class="text-muted small d-block">Categoria do Anúncio</span>
+                                        <strong class="text-dark fs-6">{{ $ad->display_category }}</strong>
+                                    </div>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2.5 py-1.5"><i class="fa-solid fa-lock me-1"></i> Fixa</span>
+                                </div>
+                                <small class="text-muted d-block mt-2" style="font-size: 0.82rem;">
+                                    <i class="fa-solid fa-circle-info me-1 text-primary"></i> A categoria do anúncio é fixa para garantir a indexação correta nas buscas da plataforma.
+                                </small>
+                            </div>
+                            <input type="hidden" name="category_name" value="{{ old('category_name', $ad->display_category) }}">
+                        @endif
 
                         <div class="row g-3 mb-3">
                             @unless($isService)
@@ -184,6 +199,61 @@
                                         <span class="input-group-text"><i class="fa-brands fa-facebook-f"></i></span>
                                         <input type="text" class="form-control" id="facebook" name="facebook" value="{{ old('facebook', $ad->facebook) }}" placeholder="Usuário ou link completo">
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- HORÁRIOS DE ATENDIMENTO -->
+                            <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0">
+                                            <i class="fa-regular fa-clock text-primary me-2"></i> Horários de Atendimento
+                                        </h6>
+                                        <small class="text-muted">Defina seus horários de trabalho para os clientes. (Padrão: 08:00 às 18:00)</small>
+                                    </div>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill fw-semibold">
+                                        <i class="fa-solid fa-check me-1"></i> Padrão: 08:00 às 18:00
+                                    </span>
+                                </div>
+
+                                <div class="row g-2">
+                                    @php
+                                        $savedHours = is_array($ad->business_hours) ? $ad->business_hours : [];
+                                        $weekDays = [
+                                            'segunda' => ['label' => 'Segunda-feira', 'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'terca'   => ['label' => 'Terça-feira',   'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'quarta'  => ['label' => 'Quarta-feira',  'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'quinta'  => ['label' => 'Quinta-feira',  'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'sexta'   => ['label' => 'Sexta-feira',   'default_open' => '08:00', 'default_close' => '18:00', 'closed' => false],
+                                            'sabado'  => ['label' => 'Sábado',        'default_open' => '08:00', 'default_close' => '12:00', 'closed' => false],
+                                            'domingo' => ['label' => 'Domingo',       'default_open' => '08:00', 'default_close' => '18:00', 'closed' => true],
+                                        ];
+                                    @endphp
+
+                                    @foreach($weekDays as $dayKey => $dayInfo)
+                                        @php
+                                            $daySaved = $savedHours[$dayKey] ?? null;
+                                            $isClosed = isset($daySaved['closed']) ? (bool)$daySaved['closed'] : (!isset($daySaved) ? $dayInfo['closed'] : false);
+                                            $openVal = $daySaved['open'] ?? $dayInfo['default_open'];
+                                            $closeVal = $daySaved['close'] ?? $dayInfo['default_close'];
+                                        @endphp
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="p-2.5 bg-white rounded-3 border">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <strong class="text-dark small">{{ $dayInfo['label'] }}</strong>
+                                                    <div class="form-check form-switch mb-0">
+                                                        <input class="form-check-input" type="checkbox" role="switch" id="closed_{{ $dayKey }}" name="business_hours[{{ $dayKey }}][closed]" value="1" {{ $isClosed ? 'checked' : '' }} onchange="toggleDayHours('{{ $dayKey }}')">
+                                                        <label class="form-check-label text-muted" for="closed_{{ $dayKey }}" style="font-size: 0.75rem;">Fechado</label>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1.5" id="hours_wrap_{{ $dayKey }}" style="{{ $isClosed ? 'opacity: 0.35;' : '' }}">
+                                                    <input type="time" class="form-control form-control-sm rounded-2 text-center" name="business_hours[{{ $dayKey }}][open]" value="{{ $openVal }}" {{ $isClosed ? 'disabled' : '' }}>
+                                                    <span class="text-muted small">às</span>
+                                                    <input type="time" class="form-control form-control-sm rounded-2 text-center" name="business_hours[{{ $dayKey }}][close]" value="{{ $closeVal }}" {{ $isClosed ? 'disabled' : '' }}>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
                         @endif
@@ -317,6 +387,17 @@
             alert("Erro ao importar a imagem: " + e.message);
         } finally {
             document.body.style.cursor = 'default';
+        }
+    }
+
+    function toggleDayHours(dayKey) {
+        const checkbox = document.getElementById('closed_' + dayKey);
+        const hoursWrap = document.getElementById('hours_wrap_' + dayKey);
+        if (checkbox && hoursWrap) {
+            hoursWrap.style.opacity = checkbox.checked ? '0.35' : '1';
+            hoursWrap.querySelectorAll('input').forEach(input => {
+                input.disabled = checkbox.checked;
+            });
         }
     }
 </script>

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\Report;
 use App\Models\ReportNotification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ChatController extends Controller
 {
@@ -49,7 +51,13 @@ class ChatController extends Controller
         $activePartner ??= $conversations->first()['user'] ?? null;
 
         $messages = collect();
+        $isBlocking = false;
+        $isBlockedBy = false;
+
         if ($activePartner) {
+            $isBlocking = Auth::user()->isBlocking($activePartner->id);
+            $isBlockedBy = Auth::user()->isBlockedBy($activePartner->id);
+
             Message::where('sender_id', $activePartner->id)
                 ->where('receiver_id', $userId)
                 ->where('is_read', false)
@@ -66,7 +74,45 @@ class ChatController extends Controller
                 ->get();
         }
 
-        return view('chat.index', compact('conversations', 'activePartner', 'messages'));
+        return view('chat.index', compact('conversations', 'activePartner', 'messages', 'isBlocking', 'isBlockedBy'));
+    }
+
+    public static function detectProhibitedChatContent(string $content): ?string
+    {
+        // Detecção de links e sites externos
+        $linkPatterns = [
+            '/\b(?:https?:\/\/|ftp:\/\/|www\.)\S+/i',
+            '/\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.(?:com|br|net|org|io|app|site|online|me|link|top|xyz|gov|edu|info|biz|co|us|uk|tech|store|shop|tv|cc|to|gg|page|club|live|dev)(?:\/[^\s]*)?/i',
+            '/[a-z0-9_\-\.]+\s*(?:\.|\(dot\)|\bponto\b)\s*(?:com|br|net|org|site|io|app)\b/i',
+        ];
+
+        foreach ($linkPatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return 'Não é permitido o envio de links ou sites externos pelo chat.';
+            }
+        }
+
+        // Detecção de contatos telefônicos e WhatsApp
+        if (preg_match('/(?:whats(?:app)?|zap|fone|tel(?:efone)?|cel(?:ular)?|contato|chama|liga)\D{0,8}\d{4,}/i', $content)) {
+            return 'Não é permitido o envio de números de telefone ou contatos pelo chat.';
+        }
+
+        $phonePatterns = [
+            '/(?:\+?55\s*)?(?:\(?0?[1-9]{2}\)?\s*)?9\s*\d{4}[-\s\.]?\d{4}/',
+            '/(?:\(?0?[1-9]{2}\)?\s*)?[2-8]\d{3}[-\s\.]?\d{4}/',
+        ];
+
+        foreach ($phonePatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return 'Não é permitido o envio de números de telefone ou contatos pelo chat.';
+            }
+        }
+
+        if (preg_match('/(?:\d[\s\.\-_,\(\)\/]*){8,}/', $content)) {
+            return 'Não é permitido o envio de números de telefone ou contatos pelo chat.';
+        }
+
+        return null;
     }
 
     public function sendMessage(Request $request)
@@ -78,6 +124,18 @@ class ChatController extends Controller
         ]);
 
         abort_if((int) $request->receiver_id === Auth::id(), 422, 'Você não pode enviar uma mensagem para si mesmo.');
+
+        if (Auth::user()->isBlocking($request->receiver_id)) {
+            return back()->withErrors(['content' => 'Você bloqueou este usuário. Desbloqueie-o para enviar mensagens.'])->withInput();
+        }
+
+        if (Auth::user()->isBlockedBy($request->receiver_id)) {
+            return back()->withErrors(['content' => 'Não é possível enviar mensagens para este usuário no momento.'])->withInput();
+        }
+
+        if ($prohibitedReason = self::detectProhibitedChatContent($request->content)) {
+            return back()->withErrors(['content' => $prohibitedReason])->withInput();
+        }
 
         $message = Message::create([
             'sender_id' => Auth::id(),
@@ -95,5 +153,52 @@ class ChatController extends Controller
         ]);
 
         return redirect()->route('chat.index', ['with' => $message->receiver_id])->with('success', 'Mensagem enviada!');
+    }
+
+    public function blockUser(Request $request, User $user)
+    {
+        abort_if($user->id === Auth::id(), 422, 'Você não pode bloquear a si mesmo.');
+
+        Auth::user()->blockedUsers()->syncWithoutDetaching([$user->id]);
+
+        return redirect()->route('chat.index', ['with' => $user->id])->with('success', 'Usuário bloqueado com sucesso.');
+    }
+
+    public function unblockUser(Request $request, User $user)
+    {
+        Auth::user()->blockedUsers()->detach($user->id);
+
+        return redirect()->route('chat.index', ['with' => $user->id])->with('success', 'Usuário desbloqueado com sucesso.');
+    }
+
+    public function reportUser(Request $request, User $user)
+    {
+        abort_if($user->id === Auth::id(), 422, 'Você não pode denunciar a si mesmo.');
+
+        $validated = $request->validate([
+            'reason' => 'required|string|max:50',
+            'details' => 'nullable|string|max:1000',
+            'block_too' => 'nullable|boolean',
+        ]);
+
+        Report::create([
+            'public_id' => (string) Str::uuid(),
+            'advertiser_id' => $user->id,
+            'reporter_user_id' => Auth::id(),
+            'subject_type' => 'user_chat',
+            'ad_title_snapshot' => 'Chat com ' . $user->name,
+            'ad_module_snapshot' => 'chat',
+            'reason' => $validated['reason'],
+            'severity' => in_array($validated['reason'], ['scam', 'offensive'], true) ? 'high' : 'medium',
+            'details' => $validated['details'] ?? null,
+            'wants_notification' => true,
+            'status' => 'open',
+        ]);
+
+        if ($request->boolean('block_too')) {
+            Auth::user()->blockedUsers()->syncWithoutDetaching([$user->id]);
+        }
+
+        return redirect()->route('chat.index', ['with' => $user->id])->with('success', 'Denúncia enviada com sucesso para análise da moderação.');
     }
 }

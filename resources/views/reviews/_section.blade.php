@@ -149,7 +149,7 @@
                                 @csrf
                                 <label for="reply-{{ $review->id }}" class="form-label fw-semibold small">{{ $reviewingStore ? 'Responder como loja' : 'Responder como profissional' }}</label>
                                 <textarea id="reply-{{ $review->id }}" name="reply" class="form-control" rows="3" minlength="2" maxlength="1500" placeholder="Agradeça ao cliente ou esclareça publicamente esta avaliação." required></textarea>
-                                <div class="d-flex justify-content-end mt-2">
+                                <div class="d-flex justify-content-center mt-2">
                                     <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
                                         <i class="fa-solid fa-reply me-1"></i>Publicar resposta
                                     </button>
@@ -229,17 +229,21 @@
     .review-avatar { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #fff; background: #0d6efd; font-weight: 800; }
     .review-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .review-comment { white-space: pre-line; overflow-wrap: anywhere; }
-    .professional-review-reply,
-    .professional-review-reply-form {
+    .professional-review-reply {
         margin: 1rem 0;
         padding: 1rem;
         background: var(--muted-bg);
         border: 1px solid var(--border);
         border-left: 4px solid #0d6efd;
         border-radius: 12px;
-    }
-    .professional-review-reply {
         scroll-margin-top: 110px;
+    }
+    .professional-review-reply-form {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--muted-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
     }
     .professional-review-reply:target {
         outline: 2px solid #0d6efd;

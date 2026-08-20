@@ -17,7 +17,32 @@
 .product-purchase-card h1 { margin: .8rem 0 .6rem; font-size: clamp(1.6rem, 3vw, 2.35rem); font-weight: 800; line-height: 1.15; }
 .product-rating { display: flex; gap: .55rem; align-items: center; }
 .product-rating span, .product-review-summary span { color: #9a6700; font-weight: 750; }
-.product-location { margin: .75rem 0; color: var(--muted-foreground); }
+.product-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: .75rem 0;
+    color: #075be8 !important;
+    font-size: .82rem;
+    font-weight: 600;
+    background: rgba(7, 91, 232, 0.10);
+    border-radius: 20px;
+    padding: 3px 12px 3px 9px;
+    width: fit-content;
+}
+.product-location i {
+    color: #075be8 !important;
+    font-size: .75rem;
+}
+[data-bs-theme="dark"] .product-location,
+html[data-theme="dark"] .product-location {
+    color: #7dd3fc !important;
+    background: rgba(125, 211, 252, 0.12);
+}
+[data-bs-theme="dark"] .product-location i,
+html[data-theme="dark"] .product-location i {
+    color: #7dd3fc !important;
+}
 .product-price { margin: 1rem 0; color: #256c2b; font-size: 2rem; font-weight: 850; }
 .product-price small { display: block; color: var(--muted-foreground); font-size: .85rem; font-weight: 500; }
 .product-stock { display: flex; justify-content: space-between; gap: .75rem; margin: -.4rem 0 1rem; font-size: .8rem; }
