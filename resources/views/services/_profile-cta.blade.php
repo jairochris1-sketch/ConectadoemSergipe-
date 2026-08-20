@@ -1,6 +1,11 @@
 @php
     $ctaState = $profileCta['state'] ?? 'create';
     $ctaClass = $class ?? 'btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm';
+    $profileKind = $profileKind ?? null;
+    $createProfileParameters = array_filter([
+        'module' => 'services',
+        'profile_kind' => $profileKind,
+    ]);
 @endphp
 
 @if($ctaState === 'manage')
@@ -8,7 +13,7 @@
         <i class="fa-solid fa-pen me-2"></i>Gerenciar meu perfil
     </a>
 @elseif($ctaState === 'create_another')
-    <a href="{{ route('ad.create', ['module' => 'services']) }}" class="{{ $ctaClass }}">
+    <a href="{{ route('ad.create', $createProfileParameters) }}" class="{{ $ctaClass }}">
         <i class="fa-solid fa-plus me-2"></i>Criar outro perfil
     </a>
 @elseif($ctaState === 'limit')
@@ -16,7 +21,7 @@
         <i class="fa-solid fa-crown me-2"></i>Aumentar limite
     </button>
 @else
-    <a href="{{ route('ad.create', ['module' => 'services']) }}" class="{{ $ctaClass }}">
+    <a href="{{ route('ad.create', $createProfileParameters) }}" class="{{ $ctaClass }}">
         <i class="fa-solid fa-user-plus me-2"></i>Criar meu perfil profissional
     </a>
 @endif

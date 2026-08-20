@@ -1,0 +1,61 @@
+.pwa-install-prompt {
+    position: fixed;
+    z-index: 1085;
+    right: 18px;
+    bottom: 18px;
+    width: min(440px, calc(100vw - 24px));
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .26);
+    border-radius: 19px;
+    color: #fff;
+    background: linear-gradient(135deg, #071b3b 0%, #075be8 100%);
+    box-shadow: 0 24px 65px rgba(2, 16, 40, .35);
+    animation: pwa-install-enter .28s ease-out both;
+}
+.pwa-install-prompt[hidden] { display: none !important; }
+.pwa-install-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, .8);
+    background: rgba(255, 255, 255, .1);
+}
+.pwa-install-icon {
+    width: 54px;
+    height: 54px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, .45);
+    border-radius: 14px;
+    background: #075be8;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+.pwa-install-icon img { width: 100%; height: 100%; object-fit: cover; }
+.pwa-install-copy { min-width: 0; padding-right: 24px; }
+.pwa-install-eyebrow { display: block; margin-bottom: 2px; color: #7dd3fc; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.pwa-install-copy strong { display: block; font-size: .94rem; line-height: 1.25; }
+.pwa-install-copy p { margin: 4px 0 0; color: rgba(255, 255, 255, .78); font-size: .72rem; line-height: 1.4; }
+.pwa-install-ios-help { padding: 8px; border-radius: 9px; background: rgba(255, 255, 255, .1); }
+.pwa-install-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+.pwa-install-actions button { min-height: 38px; padding: 8px 13px; border-radius: 10px; font-size: .74rem; font-weight: 800; }
+.pwa-install-later { border: 1px solid rgba(255, 255, 255, .24); color: #fff; background: transparent; }
+.pwa-install-confirm { border: 0; color: #075be8; background: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, .16); }
+.pwa-install-confirm:focus-visible,
+.pwa-install-later:focus-visible,
+.pwa-install-close:focus-visible { outline: 3px solid #7dd3fc; outline-offset: 2px; }
+@keyframes pwa-install-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 575.98px) {
+    .pwa-install-prompt { right: 12px; bottom: 78px; padding: 14px; }
+    .pwa-install-actions button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pwa-install-prompt { animation: none; }
+}

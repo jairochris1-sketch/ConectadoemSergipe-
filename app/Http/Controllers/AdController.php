@@ -102,7 +102,11 @@ class AdController extends Controller
                 ->first()
             : null;
 
-        return view('services.show', compact(
+        $profileView = $provider->profile_kind === 'liberal_professional'
+            ? 'services.show-liberal'
+            : 'services.show';
+
+        return view($profileView, compact(
             'provider',
             'relatedProviders',
             'ownerStores',
@@ -135,7 +139,7 @@ class AdController extends Controller
         $requestedModule = in_array($request->query('module'), array_keys(self::MODULE_CATEGORY_SLUGS), true)
             ? $request->query('module')
             : 'products';
-        $requestedProfileKind = in_array($request->query('profile_kind'), ['professional', 'service_company'], true)
+        $requestedProfileKind = in_array($request->query('profile_kind'), array_keys(Ad::PROFILE_KINDS), true)
             ? $request->query('profile_kind')
             : 'professional';
         $categories = Category::where('active', true)->orderBy('sort_order', 'asc')->get();
@@ -146,13 +150,15 @@ class AdController extends Controller
             ->orderBy('name')
             ->get();
         $storeProductLimit = $user->storeProductLimit();
+        $profileKinds = Ad::PROFILE_KINDS;
 
         return view('ads.create', compact(
             'categories',
             'requestedModule',
             'requestedProfileKind',
             'availableStores',
-            'storeProductLimit'
+            'storeProductLimit',
+            'profileKinds'
         ));
     }
 
@@ -174,7 +180,7 @@ class AdController extends Controller
             'profile_kind' => [
                 Rule::excludeIf(fn () => $request->input('module') !== 'services'),
                 'nullable',
-                Rule::in(['professional', 'service_company']),
+                Rule::in(array_keys(Ad::PROFILE_KINDS)),
             ],
             'category_name' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -292,7 +298,7 @@ class AdController extends Controller
             'public_address' => $request->module === 'services'
                 ? $request->input('public_address')
                 : null,
-            'business_hours' => $request->input('business_hours', []),
+            'business_hours' => $this->resolveBusinessHours($request),
             'instagram' => $request->instagram,
             'facebook' => $request->facebook,
             'logo' => $logoPath,
@@ -388,8 +394,9 @@ class AdController extends Controller
             ->orderBy('name')
             ->get();
         $storeProductLimit = auth()->user()->storeProductLimit();
+        $profileKinds = Ad::PROFILE_KINDS;
 
-        return view('ads.edit', compact('ad', 'categories', 'availableStores', 'storeProductLimit'));
+        return view('ads.edit', compact('ad', 'categories', 'availableStores', 'storeProductLimit', 'profileKinds'));
     }
 
     public function update(Request $request, $id)
@@ -410,7 +417,7 @@ class AdController extends Controller
             'profile_kind' => [
                 Rule::excludeIf($ad->module !== 'services'),
                 'nullable',
-                Rule::in(['professional', 'service_company']),
+                Rule::in(array_keys(Ad::PROFILE_KINDS)),
             ],
             'region' => 'nullable|string|max:100',
             'public_address' => [
@@ -527,7 +534,7 @@ class AdController extends Controller
             'contact_telegram' => $request->telegram ?? $ad->contact_telegram,
             'logo' => $logoPath,
             'banner' => $bannerPath,
-            'business_hours' => $request->input('business_hours', $ad->business_hours),
+            'business_hours' => $ad->module === 'services' ? $this->resolveBusinessHours($request, $ad) : $ad->business_hours,
         ];
 
         if ($hasPriceType) {
@@ -916,5 +923,48 @@ class AdController extends Controller
             'cover_position_y' => $ad->cover_position_y,
             'message' => 'Posição da capa salva com sucesso!',
         ]);
+    }
+
+    private function resolveBusinessHours(Request $request, ?Ad $ad = null): ?array
+    {
+        if ($request->input('module', $ad?->module) !== 'services') {
+            return $ad?->business_hours;
+        }
+
+        $inputHours = $request->input('business_hours');
+        if (! is_array($inputHours) || empty($inputHours)) {
+            return $ad?->business_hours ?: [
+                'segunda' => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+                'terca'   => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+                'quarta'  => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+                'quinta'  => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+                'sexta'   => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+                'sabado'  => ['open' => '08:00', 'close' => '12:00', 'closed' => false],
+                'domingo' => ['open' => '08:00', 'close' => '18:00', 'closed' => true],
+            ];
+        }
+
+        $processed = [];
+        $defaultDays = [
+            'segunda' => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+            'terca'   => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+            'quarta'  => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+            'quinta'  => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+            'sexta'   => ['open' => '08:00', 'close' => '18:00', 'closed' => false],
+            'sabado'  => ['open' => '08:00', 'close' => '12:00', 'closed' => false],
+            'domingo' => ['open' => '08:00', 'close' => '18:00', 'closed' => true],
+        ];
+
+        foreach ($defaultDays as $dayKey => $defaultDay) {
+            $dayData = $inputHours[$dayKey] ?? [];
+            $isClosed = ! empty($dayData['closed']);
+            $processed[$dayKey] = [
+                'open' => ! empty($dayData['open']) ? $dayData['open'] : $defaultDay['open'],
+                'close' => ! empty($dayData['close']) ? $dayData['close'] : $defaultDay['close'],
+                'closed' => $isClosed,
+            ];
+        }
+
+        return $processed;
     }
 }

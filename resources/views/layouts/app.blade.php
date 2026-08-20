@@ -12,9 +12,16 @@
 <html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#075be8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Conectado SE">
     <title>@yield('title', \App\Models\Setting::get('site_name', 'Conectado em Sergipe') . ' - O Maior Marketplace do Estado')</title>
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     @stack('meta')
     
     <!-- Fonts & Icons -->
@@ -162,6 +169,7 @@
                 <div class="col-12 col-sm-6 col-md-2">
                     <h6 class="fw-bold mb-3">Institucional</h6>
                     <ul class="list-unstyled text-secondary small space-y-2 mb-0">
+                        <li class="mb-2"><a href="{{ route('landing') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Bem-vindo</a></li>
                         <li class="mb-2"><a href="{{ route('page.about') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Sobre Nós</a></li>
                         <li class="mb-2"><a href="{{ route('page.plans') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Planos e Preços</a></li>
                         <li class="mb-2"><a href="{{ route('page.contact') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Fale Conosco</a></li>
@@ -172,6 +180,7 @@
                     <ul class="list-unstyled text-secondary small space-y-2 mb-0">
                         <li class="mb-2"><a href="{{ route('page.privacy') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Política de Privacidade</a></li>
                         <li class="mb-2"><a href="{{ route('page.terms') }}" class="text-secondary text-decoration-none"><i class="fa-solid fa-angle-right me-1"></i> Termos de Uso</a></li>
+                        <li class="mb-2"><button type="button" class="site-footer-cookie-button" onclick="if(window.openIntentSelectorModal){window.openIntentSelectorModal();}else{window.location.href='{{ route('home') }}?trocar_preferencia=1';}"><i class="fa-solid fa-compass me-1" aria-hidden="true"></i> Preferência de Navegação</button></li>
                         <li class="mb-2"><button type="button" class="site-footer-cookie-button" data-cookie-settings><i class="fa-solid fa-cookie-bite me-1" aria-hidden="true"></i> Redefinir Cookies</button></li>
                     </ul>
                 </div>
@@ -200,6 +209,13 @@
     @include('components.theme-toggle')
     @include('components.vlibras-widget')
     @include('components.cookie-consent')
+    @include('components.live-support-widget')
+    @if($showPublicHeader)
+        @include('components.pwa-install')
+    @endif
+    @if(request()->routeIs('home'))
+        @include('components.intent-modal')
+    @endif
 
     <!-- Scripts JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -207,6 +223,7 @@
     <script src="{{ asset('js/main.js') }}?v=1.4"></script>
     <script src="{{ asset('js/site-header.js') }}?v=1.3"></script>
     <script src="{{ asset('js/cookie-consent.js') }}?v=1.0"></script>
+    <script src="{{ asset('js/pwa-install.js') }}?v=1.0" defer></script>
     @stack('scripts')
 </body>
 </html>

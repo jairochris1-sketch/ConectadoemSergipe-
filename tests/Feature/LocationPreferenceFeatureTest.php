@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Ad;
 use App\Models\Store;
 use App\Models\User;
+use Database\Seeders\PlansSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,7 +36,8 @@ class LocationPreferenceFeatureTest extends TestCase
 
     public function test_active_location_filters_home_and_module_results(): void
     {
-        $owner = User::factory()->create();
+        $this->seed(PlansSeeder::class);
+        $owner = User::factory()->create(['subscription_plan' => 'start']);
         $this->createAd($owner, 'products', 'Produto de Glória', 'produto-gloria', 'Nossa Senhora da Glória');
         $this->createAd($owner, 'products', 'Produto de Aracaju', 'produto-aracaju', 'Aracaju');
         $this->createAd($owner, 'services', 'Serviço de Glória', 'servico-gloria', 'Nossa Senhora da Glória');
@@ -53,15 +55,19 @@ class LocationPreferenceFeatureTest extends TestCase
         $this->withSession($session)
             ->get(route('home'))
             ->assertOk()
-            ->assertSee('Produto de Glória')
             ->assertSee('Serviço de Glória')
-            ->assertSee('Loja de Glória')
-            ->assertDontSee('Produto de Aracaju')
             ->assertDontSee('Serviço de Aracaju')
-            ->assertDontSee('Loja de Aracaju')
             ->assertDontSee('Resultados da Pesquisa')
             ->assertSee('Desativar localização')
             ->assertSee('Nossa Senhora da Glória');
+
+        $this->withSession($session)
+            ->get(route('stores-sales.index'))
+            ->assertOk()
+            ->assertSee('Produto de Glória')
+            ->assertSee('Loja de Glória')
+            ->assertDontSee('Produto de Aracaju')
+            ->assertDontSee('Loja de Aracaju');
 
         $this->withSession($session)
             ->get(route('module.products'))

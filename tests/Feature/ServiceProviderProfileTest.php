@@ -5,10 +5,13 @@ namespace Tests\Feature;
 use App\Models\Ad;
 use App\Models\AdImage;
 use App\Models\Category;
+use App\Models\Plan;
+use App\Models\PlanFeature;
 use App\Models\Review;
 use App\Models\Store;
 use App\Models\User;
 use App\Support\CityImage;
+use Database\Seeders\PlansSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -67,13 +70,13 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('Conserto de eletrônicos');
     }
 
-    public function test_service_provider_appears_in_directory_and_homepage(): void
+    public function test_free_service_provider_appears_in_directory_but_not_in_paid_home_highlights(): void
     {
         $provider = $this->createAd('services', 'Eletricista de teste');
 
         $this->get('/servicos')
             ->assertOk()
-            ->assertSee('Perfis profissionais')
+            ->assertSee('Prestadores de serviços')
             ->assertSee($provider->title)
             ->assertSee($provider->description)
             ->assertSee('services-results-layout', false)
@@ -94,19 +97,35 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('marketplace-guest-login', false)
             ->assertSee('marketplace-mobile-announce', false)
             ->assertSee('Prestadores de Serviços')
-            ->assertSee($provider->title)
-            ->assertSee('Em destaque')
-            ->assertSee('Eletricista')
-            ->assertSee('home-provider-desktop-column', false)
-            ->assertSee('swiper-providers', false)
+            ->assertSee('Destaques para você')
+            ->assertSee('swiper-featured-ads', false)
             ->assertDontSee('home-provider-guest-mobile', false)
+            ->assertDontSee($provider->title)
             ->assertDontSee($provider->description)
-            ->assertSee(route('provider.show', $provider->slug));
+            ->assertDontSee(route('provider.show', $provider->slug));
+    }
+
+    public function test_home_highlight_uses_provider_profile_photo_instead_of_gallery_image(): void
+    {
+        $this->seed(PlansSeeder::class);
+        $provider = $this->createAd('services', 'Manicure com foto correta');
+        User::whereKey($provider->user_id)->update(['subscription_plan' => 'start']);
+        $provider->update([
+            'logo' => 'uploads/provider-profile.webp',
+            'card_image' => 'uploads/provider-gallery.webp',
+        ]);
+
+        $response = $this->actingAs($provider->user)->get(route('home'))->assertOk();
+
+        $response
+            ->assertSee('src="'.asset('uploads/provider-profile.webp').'" class="card-img-top home-featured-card-image"', false)
+            ->assertDontSee('src="'.asset('uploads/provider-gallery.webp').'" class="card-img-top home-featured-card-image"', false)
+            ->assertSee('class="home-featured-city text-truncate d-block"', false);
     }
 
     public function test_paid_provider_is_prioritized_in_home_highlights_and_free_profiles_fill_remaining_slots(): void
     {
-        $this->seed(\Database\Seeders\PlansSeeder::class);
+        $this->seed(PlansSeeder::class);
         $paidOwner = User::factory()->create(['subscription_plan' => 'start']);
         $paidProvider = $this->createAdForUser($paidOwner, 'Prestador pago em destaque');
         $paidProvider->update(['created_at' => now()->subMonth()]);
@@ -136,29 +155,79 @@ class ServiceProviderProfileTest extends TestCase
         $response = $this->get(route('home'))->assertOk();
         $providers = $response->viewData('serviceProviders');
 
-        $this->assertCount(8, $providers);
+        $this->assertCount(1, $providers);
         $this->assertSame($paidProvider->id, $providers->first()->id);
         $this->assertTrue((bool) $providers->first()->is_plan_featured);
-        $response->assertSee('Destaque do plano pago');
+        $this->assertTrue($providers->every(fn (Ad $provider) => (bool) $provider->is_plan_featured));
+        $response->assertSee('Em destaque');
         $featuredForYou = $response->viewData('featuredForYou');
         $this->assertTrue($featuredForYou->contains('id', $paidProvider->id));
-        $this->assertTrue($featuredForYou->contains('id', $mostViewedFreeProvider->id));
-        $this->assertLessThanOrEqual(3, $featuredForYou->where('module', 'services')->count());
-        $this->assertFalse((bool) $featuredForYou->firstWhere('id', $adminProvider->id)->is_plan_featured);
+        $this->assertFalse($featuredForYou->contains('id', $mostViewedFreeProvider->id));
+        $this->assertFalse($featuredForYou->contains('id', $adminProvider->id));
+        $this->assertCount(1, $featuredForYou);
+        $this->assertTrue($featuredForYou->every(fn (Ad $provider) => (bool) $provider->is_plan_featured));
         $response
-            ->assertSee('Prestador pago')
-            ->assertSee('Mais procurado')
+            ->assertSee('Em destaque')
+            ->assertDontSee('Mais procurado')
             ->assertSee(route('provider.show', $paidProvider->slug));
         $this->assertDatabaseHas('plan_feature_values', [
-            'plan_id' => \App\Models\Plan::where('slug', 'free')->value('id'),
-            'plan_feature_id' => \App\Models\PlanFeature::where('key', 'provider_featured')->value('id'),
+            'plan_id' => Plan::where('slug', 'free')->value('id'),
+            'plan_feature_id' => PlanFeature::where('key', 'provider_featured')->value('id'),
             'value' => '0',
         ]);
         $this->assertDatabaseHas('plan_feature_values', [
-            'plan_id' => \App\Models\Plan::where('slug', 'start')->value('id'),
-            'plan_feature_id' => \App\Models\PlanFeature::where('key', 'provider_featured')->value('id'),
+            'plan_id' => Plan::where('slug', 'start')->value('id'),
+            'plan_feature_id' => PlanFeature::where('key', 'provider_featured')->value('id'),
             'value' => '1',
         ]);
+    }
+
+    public function test_home_separates_service_providers_from_liberal_professionals(): void
+    {
+        $this->seed(PlansSeeder::class);
+        $serviceOwner = User::factory()->create(['subscription_plan' => 'start']);
+        $serviceProvider = $this->createAdForUser($serviceOwner, 'Eletricista em destaque');
+        $serviceProvider->update(['profile_kind' => 'professional']);
+        $liberalOwner = User::factory()->create(['subscription_plan' => 'start']);
+        $liberalProfessional = $this->createAdForUser($liberalOwner, 'Advogada em destaque');
+        $liberalProfessional->update(['profile_kind' => 'liberal_professional']);
+
+        $response = $this->get(route('home'))->assertOk();
+        $serviceProviders = $response->viewData('serviceProviders');
+        $liberalProfessionals = $response->viewData('liberalProfessionals');
+
+        $this->assertTrue($serviceProviders->contains('id', $serviceProvider->id), 'O prestador pago regular deve aparecer na grade própria.');
+        $this->assertFalse($serviceProviders->contains('id', $liberalProfessional->id), 'O profissional liberal não deve aparecer na grade regular.');
+        $this->assertTrue($liberalProfessionals->contains('id', $liberalProfessional->id), 'O profissional liberal pago deve aparecer na seção própria.');
+        $this->assertCount(0, $liberalProfessionals->where('profile_kind', '!=', 'liberal_professional'));
+        $response
+            ->assertSee('Prestadores de Serviço em destaque')
+            ->assertSee('Profissional Liberal em Destaque')
+            ->assertSee(route('provider.show', $liberalProfessional->slug));
+
+        $directoryResponse = $this->get(route('module.services', [
+            'profile_kind' => 'liberal_professional',
+        ]))->assertOk();
+        $directoryProviders = $directoryResponse->viewData('providers');
+
+        $this->assertTrue($directoryProviders->contains('id', $liberalProfessional->id), 'O filtro liberal deve manter o perfil liberal.');
+        $this->assertFalse($directoryProviders->contains('id', $serviceProvider->id), 'O filtro liberal deve excluir o prestador regular.');
+
+        $regularDirectoryResponse = $this->get(route('module.services'))->assertOk();
+        $regularDirectoryProviders = $regularDirectoryResponse->viewData('providers');
+        $this->assertTrue($regularDirectoryProviders->contains('id', $serviceProvider->id));
+        $this->assertFalse($regularDirectoryProviders->contains('id', $liberalProfessional->id));
+        $regularDirectoryResponse
+            ->assertSee('Prestadores de serviços')
+            ->assertSee('Profissionais liberais')
+            ->assertSee('aria-current="page"', false);
+
+        $this->get(route('provider.show', $liberalProfessional->slug))
+            ->assertOk()
+            ->assertSee('liberal-profile-page', false)
+            ->assertSee('Documentação e registros')
+            ->assertSee('Profissional Liberal em Sergipe')
+            ->assertSee('id="marketplaceHeader"', false);
     }
 
     public function test_service_provider_has_a_professional_page_and_old_url_redirects(): void
@@ -198,7 +267,7 @@ class ServiceProviderProfileTest extends TestCase
 
     public function test_related_professionals_are_shown_only_on_free_provider_profiles(): void
     {
-        $this->seed(\Database\Seeders\PlansSeeder::class);
+        $this->seed(PlansSeeder::class);
 
         $relatedOwner = User::factory()->create(['subscription_plan' => 'free']);
         $relatedProvider = $this->createAdForUser($relatedOwner, 'Profissional relacionado');
@@ -254,6 +323,10 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('provider-airbnb-thumbnails', false)
             ->assertSee('provider-profile-lower-frame', false)
             ->assertSee('data-gallery-thumb-index="0"', false)
+            ->assertSee('data-gallery-prev', false)
+            ->assertSee('data-gallery-next', false)
+            ->assertSee("galleryPrev?.addEventListener('click'", false)
+            ->assertSee("galleryNext?.addEventListener('click'", false)
             ->assertSee('Ver todas as fotos')
             ->assertSee('object-fit: contain;', false)
             ->assertSee('background-image: var(--portfolio-bg);', false)
@@ -528,6 +601,44 @@ class ServiceProviderProfileTest extends TestCase
             'status' => 'active',
             'views' => 0,
         ]);
+    }
+
+    public function test_edit_cover_button_is_only_visible_to_owner_or_admin(): void
+    {
+        $owner = User::factory()->create(['subscription_plan' => 'start']);
+        $provider = $this->createAdForUser($owner, 'Eletricista Profissional');
+
+        $otherUser = User::factory()->create(['subscription_plan' => 'start']);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // 1. Visitante não autenticado NÃO deve ver a opção de editar capa
+        $this->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertDontSee('Editar capa')
+            ->assertDontSee('coverUpgradeModal')
+            ->assertDontSee('editCoverModal');
+
+        // 2. Outro usuário autenticado (não dono) NÃO deve ver a opção de editar capa
+        $this->actingAs($otherUser)
+            ->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertDontSee('Editar capa')
+            ->assertDontSee('coverUpgradeModal')
+            ->assertDontSee('editCoverModal');
+
+        // 3. O dono do perfil DEVE ver a opção de editar capa
+        $this->actingAs($owner)
+            ->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertSee('Editar capa')
+            ->assertSee('editCoverModal');
+
+        // 4. Um administrador DEVE ver a opção de editar capa
+        $this->actingAs($admin)
+            ->get(route('provider.show', $provider->slug))
+            ->assertOk()
+            ->assertSee('Editar capa')
+            ->assertSee('editCoverModal');
     }
 
     private function createAdForUser(User $user, string $title): Ad

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Prestadores de Serviços em Sergipe - Conectado em Sergipe')
+@section('title', ($isLiberalDirectory ? 'Profissionais Liberais' : 'Prestadores de Serviços') . ' em Sergipe - Conectado em Sergipe')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/services-directory.css') }}?v=2.0">
@@ -11,6 +11,55 @@
             radial-gradient(circle at 74% 8%, rgba(0, 91, 255, 0.12), transparent 32%),
             linear-gradient(180deg, var(--accent) 0%, var(--background) 42%, var(--background) 100%);
         min-height: 100vh;
+    }
+
+    .services-directory-division {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 0 0 22px;
+        padding: 7px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--card);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, .07);
+    }
+    .services-directory-division-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 58px;
+        padding: 10px 14px;
+        border-radius: 13px;
+        color: var(--muted-foreground);
+        font-size: .82rem;
+        font-weight: 800;
+        text-align: center;
+        text-decoration: none;
+        transition: color .18s ease, background-color .18s ease, box-shadow .18s ease;
+    }
+    .services-directory-division-link i { font-size: 1rem; }
+    .services-directory-division-link small {
+        display: inline-grid;
+        min-width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 999px;
+        background: rgba(100, 116, 139, .12);
+        font-size: .66rem;
+    }
+    .services-directory-division-link.is-active {
+        color: #fff;
+        background: linear-gradient(135deg, #075be8, #2563eb);
+        box-shadow: 0 8px 20px rgba(7, 91, 232, .24);
+    }
+    .services-directory-division-link.is-active small { background: rgba(255, 255, 255, .18); }
+    @media (max-width: 575.98px) {
+        .services-directory-division { gap: 6px; padding: 5px; border-radius: 14px; }
+        .services-directory-division-link { min-height: 54px; gap: 6px; padding: 8px 6px; font-size: .69rem; }
+        .services-directory-division-link i { font-size: .85rem; }
+        .services-directory-division-link small { min-width: 21px; height: 21px; font-size: .58rem; }
     }
 
     /* ── BANNER SWIPER & HERO ── */
@@ -27,7 +76,7 @@
     }
     @media (max-width: 767.98px) {
         .services-banner-swiper {
-            height: 350px;
+            height: 290px;
             border-radius: 18px !important;
         }
     }
@@ -251,13 +300,13 @@
     }
 
     @media (max-width: 575.98px) {
-        .services-banner-swiper { height: 280px; }
-        .services-banner-content { transform: translateY(-18px); }
-        .services-banner-content h1 { font-size: 1.75rem; }
-        .services-hero { padding-top: 2rem; }
-        .services-search-panel { padding-top: 1.25rem; }
-        .services-hero-title { font-size: 1.65rem; }
-        .services-hero-chips { gap: 6px; }
+        .services-banner-swiper { height: 260px; }
+        .services-banner-content { transform: translateY(-8px); }
+        .services-banner-content h1 { font-size: 1.2rem; }
+        .services-hero { padding-top: 1.5rem; }
+        .services-search-panel { padding-top: 1rem; }
+        .services-hero-title { font-size: 1.35rem; }
+        .services-hero-chips { gap: 5px; }
     }
 </style>
 @endpush
@@ -305,24 +354,27 @@
             <div class="position-absolute inset-0 w-100 h-100 top-0 start-0 d-flex flex-column align-items-center justify-content-center text-center px-3 py-3" style="z-index: 10; pointer-events: none;">
                 <div class="w-100" style="max-width: 780px; pointer-events: auto;">
                     <span class="badge rounded-pill bg-primary bg-opacity-75 px-3 py-1.5 mb-2 text-uppercase fw-bold shadow-sm" style="letter-spacing: 0.05em; font-size: 0.72rem;">
-                        Profissionais de Sergipe
+                        {{ $isLiberalDirectory ? 'Formação e registro profissional' : 'Profissionais de Sergipe' }}
                     </span>
                     <h1 class="fw-bold mb-1 text-white fs-3" style="text-shadow: 0 2px 8px rgba(0,0,0,0.75);">
-                        Encontre Prestadores de Serviços em Sergipe
+                        {{ $isLiberalDirectory ? 'Encontre Profissionais Liberais em Sergipe' : 'Encontre Prestadores de Serviços em Sergipe' }}
                     </h1>
                     <p class="small text-white opacity-90 mb-3" style="max-width: 620px; margin: 0 auto; text-shadow: 0 1px 4px rgba(0,0,0,0.65);">
-                        Conheça profissionais verificados, veja seus trabalhos e fale diretamente pelo WhatsApp.
+                        {{ $isLiberalDirectory ? 'Conheça profissionais de nível superior, especialidades e informações de registro profissional.' : 'Conheça profissionais, veja seus trabalhos e fale diretamente pelo WhatsApp.' }}
                     </p>
 
                     <!-- Barra de Busca Pill DENTRO do Hero -->
-                    <form action="{{ route('module.services') }}" method="GET" class="services-pill-search shadow-lg my-2" style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); margin: 0 auto; max-width: 720px;">
+                    <form action="{{ route('module.services') }}" method="GET" class="services-pill-search shadow-lg my-2" style="backdrop-filter: blur(12px); margin: 0 auto; max-width: 720px;">
+                        @if($isLiberalDirectory)
+                            <input type="hidden" name="profile_kind" value="liberal_professional">
+                        @endif
                         <div class="services-pill-field">
                             <i class="fa-solid fa-magnifying-glass text-muted"></i>
                             <input
                                 type="search"
                                 name="q"
                                 value="{{ $q }}"
-                                placeholder="O que você precisa hoje? Ex: Eletricista..."
+                                placeholder="{{ $isLiberalDirectory ? 'Ex.: advogado, psicólogo, nutricionista...' : 'O que você precisa hoje? Ex.: eletricista...' }}"
                                 autocomplete="off"
                             >
                         </div>
@@ -354,7 +406,7 @@
                         <span class="text-white-50 small me-1" style="font-size: 0.72rem; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Populares:</span>
                         @foreach(array_slice($popularSearches, 0, 5) as $search)
                             <a
-                                href="{{ route('module.services', ['q' => $search['label']]) }}"
+                                href="{{ route('module.services', array_filter(['q' => $search['label'], 'profile_kind' => $isLiberalDirectory ? 'liberal_professional' : null])) }}"
                                 class="services-chip py-1 px-2.5 bg-white bg-opacity-90 text-dark border-0 shadow-sm {{ strcasecmp($q, $search['label']) === 0 ? 'active' : '' }}"
                                 style="font-size: 0.7rem;"
                             >
@@ -367,6 +419,7 @@
                     <div class="mt-4">
                         @include('services._profile-cta', [
                             'profileCta' => $profileCta,
+                            'profileKind' => $isLiberalDirectory ? 'liberal_professional' : 'professional',
                             'class' => 'btn btn-success bg-gradient rounded-pill px-4 py-2 fw-bold shadow',
                         ])
                     </div>
@@ -381,6 +434,19 @@
     @endif
 
     <div class="container services-search-panel pb-5">
+        <nav class="services-directory-division" aria-label="Escolher tipo de profissional">
+            <a href="{{ route('module.services') }}" class="services-directory-division-link {{ $isLiberalDirectory ? '' : 'is-active' }}" @if(! $isLiberalDirectory) aria-current="page" @endif>
+                <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+                <span>Prestadores de serviços</span>
+                <small>{{ $directoryCounts['services'] }}</small>
+            </a>
+            <a href="{{ route('module.services', ['profile_kind' => 'liberal_professional']) }}" class="services-directory-division-link {{ $isLiberalDirectory ? 'is-active' : '' }}" @if($isLiberalDirectory) aria-current="page" @endif>
+                <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+                <span>Profissionais liberais</span>
+                <small>{{ $directoryCounts['liberal'] }}</small>
+            </a>
+        </nav>
+
         {{-- Formulário de busca legado (oculto, mantido para compatibilidade) --}}
         <form action="{{ route('module.services') }}" method="GET" class="services-filter-card rounded-4 p-3 p-md-4 mb-4 d-none" aria-hidden="true">
             <div class="row g-3 align-items-end">
@@ -484,20 +550,23 @@
 
                     <div id="servicesDirectoryFilters" class="collapse {{ ($q || $city || $category) ? 'show' : '' }} d-md-block">
                         <form action="{{ route('module.services') }}" method="GET" class="services-directory-filter-body">
+                            @if($isLiberalDirectory)
+                                <input type="hidden" name="profile_kind" value="liberal_professional">
+                            @endif
                             <div class="d-flex align-items-center justify-content-between mb-1">
                                 <h2 class="services-directory-filter-title mb-0">
                                     <i class="fa-solid fa-sliders me-1 text-primary"></i> Filtros
                                 </h2>
                                 @if($q || $city || $category)
-                                    <a href="{{ route('module.services') }}" class="text-primary fw-bold" style="font-size:.72rem;">Limpar</a>
+                                    <a href="{{ route('module.services', $isLiberalDirectory ? ['profile_kind' => 'liberal_professional'] : []) }}" class="text-primary fw-bold" style="font-size:.72rem;">Limpar</a>
                                 @endif
                             </div>
                             <p class="services-directory-filter-subtitle">Encontre o profissional ideal.</p>
 
                             <div class="services-directory-field">
-                                <label for="directory-service-search">Profissional ou serviço</label>
+                                <label for="directory-service-search">{{ $isLiberalDirectory ? 'Profissional ou especialidade' : 'Profissional ou serviço' }}</label>
                                 <div class="position-relative">
-                                    <input type="search" id="directory-service-search" name="q" value="{{ $q }}" class="form-control ps-4" placeholder="Ex.: eletricista, pedreiro...">
+                                    <input type="search" id="directory-service-search" name="q" value="{{ $q }}" class="form-control ps-4" placeholder="{{ $isLiberalDirectory ? 'Ex.: advogado, arquiteto...' : 'Ex.: eletricista, pedreiro...' }}">
                                     <i class="fa-solid fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y ms-2 text-muted" style="font-size: .8rem; pointer-events: none;"></i>
                                 </div>
                             </div>
@@ -557,7 +626,7 @@
                             <div class="services-directory-popular">
                                 @foreach(array_slice($popularSearches, 0, 6) as $search)
                                     <a
-                                        href="{{ route('module.services', ['q' => $search['label'], 'city' => $city, 'category' => $category]) }}"
+                                        href="{{ route('module.services', array_filter(['q' => $search['label'], 'city' => $city, 'category' => $category, 'profile_kind' => $isLiberalDirectory ? 'liberal_professional' : null])) }}"
                                         class="{{ strcasecmp($q, $search['label']) === 0 ? 'active' : '' }}"
                                     >
                                         {{ $search['label'] }}
@@ -579,7 +648,7 @@
                 <div class="services-directory-heading">
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            <h2 class="fw-bold mb-0">Perfis profissionais</h2>
+                            <h2 class="fw-bold mb-0">{{ $isLiberalDirectory ? 'Profissionais liberais' : 'Prestadores de serviços' }}</h2>
                             <span class="services-count-pill rounded-pill fw-bold">{{ $providers->total() }}</span>
                         </div>
                         <p class="text-muted mb-0">
@@ -591,7 +660,7 @@
                         </p>
                     </div>
                     @if($q || $city || $category)
-                        <a href="{{ route('module.services') }}" class="btn btn-link text-primary fw-bold text-decoration-none">
+                        <a href="{{ route('module.services', $isLiberalDirectory ? ['profile_kind' => 'liberal_professional'] : []) }}" class="btn btn-link text-primary fw-bold text-decoration-none">
                             Ver todos <i class="fa-solid fa-chevron-right ms-1"></i>
                         </a>
                     @endif
@@ -600,7 +669,7 @@
                 @if($providers->isEmpty())
                     <div class="text-center bg-white border rounded-4 shadow-sm py-5 px-4">
                         <i class="fa-solid fa-user-tie text-muted display-5 mb-3"></i>
-                        <h3 class="h5 fw-bold">Nenhum prestador encontrado</h3>
+                        <h3 class="h5 fw-bold">{{ $isLiberalDirectory ? 'Nenhum profissional liberal encontrado' : 'Nenhum prestador encontrado' }}</h3>
                         <p class="text-muted mb-0">Tente outra especialidade ou cidade.</p>
                     </div>
                 @else

@@ -6,6 +6,7 @@ use App\Models\Ad;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\Store;
+use App\Http\Controllers\AdFavoriteController;
 use App\Support\HomeCityGroupCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -44,8 +45,8 @@ class HomeController extends Controller
         $brand = $request->input('brand');
         $year = $request->input('year');
         $moduleTitle = self::MODULE_LABELS[$module] ?? null;
-        $locationPreferenceActive = (bool) $request->session()->get('location_filter.enabled', false);
-        $city = $request->input('city') ?: ($locationPreferenceActive ? $request->session()->get('location_filter.city') : null);
+        $locationPreferenceActive = $request->hasSession() ? (bool) $request->session()->get('location_filter.enabled', false) : false;
+        $city = $request->input('city') ?: ($locationPreferenceActive && $request->hasSession() ? $request->session()->get('location_filter.city') : null);
 
         if ($module === 'services') {
             return $this->serviceDirectory($request);
@@ -127,54 +128,34 @@ class HomeController extends Controller
             ->where('status', 'active')
             ->where('module', 'services')
             ->when($city, fn ($query) => $query->where('city', $city));
+        $regularServiceProvidersQuery = (clone $serviceProvidersQuery)
+            ->where(function ($query) {
+                $query->whereNull('profile_kind')
+                    ->orWhere('profile_kind', '!=', 'liberal_professional');
+            });
         $featuredProviderUserIds = $this->featuredProviderUserIds();
-        $featuredProviders = (clone $serviceProvidersQuery)
+        $featuredProviders = (clone $regularServiceProvidersQuery)
             ->whereIn('user_id', $featuredProviderUserIds)
+            ->inRandomOrder()
+            ->take(6)
             ->get()
-            ->sortBy(fn (Ad $provider): string => hash(
-                'sha256',
-                now('America/Fortaleza')->toDateString().'|'.$provider->id
-            ))
-            ->take(8)
-            ->values()
             ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', true));
         $serviceProviders = $featuredProviders;
-
-        if ($serviceProviders->count() < 8) {
-            $fallbackProviders = (clone $serviceProvidersQuery)
-                ->whereNotIn('user_id', $featuredProviderUserIds)
-                ->latest()
-                ->take(8 - $serviceProviders->count())
-                ->get()
-                ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', false));
-            $serviceProviders = $serviceProviders->concat($fallbackProviders)->values();
-        }
-        $paidProviderHighlights = (clone $serviceProvidersQuery)
+        $featuredLiberalProfessionals = (clone $serviceProvidersQuery)
+            ->where('profile_kind', 'liberal_professional')
             ->whereIn('user_id', $featuredProviderUserIds)
-            ->orderByDesc('views')
-            ->latest()
-            ->take(3)
+            ->inRandomOrder()
+            ->take(8)
             ->get()
             ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', true));
-        $providerHighlights = $paidProviderHighlights;
-
-        if ($providerHighlights->count() < 3) {
-            $popularFreeProviders = (clone $serviceProvidersQuery)
-                ->whereNotIn('user_id', $featuredProviderUserIds)
-                ->orderByDesc('views')
-                ->latest()
-                ->take(3 - $providerHighlights->count())
-                ->get()
-                ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', false));
-            $providerHighlights = $providerHighlights->concat($popularFreeProviders)->values();
-        }
-
-        $generalHighlights = (clone $popularAdsQuery)
-            ->orderByDesc('views')
-            ->latest()
+        $liberalProfessionals = $featuredLiberalProfessionals;
+        $paidProviderHighlights = (clone $serviceProvidersQuery)
+            ->whereIn('user_id', $featuredProviderUserIds)
+            ->inRandomOrder()
             ->take(10)
-            ->get();
-        $featuredForYou = $this->interleaveHomeHighlights($generalHighlights, $providerHighlights);
+            ->get()
+            ->each(fn (Ad $provider) => $provider->setAttribute('is_plan_featured', true));
+        $featuredForYou = $paidProviderHighlights;
         $recentStores = Store::query()
             ->with(['user'])
             ->withCount([
@@ -193,7 +174,7 @@ class HomeController extends Controller
                     });
             }))
             ->latest()
-            ->take(4)
+            ->take(10)
             ->get();
         $serviceSearchCategories = $this->serviceSearchCategories();
         $adSearchCategories = self::AD_SEARCH_CATEGORIES;
@@ -321,6 +302,19 @@ class HomeController extends Controller
             })
             ->values();
 
+        $favoriteFolders = collect();
+        $favoriteFolderAssignments = collect();
+        $favoriteCount = 0;
+        $favoriteLimit = AdFavoriteController::MAX_FAVORITES;
+
+        if ($request->user()) {
+            $favoriteFolders = $request->user()->favoriteFolders()->orderBy('name')->get();
+            $favoriteFolderAssignments = DB::table('favorites')
+                ->where('user_id', $request->user()->id)
+                ->pluck('folder_id', 'ad_id');
+            $favoriteCount = $favoriteFolderAssignments->count();
+        }
+
         return view('home', compact(
             'q',
             'city',
@@ -333,6 +327,7 @@ class HomeController extends Controller
             'popularAds',
             'featuredForYou',
             'serviceProviders',
+            'liberalProfessionals',
             'recentStores',
             'serviceSearchCategories',
             'adSearchCategories',
@@ -345,7 +340,11 @@ class HomeController extends Controller
             'vehicleAds',
             'productAds',
             'jobAgroAds',
-            'homeCityGroups'
+            'homeCityGroups',
+            'favoriteFolders',
+            'favoriteFolderAssignments',
+            'favoriteCount',
+            'favoriteLimit'
         ));
     }
 
@@ -388,10 +387,18 @@ class HomeController extends Controller
             );
 
         if ($term !== '') {
+            $termKey = mb_strtolower(\Illuminate\Support\Str::ascii($term));
+            $synonyms = $this->searchSynonymMap()[$termKey] ?? [$term];
             $adsQuery
-                ->where(function ($query) use ($term) {
+                ->where(function ($query) use ($term, $synonyms) {
                     $query->where('title', 'like', "%{$term}%")
-                        ->orWhere('description', 'like', "%{$term}%");
+                        ->orWhere('description', 'like', "%{$term}%")
+                        ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$term}%"));
+                    foreach ($synonyms as $syn) {
+                        $query->orWhere('title', 'like', "%{$syn}%")
+                            ->orWhere('description', 'like', "%{$syn}%")
+                            ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$syn}%"));
+                    }
                 })
                 ->orderByRaw('CASE WHEN title LIKE ? THEN 0 ELSE 1 END', ["{$term}%"]);
         } else {
@@ -458,9 +465,16 @@ class HomeController extends Controller
 
     private function serviceDirectory(Request $request)
     {
+        $isLiberalDirectory = $request->input('profile_kind') === 'liberal_professional';
         $q = trim((string) $request->input('q'));
         $city = $request->input('city');
         $category = trim((string) $request->input('category'));
+        if (str_starts_with($category, 'service:')) {
+            $category = trim(substr($category, strlen('service:')));
+        }
+        if (str_starts_with($category, 'module:')) {
+            $category = trim(substr($category, strlen('module:')));
+        }
         $serviceCategories = collect($this->serviceSearchCategories())
             ->pluck('name')
             ->all();
@@ -474,6 +488,14 @@ class HomeController extends Controller
             ], 'rating')
             ->where('status', 'active')
             ->where('module', 'services')
+            ->when(
+                $isLiberalDirectory,
+                fn ($query) => $query->where('profile_kind', 'liberal_professional'),
+                fn ($query) => $query->where(function ($profileQuery) {
+                    $profileQuery->whereNull('profile_kind')
+                        ->orWhere('profile_kind', '!=', 'liberal_professional');
+                })
+            )
             ->when($category, fn ($query) => $this->applySmartSearch($query, $category))
             ->when($q, fn ($query) => $this->applySmartSearch($query, $q))
             ->when($city, fn ($query) => $query->where('city', $city))
@@ -489,6 +511,22 @@ class HomeController extends Controller
             ->orderByDesc('created_at')
             ->paginate(21)
             ->withQueryString();
+
+        $directoryCounts = [
+            'services' => Ad::query()
+                ->where('module', 'services')
+                ->where('status', 'active')
+                ->where(function ($query) {
+                    $query->whereNull('profile_kind')
+                        ->orWhere('profile_kind', '!=', 'liberal_professional');
+                })
+                ->count(),
+            'liberal' => Ad::query()
+                ->where('module', 'services')
+                ->where('status', 'active')
+                ->where('profile_kind', 'liberal_professional')
+                ->count(),
+        ];
 
         $profileCta = $this->professionalProfileCta($request);
 
@@ -526,7 +564,9 @@ class HomeController extends Controller
             'category',
             'serviceCategories',
             'serviceBanners',
-            'profileCta'
+            'profileCta',
+            'isLiberalDirectory',
+            'directoryCounts'
         ));
     }
 
@@ -559,7 +599,7 @@ class HomeController extends Controller
             ->concat($databaseCategories)
             ->filter(fn (array $category): bool => filled($category['name'] ?? null))
             ->unique(fn (array $category): string => mb_strtolower($category['name']))
-            ->sort(fn (array $left, array $right): int => strcasecmp($left['name'], $right['name']))
+            ->shuffle()
             ->values()
             ->all();
     }
@@ -620,26 +660,6 @@ class HomeController extends Controller
             ->concat($enabledOverrideUserIds)
             ->unique()
             ->values();
-    }
-
-    private function interleaveHomeHighlights(Collection $generalAds, Collection $providers): Collection
-    {
-        $highlights = collect();
-        $generalIndex = 0;
-        $providerIndex = 0;
-        $providerSlots = [1, 4, 7];
-
-        for ($position = 0; $position < 10; $position++) {
-            if (in_array($position, $providerSlots, true) && $providers->has($providerIndex)) {
-                $highlights->push($providers->get($providerIndex++));
-            } elseif ($generalAds->has($generalIndex)) {
-                $highlights->push($generalAds->get($generalIndex++));
-            } elseif ($providers->has($providerIndex)) {
-                $highlights->push($providers->get($providerIndex++));
-            }
-        }
-
-        return $highlights->values();
     }
 
     private function professionalProfileCta(Request $request): array
@@ -806,6 +826,50 @@ class HomeController extends Controller
         ));
     }
 
+    private function searchSynonymMap(): array
+    {
+        return [
+            'manicure' => ['manicure', 'manicuri', 'unha', 'unhas', 'pedicure', 'pedicuri', 'alongamento', 'esmalteria', 'esmalte', 'postiça', 'nail', 'nails'],
+            'manicuri' => ['manicure', 'manicuri', 'unha', 'unhas', 'pedicure', 'pedicuri', 'alongamento', 'esmalteria', 'nail', 'nails'],
+            'pedicure' => ['pedicure', 'pedicuri', 'unha', 'unhas', 'manicure', 'manicuri', 'spa dos pés', 'esmalteria', 'alongamento', 'calcanhar', 'nail', 'nails'],
+            'pedicuri' => ['pedicure', 'pedicuri', 'unha', 'unhas', 'manicure', 'manicuri', 'spa dos pés', 'esmalteria', 'nail', 'nails'],
+            'unha' => ['unha', 'unhas', 'manicure', 'pedicure', 'alongamento', 'esmalteria', 'nail', 'nails'],
+            'unhas' => ['unha', 'unhas', 'manicure', 'pedicure', 'alongamento', 'esmalteria', 'nail', 'nails'],
+            'nail' => ['nail', 'nails', 'unha', 'unhas', 'manicure', 'pedicure', 'alongamento'],
+            'nails' => ['nail', 'nails', 'unha', 'unhas', 'manicure', 'pedicure', 'alongamento'],
+            'alongamento' => ['alongamento', 'unha', 'unhas', 'manicure', 'pedicure', 'nail', 'nails', 'postiça'],
+            'cabelo' => ['cabelo', 'cabelos', 'cabeleireiro', 'cabeleireira', 'salão de beleza', 'escova', 'corte de cabelo'],
+            'cabelos' => ['cabelo', 'cabelos', 'cabeleireiro', 'cabeleireira', 'salão de beleza', 'escova', 'corte de cabelo'],
+            'cabeleireiro' => ['cabeleireiro', 'cabeleireira', 'cabelo', 'salão de beleza', 'barbeiro', 'barbearia', 'corte'],
+            'cabeleireira' => ['cabeleireira', 'cabeleireiro', 'cabelo', 'salão de beleza', 'escova', 'mechas', 'tintura'],
+            'barbeiro' => ['barbeiro', 'barbearia', 'barba', 'corte masculino'],
+            'barbearia' => ['barbeiro', 'barbearia', 'barba', 'corte masculino'],
+            'estetica' => ['estetica', 'estética', 'beleza', 'massagem', 'depilação', 'limpeza de pele', 'sobrancelha', 'cílios'],
+            'estética' => ['estetica', 'estética', 'beleza', 'massagem', 'depilação', 'limpeza de pele', 'sobrancelha', 'cílios'],
+            'laboratorio' => ['laboratorio', 'laboratório', 'prótese dentária', 'protese'],
+            'laboratório' => ['laboratorio', 'laboratório', 'prótese dentária', 'protese'],
+            'protese' => ['protese', 'prótese', 'protético', 'protetico', 'dentária', 'dentaria'],
+            'prótese' => ['protese', 'prótese', 'protético', 'protetico', 'dentária', 'dentaria'],
+            'dentaria' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
+            'dentária' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
+            'dentista' => ['dentista', 'dentaria', 'dentária', 'odontologia', 'odonto', 'dente'],
+            'mecanico' => ['mecanico', 'mecânico', 'oficina mecânica', 'conserto de carro', 'conserto de moto'],
+            'mecânico' => ['mecanico', 'mecânico', 'oficina mecânica', 'conserto de carro', 'conserto de moto'],
+            'eletricista' => ['eletricista', 'instalação elétrica', 'eletricidade', 'quadro elétrico'],
+            'encanador' => ['encanador', 'hidráulica', 'hidraulica', 'vazamento', 'desentupimento'],
+            'pedreiro' => ['pedreiro', 'construção', 'construcao', 'reforma', 'assentamento de pisos', 'porcelanato'],
+            'pintor' => ['pintor', 'pintura residencial', 'pintura comercial', 'textura'],
+            'faxineira' => ['faxineira', 'diarista', 'limpeza residencial', 'limpeza comercial', 'faxina'],
+            'faxina' => ['faxina', 'faxineira', 'diarista', 'limpeza residencial', 'limpeza comercial'],
+            'limpeza' => ['limpeza', 'faxina', 'faxineira', 'diarista'],
+            'advogado' => ['advogado', 'advocacia', 'jurídico', 'juridico', 'direito'],
+            'frete' => ['frete', 'mudança', 'mudanca', 'transporte de cargas', 'carreto'],
+            'programador' => ['programador', 'desenvolvedor', 'criação de sistemas', 'sites', 'software', 'informática', '4lab'],
+            'desenvolvedor' => ['desenvolvedor', 'programador', 'criação de sistemas', 'sites', 'software', 'informática', '4lab'],
+            'informatica' => ['informatica', 'informática', 'programador', 'computador', 'notebook', 'sistemas', 'software'],
+        ];
+    }
+
     private function applySmartSearch($query, ?string $search)
     {
         $raw = trim((string) $search);
@@ -815,27 +879,7 @@ class HomeController extends Controller
 
         $ascii = \Illuminate\Support\Str::ascii($raw);
         $words = array_values(array_filter(explode(' ', $raw), fn ($w) => mb_strlen(trim($w)) > 0));
-
-        $synonymMap = [
-            'lab' => ['lab', 'laboratorio', 'laboratório'],
-            'laboratorio' => ['lab', 'laboratorio', 'laboratório'],
-            'laboratório' => ['lab', 'laboratorio', 'laboratório'],
-            'protese' => ['protese', 'prótese', 'protético', 'protetico'],
-            'prótese' => ['protese', 'prótese', 'protético', 'protetico'],
-            'dentaria' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
-            'dentária' => ['dentaria', 'dentária', 'dente', 'dentista', 'odontologia', 'odonto'],
-            'dentista' => ['dentista', 'dentaria', 'dentária', 'odontologia', 'odonto'],
-            'mecanico' => ['mecanico', 'mecânico', 'oficina', 'auto'],
-            'mecânico' => ['mecanico', 'mecânico', 'oficina', 'auto'],
-            'eletricista' => ['eletricista', 'eletrica', 'elétrica'],
-            'encanador' => ['encanador', 'hidraulica', 'hidráulica'],
-            'pedreiro' => ['pedreiro', 'obra', 'construcao', 'construção'],
-            'pintor' => ['pintor', 'pintura'],
-            'faxineira' => ['faxineira', 'diarista', 'limpeza'],
-            'advogado' => ['advogado', 'advocacia', 'juridico', 'jurídico'],
-            'frete' => ['frete', 'mudança', 'mudanca', 'transporte'],
-            'ti' => ['ti', 'tecnico', 'técnico', 'informatica', 'informática', 'programador', 'computador'],
-        ];
+        $synonymMap = $this->searchSynonymMap();
 
         return $query->where(function ($groupQuery) use ($raw, $ascii, $words, $synonymMap) {
             // 1. Exact or normalized phrase match
@@ -888,5 +932,246 @@ class HomeController extends Controller
                 }
             }
         });
+    }
+
+    public function highlights(Request $request)
+    {
+        try {
+            \App\Services\DemoAdSeeder::seedIfNeeded();
+        } catch (\Throwable $e) {
+            // Silence seeder exception
+        }
+
+        $q = $request->input('q');
+        $category = $request->input('category', 'all');
+        $viewMode = $request->input('view', 'grid'); // grid, list, cards
+        $locationPreferenceActive = $request->hasSession() ? (bool) $request->session()->get('location_filter.enabled', false) : false;
+        $city = $request->input('city') ?: ($locationPreferenceActive && $request->hasSession() ? $request->session()->get('location_filter.city') : null);
+
+        // 1. Prestadores de Serviços em Destaque
+        $providersQuery = Ad::with(['mainImage', 'category', 'user'])
+            ->where('module', 'services')
+            ->where('status', 'active');
+
+        if (!empty($q)) {
+            $providersQuery->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%")
+                    ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$q}%"));
+            });
+        }
+
+        if (!empty($city)) {
+            $providersQuery->where('city', $city);
+        }
+
+        $featuredProviders = (clone $providersQuery)
+            ->orderByDesc('views')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // 2. Lojas em Destaque
+        $storesQuery = Store::with(['user'])
+            ->withCount([
+                'ads as active_ads_count' => fn ($query) => $query
+                    ->where('module', 'products')
+                    ->where('status', 'active'),
+            ])
+            ->publiclyVisible();
+
+        if (!empty($q)) {
+            $storesQuery->where('name', 'like', "%{$q}%");
+        }
+
+        if (!empty($city)) {
+            $storesQuery->where(function ($cityQuery) use ($city) {
+                $cityQuery->where('city', $city)
+                    ->orWhere(function ($fallbackQuery) use ($city) {
+                        $fallbackQuery->whereNull('city')
+                            ->whereHas('user', fn ($userQuery) => $userQuery->where('city', $city));
+                    });
+            });
+        }
+
+        $featuredStores = (clone $storesQuery)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // 3. Anúncios em Destaque por módulo/categoria
+        $adsQuery = Ad::with(['mainImage', 'category', 'user'])
+            ->where('status', 'active');
+
+        if (!empty($q)) {
+            $adsQuery->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            });
+        }
+
+        if (!empty($city)) {
+            $adsQuery->where('city', $city);
+        }
+
+        if (!empty($category) && $category !== 'all') {
+            if ($category === 'services') {
+                $adsQuery->where('module', 'services');
+            } elseif ($category === 'stores') {
+                $adsQuery->where('id', 0);
+            } else {
+                $adsQuery->where('module', $category);
+            }
+        }
+
+        $featuredAds = $adsQuery
+            ->orderByDesc('views')
+            ->latest()
+            ->paginate(16)
+            ->appends($request->all());
+
+        // Estatísticas para os widgets laterais
+        $totalProvidersCount = Ad::where('module', 'services')->where('status', 'active')->count();
+        $totalStoresCount = Store::publiclyVisible()->count();
+        $totalAdsCount = Ad::where('status', 'active')->count();
+        $totalHighlightsCount = $totalProvidersCount + $totalStoresCount + $totalAdsCount;
+
+        // Anúncios específicos por módulo para renderização rápida
+        $featuredRealEstate = Ad::with(['mainImage', 'category', 'user'])
+            ->where('module', 'real_estate')->where('status', 'active')
+            ->when($city, fn($query) => $query->where('city', $city))
+            ->orderByDesc('views')->latest()->take(6)->get();
+
+        $featuredVehicles = Ad::with(['mainImage', 'category', 'user'])
+            ->where('module', 'vehicles')->where('status', 'active')
+            ->when($city, fn($query) => $query->where('city', $city))
+            ->orderByDesc('views')->latest()->take(6)->get();
+
+        $featuredProducts = Ad::with(['mainImage', 'category', 'user'])
+            ->where('module', 'products')->where('status', 'active')
+            ->when($city, fn($query) => $query->where('city', $city))
+            ->orderByDesc('views')->latest()->take(6)->get();
+
+        $featuredJobs = Ad::with(['mainImage', 'category', 'user'])
+            ->where('module', 'jobs')->where('status', 'active')
+            ->when($city, fn($query) => $query->where('city', $city))
+            ->orderByDesc('views')->latest()->take(6)->get();
+
+        return view('highlights.index', compact(
+            'featuredAds',
+            'featuredProviders',
+            'featuredStores',
+            'featuredRealEstate',
+            'featuredVehicles',
+            'featuredProducts',
+            'featuredJobs',
+            'totalHighlightsCount',
+            'totalProvidersCount',
+            'totalStoresCount',
+            'q',
+            'category',
+            'city',
+            'viewMode'
+        ));
+    }
+
+    public function storesAndSalesPage(Request $request)
+    {
+        $locationPreferenceActive = $request->hasSession()
+            ? (bool) $request->session()->get('location_filter.enabled', false)
+            : false;
+        $city = $request->input('city')
+            ?: ($locationPreferenceActive && $request->hasSession()
+                ? $request->session()->get('location_filter.city')
+                : null);
+        $q = trim((string) $request->input('q'));
+
+        $recentStores = Store::query()
+            ->with(['user'])
+            ->withCount([
+                'ads as active_ads_count' => fn ($query) => $query
+                    ->where('module', 'products')
+                    ->where('status', 'active'),
+            ])
+            ->publiclyVisible()
+            ->when($city, fn ($query) => $query->where(function ($cq) use ($city) {
+                $cq->where('city', $city)
+                    ->orWhereHas('user', fn ($uq) => $uq->where('city', $city));
+            }))
+            ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%")
+                    ->orWhere('category', 'like', "%{$q}%");
+            }))
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $productAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'products')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            }))
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $realEstateAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'real_estate')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            }))
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $vehicleAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->where('module', 'vehicles')
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            }))
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $jobAgroAds = Ad::with(['mainImage'])
+            ->where('status', 'active')
+            ->whereIn('module', ['jobs', 'agro'])
+            ->when($city, fn ($query) => $query->where('city', $city))
+            ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            }))
+            ->latest()
+            ->take(12)
+            ->get();
+
+        $cityFiles = glob(public_path('Cidades/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}'), GLOB_BRACE) ?: [];
+        $heroBanners = array_map(fn ($f) => 'Cidades/' . basename($f), $cityFiles);
+        if (empty($heroBanners)) {
+            $heroBanners = [
+                'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1600&auto=format&fit=crop',
+            ];
+        }
+
+        return view('stores-sales.index', compact(
+            'q',
+            'city',
+            'recentStores',
+            'productAds',
+            'realEstateAds',
+            'vehicleAds',
+            'jobAgroAds',
+            'heroBanners'
+        ));
     }
 }

@@ -82,12 +82,12 @@ class AdPublishingFlowTest extends TestCase
             ->assertSee('reader.readAsArrayBuffer(file)', false)
             ->assertSee('const stableFile = await snapshotFileForUpload(file)', false)
             ->assertDontSee("file.size <= 900 * 1024) {\n            return file", false)
-            ->assertSee('#wizard-step-5 .wizard-submit-button', false)
-            ->assertSee('Qual perfil representa você?')
+            ->assertSee('wizard-submit-button', false)
+            ->assertSee('Como você atua? (Tipo de anunciante)')
             ->assertSee('Prestador de serviços')
             ->assertSee('Empresa de serviços')
-            ->assertSee('Loja / Comércio')
-            ->assertSee('Restaurante / Alimentação')
+            ->assertSee('Loja ou comércio')
+            ->assertSee('Profissional liberal')
             ->assertSee('id="service-profile-kind"', false)
             ->assertDontSee('Seus dados protegidos')
             ->assertDontSee('moduleMotionTrail', false);
@@ -205,6 +205,47 @@ class AdPublishingFlowTest extends TestCase
             $ad->images->pluck('image_path')->all(),
             [$ad->logo]
         );
+    }
+
+    public function test_user_can_publish_and_edit_service_with_extended_profile_kinds(): void
+    {
+        $user = User::factory()->create(['whatsapp' => '79999999999']);
+
+        $this->actingAs($user)->post(route('ad.store'), [
+            'module' => 'services',
+            'profile_kind' => 'liberal_professional',
+            'category_name' => 'Advogado',
+            'title' => 'Advogado Trabalhista em Aracaju',
+            'city' => 'Aracaju',
+            'description' => 'Consultoria jurídica trabalhista e previdenciária especializada.',
+            'whatsapp' => '79999999999',
+            'phone' => '79999999999',
+        ])->assertSessionHasNoErrors();
+
+        $service = Ad::where('title', 'Advogado Trabalhista em Aracaju')->firstOrFail();
+        $this->assertSame('liberal_professional', $service->profile_kind);
+        $this->assertSame('Profissional liberal', $service->profile_kind_label);
+
+        $this->get(route('provider.show', $service->slug))
+            ->assertOk()
+            ->assertSee('liberal-profile-page', false)
+            ->assertSee('Profissional Liberal em Sergipe');
+
+        $this->actingAs($user)->put(route('ad.update', $service->id), [
+            'title' => 'Escritório de Advocacia & Consultoria',
+            'city' => 'Aracaju',
+            'description' => 'Sociedade de advogados prestando assessoria jurídica empresarial.',
+            'profile_kind' => 'cultural_artist',
+            'category_name' => 'Advogado',
+        ])->assertSessionHasNoErrors();
+
+        $service->refresh();
+        $this->assertSame('cultural_artist', $service->profile_kind);
+        $this->assertSame('Artista / Profissional da cultura', $service->profile_kind_label);
+
+        $this->get(route('provider.show', $service->slug))
+            ->assertOk()
+            ->assertSee('Artista / Profissional da cultura');
     }
 
     private function fakePng(string $name): UploadedFile
