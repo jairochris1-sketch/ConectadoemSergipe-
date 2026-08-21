@@ -48,7 +48,7 @@
                 @endif
 
                 <!-- Formulário de Login -->
-                <form action="{{ route('login') }}" method="POST">
+                <form action="{{ route('login') }}" method="POST" data-login-form>
                     @csrf
                     
                     <div class="mb-3">
@@ -79,8 +79,9 @@
                     </div>
 
                     <div class="d-grid mb-4">
-                        <button type="submit" class="btn btn-primary auth-login-submit fw-bold shadow-sm">
-                            Entrar
+                        <button type="submit" class="btn btn-primary auth-login-submit fw-bold shadow-sm" data-login-submit>
+                            <span data-login-submit-label>Entrar</span>
+                            <span class="spinner-border spinner-border-sm d-none" data-login-submit-spinner aria-hidden="true"></span>
                         </button>
                     </div>
 
@@ -234,6 +235,10 @@
 
 .auth-login-submit {
     min-height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
     border: 0;
     border-radius: 999px;
     font-size: 1rem;
@@ -322,4 +327,33 @@ html[data-theme="dark"] .auth-login-brand-logo-dark {
 }
 </style>
 @include('auth._password_controls')
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('[data-login-form]');
+    const submitButton = form?.querySelector('[data-login-submit]');
+    const submitLabel = submitButton?.querySelector('[data-login-submit-label]');
+    const submitSpinner = submitButton?.querySelector('[data-login-submit-spinner]');
+
+    if (!form || !submitButton || !submitLabel || !submitSpinner) return;
+
+    const resetSubmit = () => {
+        submitButton.disabled = false;
+        submitButton.removeAttribute('aria-busy');
+        submitLabel.textContent = 'Entrar';
+        submitSpinner.classList.add('d-none');
+    };
+
+    form.addEventListener('submit', () => {
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+        submitLabel.textContent = 'Entrando…';
+        submitSpinner.classList.remove('d-none');
+    });
+
+    window.addEventListener('pageshow', resetSubmit);
+});
+</script>
+@endpush
 @endsection
