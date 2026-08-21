@@ -23,6 +23,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductFavoriteController;
 use App\Http\Controllers\ProductQuestionController;
+use App\Http\Controllers\QuickProfileController;
 use App\Http\Controllers\ProviderClaimController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceBookingController;
@@ -52,6 +53,10 @@ Route::post('/suporte/{ticket}/encerrar', [SupportChatController::class, 'closeT
 Route::post('/suporte/{ticket}/avaliar', [SupportChatController::class, 'rateTicket'])->name('support.rate');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/cadastro-rapido', [QuickProfileController::class, 'create'])->name('quick-profile.create');
+Route::post('/cadastro-rapido', [QuickProfileController::class, 'store'])
+    ->middleware('throttle:5,60')
+    ->name('quick-profile.store');
 Route::get('/bem-vindo', LandingPageController::class)->name('landing');
 Route::get('/plataforma', fn () => redirect()->route('home'))->name('home.redirect');
 Route::get('/lojas-e-vendas', [HomeController::class, 'storesAndSalesPage'])->name('stores-sales.index');

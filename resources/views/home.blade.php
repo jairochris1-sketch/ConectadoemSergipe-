@@ -2152,7 +2152,7 @@
                     <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1 rounded-pill small fw-bold">Divulgue seus Serviços</span>
                     <h5 class="fw-bold mb-2">Você é um prestador de serviços em Sergipe?</h5>
                     <p class="text-muted small mb-4">Crie seu perfil profissional, apareça em destaque na sua cidade e receba solicitações de orçamento direto no seu WhatsApp.</p>
-                    <a href="{{ route('ad.create') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                    <a href="{{ route('quick-profile.create') }}" class="btn btn-primary fw-bold w-100 rounded-3 py-2 mb-4 shadow-sm d-flex align-items-center justify-content-center gap-2">
                         <i class="fa-solid fa-plus-circle"></i> Cadastrar Meu Perfil Profissional
                     </a>
                 </div>
