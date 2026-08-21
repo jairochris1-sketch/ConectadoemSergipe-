@@ -13,6 +13,7 @@ class Category extends Model
         'name',
         'slug',
         'module',
+        'profile_kind',
         'icon',
         'color',
         'image',

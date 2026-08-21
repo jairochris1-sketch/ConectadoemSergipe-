@@ -14,6 +14,7 @@ use App\Models\ServiceSubscriptionPayment;
 use App\Models\ServiceSubscriptionUsage;
 use App\Models\User;
 use App\Support\ServiceBookingCatalog;
+use App\Support\ServiceBookingAvailability;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -250,19 +251,24 @@ class ServiceBookingController extends Controller
                 ->get()
             : collect();
         $rescheduleAppointment = $customerAppointments->firstWhere('id', (int) $request->query('reschedule'));
+        $attendanceModes = ServiceBookingCatalog::allowedAttendanceModes($ad);
+        $attendanceMode = $request->query('attendance_mode', $rescheduleAppointment?->attendance_mode ?? $attendanceModes[0]);
+        if (! in_array($attendanceMode, $attendanceModes, true)) {
+            $attendanceMode = $attendanceModes[0];
+        }
         $procedure = $rescheduleAppointment?->procedure
             ?? $ad->serviceProcedures->firstWhere('id', (int) $request->query('procedure'));
         $staff = $rescheduleAppointment?->staff
             ?? $ad->serviceStaff->firstWhere('id', (int) $request->query('staff'));
         $date = $request->query('date', now('America/Fortaleza')->addDay()->toDateString());
         $slots = ($procedure && $staff && $staff->procedures->contains($procedure))
-            ? $this->availableSlots($ad, $staff, $procedure, $date, $rescheduleAppointment?->id)
+            ? app(ServiceBookingAvailability::class)->slots($ad, $staff, $procedure, $date, $rescheduleAppointment?->id)
             : [];
         $coveringSubscription = ($procedure && $request->user())
             ? $this->availableSubscriptionFor($ad, $request->user()->id, $procedure, Carbon::parse($date, 'America/Fortaleza'))
             : null;
 
-        return view('service-booking.book', compact('ad', 'procedure', 'staff', 'date', 'slots', 'subscriptionPlans', 'customerSubscriptions', 'coveringSubscription', 'customerAppointments', 'rescheduleAppointment'));
+        return view('service-booking.book', compact('ad', 'procedure', 'staff', 'date', 'slots', 'subscriptionPlans', 'customerSubscriptions', 'coveringSubscription', 'customerAppointments', 'rescheduleAppointment', 'attendanceModes', 'attendanceMode'));
     }
 
     public function storeAppointment(Request $request, Ad $ad)
@@ -274,6 +280,11 @@ class ServiceBookingController extends Controller
             'starts_at' => ['required', 'date'],
             'phone' => ['nullable', 'string', 'max:20'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'attendance_mode' => [
+                Rule::requiredIf(ServiceBookingCatalog::isConsultation($ad)),
+                'nullable',
+                Rule::in(ServiceBookingCatalog::allowedAttendanceModes($ad)),
+            ],
         ]);
         $procedure = $ad->serviceProcedures()->where('active', true)->findOrFail($data['procedure_id']);
         $staff = $ad->serviceStaff()->where('active', true)->findOrFail($data['staff_id']);
@@ -308,6 +319,7 @@ class ServiceBookingController extends Controller
                 'service_price' => $coveringSubscription ? 0 : $procedure->price,
                 'status' => 'pending',
                 'notes' => $data['notes'] ?? null,
+                'attendance_mode' => $data['attendance_mode'] ?? null,
             ]);
             if ($coveringSubscription) {
                 $coveringSubscription->usages()->create([
@@ -338,10 +350,15 @@ class ServiceBookingController extends Controller
         abort_unless(in_array($event, ['requested', 'cancelled', 'rescheduled'], true), 404);
         $appointment->loadMissing(['procedure', 'staff', 'clientSubscription.plan']);
         $phone = $this->normalizeBrazilianWhatsapp($ad->publicWhatsapp());
+        $attendanceText = $appointment->attendance_mode_label
+            ? ' em atendimento '.mb_strtolower($appointment->attendance_mode_label)
+            : '';
+        $appointmentName = ServiceBookingCatalog::isConsultation($ad) ? 'a consulta' : 'o serviço';
+        $appointmentReference = ServiceBookingCatalog::isConsultation($ad) ? 'da consulta' : 'do serviço';
         $messages = [
-            'requested' => "Olá! Sou {$appointment->customer_name}. Acabei de solicitar pelo Conectado em Sergipe o procedimento {$appointment->procedure->name}, com {$appointment->staff->name}, para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
-            'cancelled' => "Olá! Sou {$appointment->customer_name}. Informo que cancelei pelo Conectado em Sergipe o procedimento {$appointment->procedure->name} que estava marcado para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}.",
-            'rescheduled' => "Olá! Sou {$appointment->customer_name}. Solicitei pelo Conectado em Sergipe a remarcação do procedimento {$appointment->procedure->name} para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
+            'requested' => "Olá! Sou {$appointment->customer_name}. Acabei de solicitar pelo Conectado em Sergipe {$appointmentName} {$appointment->procedure->name}{$attendanceText}, com {$appointment->staff->name}, para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
+            'cancelled' => "Olá! Sou {$appointment->customer_name}. Informo que cancelei pelo Conectado em Sergipe {$appointmentName} {$appointment->procedure->name}{$attendanceText}, marcado para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}.",
+            'rescheduled' => "Olá! Sou {$appointment->customer_name}. Solicitei pelo Conectado em Sergipe a remarcação {$appointmentReference} {$appointment->procedure->name}{$attendanceText} para {$appointment->starts_at->format('d/m/Y')} às {$appointment->starts_at->format('H:i')}. Aguardo sua confirmação, por favor.",
         ];
         $whatsappUrl = $phone ? 'https://wa.me/'.$phone.'?text='.rawurlencode($messages[$event]) : null;
 
@@ -424,6 +441,7 @@ class ServiceBookingController extends Controller
             'customer_phone' => ['nullable', 'string', 'max:20'],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'attendance_mode' => ['nullable', Rule::in(ServiceBookingCatalog::allowedAttendanceModes($ad))],
         ]);
         $procedure = $ad->serviceProcedures()->where('active', true)->findOrFail($data['procedure_id']);
         $staff = $ad->serviceStaff()->where('active', true)->findOrFail($data['staff_id']);
@@ -446,6 +464,7 @@ class ServiceBookingController extends Controller
                 'service_price' => $procedure->price,
                 'status' => 'confirmed',
                 'notes' => $data['notes'] ?? null,
+                'attendance_mode' => $data['attendance_mode'] ?? null,
             ]);
         });
 
@@ -474,12 +493,15 @@ class ServiceBookingController extends Controller
     {
         $this->ensureCustomerAppointment($request, $ad, $appointment);
         $this->ensurePublicBooking($ad);
-        $data = $request->validate(['starts_at' => ['required', 'date', 'after:now']]);
+        $data = $request->validate([
+            'starts_at' => ['required', 'date', 'after:now'],
+            'attendance_mode' => ['nullable', Rule::in(ServiceBookingCatalog::allowedAttendanceModes($ad))],
+        ]);
         $appointment->loadMissing(['procedure', 'staff', 'subscriptionUsage']);
         $start = Carbon::parse($data['starts_at'], 'America/Fortaleza');
         $this->assertSlotAvailable($ad, $appointment->staff, $appointment->procedure, $start, $appointment->id);
 
-        DB::transaction(function () use ($ad, $appointment, $start, $request): void {
+        DB::transaction(function () use ($ad, $appointment, $start, $request, $data): void {
             ServiceStaff::query()->lockForUpdate()->findOrFail($appointment->service_staff_id);
             $appointment->subscriptionUsage?->update(['status' => 'released']);
             $this->assertSlotAvailable($ad, $appointment->staff, $appointment->procedure, $start, $appointment->id);
@@ -490,6 +512,7 @@ class ServiceBookingController extends Controller
                 'ends_at' => $start->copy()->addMinutes($appointment->procedure->duration_minutes),
                 'service_price' => $subscription ? 0 : $appointment->procedure->price,
                 'status' => 'pending',
+                'attendance_mode' => $data['attendance_mode'] ?? $appointment->attendance_mode,
             ]);
             if ($subscription) {
                 ServiceSubscriptionUsage::updateOrCreate(
@@ -515,49 +538,10 @@ class ServiceBookingController extends Controller
         return redirect()->route('service-booking.whatsapp', [$ad, $appointment, 'rescheduled']);
     }
 
-    private function availableSlots(Ad $ad, ServiceStaff $staff, ServiceProcedure $procedure, string $date, ?int $excludeAppointmentId = null, bool $enforceLeadTime = true): array
-    {
-        try {
-            $day = Carbon::createFromFormat('Y-m-d', $date, 'America/Fortaleza')->startOfDay();
-        } catch (\Throwable) {
-            return [];
-        }
-        if ($day->lt(now('America/Fortaleza')->startOfDay()) || $day->gt(now('America/Fortaleza')->addDays(60))) {
-            return [];
-        }
-        $availability = $staff->availabilities()->where('day_of_week', $day->dayOfWeek)->first();
-        if (! $availability) {
-            return [];
-        }
-        $cursor = Carbon::parse($date.' '.$availability->starts_at, 'America/Fortaleza');
-        $limit = Carbon::parse($date.' '.$availability->ends_at, 'America/Fortaleza');
-        $appointments = $ad->serviceAppointments()->where('service_staff_id', $staff->id)->whereNotIn('status', ['cancelled'])
-            ->when($excludeAppointmentId, fn ($query) => $query->where('id', '!=', $excludeAppointmentId))
-            ->whereDate('starts_at', $date)->get();
-        $blocks = $ad->serviceScheduleBlocks()
-            ->where(fn ($query) => $query->whereNull('service_staff_id')->orWhere('service_staff_id', $staff->id))
-            ->where('starts_at', '<', $limit)
-            ->where('ends_at', '>', $cursor)
-            ->get();
-        $slots = [];
-        while ($cursor->copy()->addMinutes($procedure->duration_minutes)->lte($limit)) {
-            $end = $cursor->copy()->addMinutes($procedure->duration_minutes);
-            $conflict = $appointments->contains(fn ($item) => $item->starts_at->lt($end) && $item->ends_at->gt($cursor));
-            $blocked = $blocks->contains(fn ($block) => $block->starts_at->lt($end) && $block->ends_at->gt($cursor));
-            $leadTimeOk = ! $enforceLeadTime || $cursor->gt(now('America/Fortaleza')->addHours(2));
-            if (! $conflict && ! $blocked && $leadTimeOk) {
-                $slots[] = $cursor->format('H:i');
-            }
-            $cursor->addMinutes(10);
-        }
-
-        return $slots;
-    }
-
     private function assertSlotAvailable(Ad $ad, ServiceStaff $staff, ServiceProcedure $procedure, Carbon $start, ?int $excludeAppointmentId = null, bool $enforceLeadTime = true): void
     {
         $slot = $start->format('H:i');
-        if (! in_array($slot, $this->availableSlots($ad, $staff, $procedure, $start->toDateString(), $excludeAppointmentId, $enforceLeadTime), true)) {
+        if (! in_array($slot, app(ServiceBookingAvailability::class)->slots($ad, $staff, $procedure, $start->toDateString(), $excludeAppointmentId, $enforceLeadTime), true)) {
             abort(422, 'Este horário não está mais disponível.');
         }
     }

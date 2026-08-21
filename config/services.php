@@ -42,4 +42,10 @@ return [
         'webhook_base_url' => env('ASAAS_WEBHOOK_BASE_URL') ?: env('APP_URL'),
     ],
 
+    'consultar_crm' => [
+        'url' => env('CONSULTAR_CRM_API_URL', 'https://www.consultarcrm.com.br/api/index.php'),
+        'key' => env('CONSULTAR_CRM_API_KEY'),
+        'timeout' => (int) env('CONSULTAR_CRM_API_TIMEOUT', 12),
+    ],
+
 ];

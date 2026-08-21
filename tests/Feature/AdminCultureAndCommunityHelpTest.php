@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Ad;
 use App\Models\CommunityHelpRequest;
 use App\Models\CultureWork;
 use App\Models\User;
@@ -71,6 +72,17 @@ class AdminCultureAndCommunityHelpTest extends TestCase
     public function test_author_cannot_republish_a_work_hidden_by_administration(): void
     {
         $author = User::factory()->create();
+        Ad::create([
+            'user_id' => $author->id,
+            'module' => 'services',
+            'profile_kind' => 'cultural_artist',
+            'advertiser_type' => 'Cordelista',
+            'title' => 'Perfil cultural da autora',
+            'slug' => 'perfil-cultural-autora',
+            'description' => 'Perfil artístico usado para gerenciar obras culturais.',
+            'city' => 'Aracaju',
+            'status' => 'active',
+        ]);
         $work = $this->createCultureWork($author, 'Obra sob análise', 'hidden');
 
         $this->actingAs($author)

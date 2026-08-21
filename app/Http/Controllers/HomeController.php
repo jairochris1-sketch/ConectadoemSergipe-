@@ -475,7 +475,9 @@ class HomeController extends Controller
         if (str_starts_with($category, 'module:')) {
             $category = trim(substr($category, strlen('module:')));
         }
-        $serviceCategories = collect($this->serviceSearchCategories())
+        $serviceCategories = collect($this->serviceSearchCategories(
+            $isLiberalDirectory ? 'liberal_professional' : '__non_liberal__'
+        ))
             ->pluck('name')
             ->all();
 
@@ -570,16 +572,29 @@ class HomeController extends Controller
         ));
     }
 
-    private function serviceSearchCategories(): array
+    private function serviceSearchCategories(?string $profileKind = null): array
     {
-        $configuredCategories = collect(config('marketplace.service_categories', []))
+        $profileGroups = collect(config('marketplace.service_categories_by_profile_kind', []));
+        $profileCategories = match ($profileKind) {
+            'liberal_professional' => collect($profileGroups->get('liberal_professional', [])),
+            '__non_liberal__' => $profileGroups->except('liberal_professional')->flatten(1),
+            default => $profileGroups->flatten(1),
+        };
+
+        $configuredCategories = collect(
+            $profileKind === 'liberal_professional'
+                ? []
+                : config('marketplace.service_categories', [])
+        )
+            ->concat($profileCategories)
+            ->unique(fn (string $name): string => mb_strtolower($name))
             ->map(fn (string $name): array => [
                 'name' => $name,
                 'icon' => $this->serviceCategoryIcon($name),
             ]);
 
         $databaseCategories = Category::query()
-            ->select(['categories.name', 'categories.icon'])
+            ->select(['categories.name', 'categories.icon', 'categories.profile_kind'])
             ->where('categories.active', true)
             ->where(function ($query) {
                 $query->where('categories.module', 'services')
@@ -587,6 +602,17 @@ class HomeController extends Controller
             })
             ->whereNotNull('categories.name')
             ->where('categories.name', '!=', '')
+            ->when(
+                $profileKind === 'liberal_professional',
+                fn ($query) => $query->where('categories.profile_kind', 'liberal_professional')
+            )
+            ->when(
+                $profileKind === '__non_liberal__',
+                fn ($query) => $query->where(function ($profileQuery) {
+                    $profileQuery->whereNull('categories.profile_kind')
+                        ->orWhere('categories.profile_kind', '!=', 'liberal_professional');
+                })
+            )
             ->distinct()
             ->orderBy('categories.name')
             ->get()

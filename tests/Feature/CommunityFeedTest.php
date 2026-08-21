@@ -199,7 +199,7 @@ class CommunityFeedTest extends TestCase
             'status' => 'active',
         ]);
 
-        $this->get(route('home'))
+        $this->get(route('home', ['module' => 'products']))
             ->assertOk()
             ->assertSee('home-clickable-name', false)
             ->assertSee('Artesanato Sergipano');

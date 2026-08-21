@@ -595,8 +595,9 @@ class AdminController extends Controller
             'culture' => 'Arte & Cultura',
             'stores' => 'Lojas & Negócios',
         ];
+        $profileKinds = Ad::PROFILE_KINDS;
 
-        return view('admin.categories', compact('categories', 'modules'));
+        return view('admin.categories', compact('categories', 'modules', 'profileKinds'));
     }
 
     public function storeCategory(Request $request)
@@ -604,6 +605,11 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'module' => 'nullable|string|max:50',
+            'profile_kind' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'),
+                'nullable',
+                Rule::in(array_keys(Ad::PROFILE_KINDS)),
+            ],
             'icon' => ['required', 'string', 'max:100', 'regex:/^fa-[a-z0-9-]+$/'],
             'color' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
@@ -620,6 +626,9 @@ class AdminController extends Controller
             'name' => trim($validated['name']),
             'slug' => $slug,
             'module' => $validated['module'] ?? null,
+            'profile_kind' => ($validated['module'] ?? null) === 'services'
+                ? $validated['profile_kind']
+                : null,
             'icon' => $validated['icon'],
             'color' => $validated['color'],
             'sort_order' => Category::count() + 1,
@@ -634,6 +643,11 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'module' => 'nullable|string|max:50',
+            'profile_kind' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'),
+                'nullable',
+                Rule::in(array_keys(Ad::PROFILE_KINDS)),
+            ],
             'icon' => ['required', 'string', 'max:100', 'regex:/^fa-[a-z0-9-]+$/'],
             'color' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'sort_order' => 'required|integer|min:0',
@@ -650,6 +664,9 @@ class AdminController extends Controller
             'name' => trim($validated['name']),
             'slug' => $newSlug,
             'module' => $validated['module'] ?? null,
+            'profile_kind' => ($validated['module'] ?? null) === 'services'
+                ? $validated['profile_kind']
+                : null,
             'icon' => $validated['icon'],
             'color' => $validated['color'],
             'sort_order' => $validated['sort_order'],

@@ -207,18 +207,22 @@
                         Artistas, poetas, artesãos, músicos e escritores divulgam suas obras, cordéis e artesanato sergipano.
                     </p>
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
-                        @auth
+                        @if($canManageCultureWorks)
                             <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
                                 <i class="fa-solid fa-feather-pointed me-1"></i> Publicar Minha Obra / Arte
                             </a>
                             <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline text-white border-white px-3 py-2 btn-sm">
                                 Minhas Obras
                             </a>
+                        @elseif(auth()->check())
+                            <a href="{{ route('ad.create', ['module' => 'services', 'profile_kind' => 'cultural_artist']) }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                                Criar perfil artístico
+                            </a>
                         @else
                             <a href="{{ route('login') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
                                 Sou Artista / Publicar
                             </a>
-                        @endauth
+                        @endif
                         <a href="#culture-works-container" class="btn btn-cordel-outline text-white border-white px-3 py-2 btn-sm">
                             Explorar Obras
                         </a>
@@ -246,18 +250,22 @@
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    @auth
+                    @if($canManageCultureWorks)
                         <a href="{{ route('culture.create') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
                             <i class="fa-solid fa-feather-pointed me-1"></i> Publicar Minha Obra / Arte
                         </a>
                         <a href="{{ route('culture.my-works') }}" class="btn btn-cordel-outline px-3 py-2 btn-sm">
                             Minhas Obras
                         </a>
+                    @elseif(auth()->check())
+                        <a href="{{ route('ad.create', ['module' => 'services', 'profile_kind' => 'cultural_artist']) }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
+                            Criar perfil artístico
+                        </a>
                     @else
                         <a href="{{ route('login') }}" class="btn btn-cordel-red px-3 py-2 btn-sm">
                             Sou Artista / Publicar
                         </a>
-                    @endauth
+                    @endif
                     <a href="#culture-works-container" class="btn btn-cordel-outline px-3 py-2 btn-sm">
                         Explorar Obras
                     </a>
@@ -351,11 +359,15 @@
                         <i class="fa-solid fa-book-open fs-1 text-muted mb-3 d-block"></i>
                         <h3 class="h4 fw-bold text-dark mb-2">Nenhuma obra encontrada</h3>
                         <p class="text-muted mb-4">Tente buscar por outros termos ou categorias, ou seja o primeiro a publicar!</p>
-                        @auth
+                        @if($canManageCultureWorks)
                             <a href="{{ route('culture.create') }}" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">
                                 <i class="fa-solid fa-plus me-1"></i> Publicar Cordel / Obra
                             </a>
-                        @endauth
+                        @elseif(auth()->check())
+                            <a href="{{ route('ad.create', ['module' => 'services', 'profile_kind' => 'cultural_artist']) }}" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">
+                                Criar perfil artístico
+                            </a>
+                        @endif
                     </div>
                 </div>
             @else

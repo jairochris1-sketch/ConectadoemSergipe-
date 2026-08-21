@@ -34,7 +34,7 @@ class HomeLocationSearchTest extends TestCase
             ->assertSee('id="home-voice-status"', false)
             ->assertSee('findSpokenServiceCategory(transcript)', false)
             ->assertSee('Categoria reconhecida:', false)
-            ->assertSee('const automaticSearchDelay = 20000', false)
+            ->assertSee('const automaticSearchDelay = 2000', false)
             ->assertDontSee('scheduleAutomaticSearch(nearestMunicipality.name)', false);
     }
 

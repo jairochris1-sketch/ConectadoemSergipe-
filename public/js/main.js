@@ -9,8 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeOptions = document.querySelectorAll('.theme-option');
     const html = document.documentElement;
     const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    const allowedThemes = ['light', 'dark', 'system'];
 
-    const getSavedTheme = () => localStorage.getItem('theme') || 'system';
+    const getSavedTheme = () => {
+        const savedTheme = localStorage.getItem('theme');
+        const accountTheme = html.getAttribute('data-theme-preference');
+
+        return savedTheme || (allowedThemes.includes(accountTheme) ? accountTheme : 'system');
+    };
 
     const getResolvedTheme = theme => {
         if (theme === 'system') {
@@ -43,8 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const applyTheme = (theme, save = false) => {
-        const allowedThemes = ['light', 'dark', 'system'];
-
         if (!allowedThemes.includes(theme)) {
             theme = 'system';
         }
@@ -63,6 +67,44 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     applyTheme(getSavedTheme());
+
+    document.querySelectorAll('input[name="theme_preference"]').forEach(option => {
+        option.addEventListener('change', () => applyTheme(option.value));
+    });
+
+    document.querySelectorAll('[data-avatar-upload]').forEach(input => {
+        input.addEventListener('change', async () => {
+            const selectedFile = input.files?.[0];
+            if (!selectedFile) return;
+
+            try {
+                if (typeof DataTransfer !== 'undefined') {
+                    const stableFile = new File(
+                        [await selectedFile.arrayBuffer()],
+                        selectedFile.name,
+                        { type: selectedFile.type, lastModified: selectedFile.lastModified }
+                    );
+                    const transfer = new DataTransfer();
+                    transfer.items.add(stableFile);
+                    input.files = transfer.files;
+                }
+            } catch (error) {
+                // O envio tradicional continua disponivel em navegadores sem essa API.
+            }
+
+            const preview = document.getElementById(input.dataset.previewTarget || '');
+            const placeholder = document.getElementById(input.dataset.placeholderTarget || '');
+            if (preview) {
+                preview.src = URL.createObjectURL(input.files?.[0] || selectedFile);
+                preview.classList.remove('d-none');
+                placeholder?.classList.add('d-none');
+            }
+
+            if (input.dataset.autoSubmit === 'true') {
+                input.form?.requestSubmit();
+            }
+        });
+    });
 
     if (themeContainer && themeBtn) {
         const desktopHover = window.matchMedia('(min-width: 992px) and (hover: hover) and (pointer: fine)');
@@ -317,5 +359,4 @@ document.addEventListener('DOMContentLoaded', () => {
         cardObserver.observe(document.body, { childList: true, subtree: true });
     }
 });
-
 

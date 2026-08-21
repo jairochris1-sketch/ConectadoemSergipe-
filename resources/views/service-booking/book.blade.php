@@ -1,15 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Agendar com '.$ad->title.' - Conectado em Sergipe')
+@php
+    $isConsultation = \App\Support\ServiceBookingCatalog::isConsultation($ad);
+    $bookingNoun = $isConsultation ? 'consulta' : 'serviço';
+@endphp
+
+@section('title', ($isConsultation ? 'Agendar consulta com ' : 'Agendar serviço com ').$ad->title.' - Conectado em Sergipe')
 
 @section('content')
 <div class="container py-4 py-md-5 booking-page">
     <div class="booking-public-shell">
         <header class="booking-hero">
             <a href="{{ route('provider.show', $ad->slug) }}" class="booking-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao perfil</a>
-            <span>Agendamento online</span>
-            <h1>Escolha seu atendimento com {{ $ad->title }}</h1>
-            <p>Selecione o procedimento, o profissional e um dos horários realmente disponíveis.</p>
+            <span>{{ $isConsultation ? 'Agenda de consultas' : 'Agenda profissional' }}</span>
+            <h1>{{ $isConsultation ? 'Agendar consulta' : 'Agendar serviço' }} com {{ $ad->title }}</h1>
+            <p>Escolha a modalidade, a data e um dos horários realmente disponíveis. O profissional fará a confirmação.</p>
         </header>
 
         @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
@@ -24,7 +29,7 @@
                             <div><strong>{{ $customerAppointment->procedure->name }}</strong><span>{{ $customerAppointment->status_label }}</span></div>
                             <p>{{ $customerAppointment->starts_at->format('d/m/Y H:i') }} · {{ $customerAppointment->staff->name }}</p>
                             <div class="booking-subscription-actions">
-                                <a href="{{ route('service-booking.book', ['ad' => $ad, 'procedure' => $customerAppointment->service_procedure_id, 'staff' => $customerAppointment->service_staff_id, 'date' => $customerAppointment->starts_at->toDateString(), 'reschedule' => $customerAppointment->id]) }}">Remarcar</a>
+                                <a href="{{ route('service-booking.book', ['ad' => $ad, 'procedure' => $customerAppointment->service_procedure_id, 'staff' => $customerAppointment->service_staff_id, 'date' => $customerAppointment->starts_at->toDateString(), 'attendance_mode' => $customerAppointment->attendance_mode, 'reschedule' => $customerAppointment->id]) }}">Remarcar</a>
                                 <form method="POST" action="{{ route('service-booking.customer.cancel', [$ad, $customerAppointment]) }}" onsubmit="return confirm('Cancelar este agendamento?')">@csrf @method('PATCH')<button>Cancelar horário</button></form>
                             </div>
                         </article>
@@ -97,7 +102,15 @@
         <section class="booking-card">
             <form method="GET" action="{{ route('service-booking.book', $ad) }}" class="booking-selection-form">
                 @if($rescheduleAppointment)<input type="hidden" name="reschedule" value="{{ $rescheduleAppointment->id }}">@endif
-                <label>Procedimento
+                @if($isConsultation)
+                    <fieldset class="booking-mode-choice">
+                        <legend>1. Escolha o atendimento</legend>
+                        @foreach($attendanceModes as $mode)
+                            <label><input type="radio" name="attendance_mode" value="{{ $mode }}" @checked($attendanceMode === $mode) onchange="this.form.submit()"><span><i class="fa-solid {{ $mode === 'online' ? 'fa-laptop-medical' : 'fa-hospital' }}"></i>{{ $mode === 'online' ? 'Online / teleconsulta' : 'Presencial' }}</span></label>
+                        @endforeach
+                    </fieldset>
+                @endif
+                <label>{{ $isConsultation ? 'Tipo de consulta' : 'Serviço' }}
                     <select name="procedure" required onchange="this.form.submit()">
                         <option value="">Escolha...</option>
                         @foreach($ad->serviceProcedures as $item)
@@ -122,7 +135,7 @@
                         @endforeach
                     </select>
                 </label>
-                <label>Data
+                <label>{{ $isConsultation ? '2. Escolha a data' : 'Data' }}
                     <input type="date" name="date" value="{{ $date }}" min="{{ now('America/Fortaleza')->toDateString() }}" max="{{ now('America/Fortaleza')->addDays(60)->toDateString() }}" onchange="this.form.submit()">
                 </label>
                 <noscript><button class="btn btn-primary">Consultar horários</button></noscript>
@@ -134,21 +147,24 @@
                     @if($rescheduleAppointment) @method('PATCH') @endif
                     <input type="hidden" name="procedure_id" value="{{ $procedure->id }}">
                     <input type="hidden" name="staff_id" value="{{ $staff->id }}">
-                    <h2>{{ $rescheduleAppointment ? 'Escolha o novo horário' : 'Horários disponíveis' }} em {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h2>
+                    <input type="hidden" name="attendance_mode" value="{{ $attendanceMode }}">
+                    <h2>{{ $isConsultation ? '3. Escolha o horário' : ($rescheduleAppointment ? 'Escolha o novo horário' : 'Horários disponíveis') }} · {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h2>
                     @if($slots)
                         <div class="booking-slots">
                             @foreach($slots as $slot)
                                 <label><input type="radio" name="starts_at" value="{{ $date }} {{ $slot }}" required><span>{{ $slot }}</span></label>
                             @endforeach
                         </div>
+                        @if($isConsultation)<h2 class="booking-customer-title">4. Seus dados</h2>@endif
                         <div class="booking-customer-fields">
+                            <label>Nome<input value="{{ auth()->user()?->name }}" readonly></label>
                             <label>Telefone para contato<input name="phone" value="{{ old('phone', auth()->user()?->phone) }}" maxlength="20"></label>
-                            <label>Observação (opcional)<textarea name="notes" maxlength="1000" rows="3">{{ old('notes') }}</textarea></label>
+                            @unless($isConsultation)<label>Observação (opcional)<textarea name="notes" maxlength="1000" rows="3">{{ old('notes') }}</textarea></label>@endunless
                         </div>
                         @if($coveringSubscription)
                             <div class="booking-plan-covered"><i class="fa-solid fa-circle-check"></i><div><strong>Incluído no seu plano {{ $coveringSubscription->plan->name }}</strong><span>Uma utilização será reservada agora e devolvida se o atendimento for cancelado.</span></div></div>
                         @endif
-                        <button class="booking-primary-button"><i class="fa-regular fa-calendar-check"></i> {{ $rescheduleAppointment ? 'Solicitar remarcação' : ($coveringSubscription ? 'Agendar usando meu plano' : 'Solicitar agendamento') }}</button>
+                        <button class="booking-primary-button"><i class="fa-regular fa-calendar-check"></i> {{ $rescheduleAppointment ? 'Solicitar remarcação' : ($coveringSubscription ? 'Agendar usando meu plano' : ($isConsultation ? 'Confirmar agendamento' : 'Solicitar agendamento')) }}</button>
                         <small>O horário fica pendente até a confirmação do profissional.</small>
                     @else
                         <div class="booking-empty">Nenhum horário disponível para essa combinação. Escolha outra data ou profissional.</div>
@@ -162,7 +178,7 @@
 
 @push('styles')
 <style>
-.booking-page{color:var(--foreground)}.booking-public-shell{width:min(100%,900px);margin:auto}.booking-hero{padding:28px;border-radius:22px 22px 0 0;background:linear-gradient(135deg,#0b244d,#1167c9);color:#fff}.booking-hero>span{display:block;margin-top:18px;color:#9bc8ff;font-size:.75rem;font-weight:800;text-transform:uppercase}.booking-hero h1{margin:6px 0;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900}.booking-hero p{margin:0;color:#dae8fb}.booking-back{color:#fff;text-decoration:none;font-weight:800}.booking-card{padding:24px;border:1px solid var(--border);border-top:0;border-radius:0 0 22px 22px;background:var(--card);box-shadow:0 18px 45px rgba(13,45,90,.12)}.booking-selection-form{display:grid;grid-template-columns:1.4fr 1fr .8fr;gap:14px}.booking-selection-form label,.booking-customer-fields label{display:grid;gap:6px;font-size:.78rem;font-weight:800}.booking-selection-form select,.booking-selection-form input,.booking-customer-fields input,.booking-customer-fields textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground)}.booking-confirm-form{margin-top:24px;padding-top:22px;border-top:1px solid var(--border)}.booking-confirm-form h2{font-size:1.05rem;font-weight:900}.booking-slots{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.booking-slots input{position:absolute;opacity:0}.booking-slots span{display:block;padding:9px 13px;border:1px solid #8eb5e8;border-radius:9px;color:#1556a2;cursor:pointer}.booking-slots input:checked+span{background:#0d6efd;color:#fff;border-color:#0d6efd}.booking-customer-fields{display:grid;grid-template-columns:1fr 1.5fr;gap:14px;margin:18px 0}.booking-primary-button{min-height:45px;padding:10px 18px;border:0;border-radius:10px;background:#0d6efd;color:#fff;font-weight:900}.booking-confirm-form>small{display:block;margin-top:8px;color:var(--muted)}.booking-empty{padding:18px;border-radius:12px;background:var(--background);color:var(--muted)}@media(max-width:767px){.booking-selection-form,.booking-customer-fields{grid-template-columns:1fr}.booking-hero,.booking-card{padding:18px}.booking-primary-button{width:100%}}
+.booking-page{color:var(--foreground)}.booking-public-shell{width:min(100%,900px);margin:auto}.booking-hero{padding:28px;border-radius:22px 22px 0 0;background:linear-gradient(135deg,#0b244d,#1167c9);color:#fff}.booking-hero>span{display:block;margin-top:18px;color:#9bc8ff;font-size:.75rem;font-weight:800;text-transform:uppercase}.booking-hero h1{margin:6px 0;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900}.booking-hero p{margin:0;color:#dae8fb}.booking-back{color:#fff;text-decoration:none;font-weight:800}.booking-card{padding:24px;border:1px solid var(--border);border-top:0;border-radius:0 0 22px 22px;background:var(--card);box-shadow:0 18px 45px rgba(13,45,90,.12)}.booking-selection-form{display:grid;grid-template-columns:1.4fr 1fr .8fr;gap:14px}.booking-selection-form label,.booking-customer-fields label{display:grid;gap:6px;font-size:.78rem;font-weight:800}.booking-selection-form select,.booking-selection-form input,.booking-customer-fields input,.booking-customer-fields textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground)}.booking-mode-choice{display:flex;grid-column:1/-1;flex-wrap:wrap;gap:10px;margin:0;padding:0;border:0}.booking-mode-choice legend{width:100%;font-size:1.05rem;font-weight:900}.booking-mode-choice label{display:block}.booking-mode-choice input{position:absolute;opacity:0}.booking-mode-choice span{display:flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #8eb5e8;border-radius:10px;color:#1556a2;cursor:pointer}.booking-mode-choice input:checked+span{border-color:#0d6efd;background:#0d6efd;color:#fff}.booking-confirm-form{margin-top:24px;padding-top:22px;border-top:1px solid var(--border)}.booking-confirm-form h2{font-size:1.05rem;font-weight:900}.booking-customer-title{margin-top:20px}.booking-slots{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.booking-slots input{position:absolute;opacity:0}.booking-slots span{display:block;padding:9px 13px;border:1px solid #8eb5e8;border-radius:9px;color:#1556a2;cursor:pointer}.booking-slots input:checked+span{background:#0d6efd;color:#fff;border-color:#0d6efd}.booking-customer-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 18px}.booking-customer-fields input[readonly]{opacity:.8}.booking-primary-button{min-height:45px;padding:10px 18px;border:0;border-radius:10px;background:#0d6efd;color:#fff;font-weight:900}.booking-confirm-form>small{display:block;margin-top:8px;color:var(--muted)}.booking-empty{padding:18px;border-radius:12px;background:var(--background);color:var(--muted)}@media(max-width:767px){.booking-selection-form,.booking-customer-fields{grid-template-columns:1fr}.booking-hero,.booking-card{padding:18px}.booking-primary-button{width:100%}}
 .booking-subscriptions{margin-top:18px;border-top:1px solid var(--border);border-radius:20px}.booking-subscription-heading span{color:#1767c5;font-size:.72rem;font-weight:900;text-transform:uppercase}.booking-subscription-heading h2{margin:4px 0;font-size:1.25rem;font-weight:900}.booking-subscription-heading p{margin:0;color:var(--muted);font-size:.78rem}.booking-subscription-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.booking-subscription-grid>article{padding:17px;border:1px solid var(--border);border-radius:14px;background:var(--background)}.booking-plan-price{display:flex;align-items:start;justify-content:space-between;gap:12px}.booking-plan-price strong{font-size:1rem}.booking-plan-price b{color:#1264c0;white-space:nowrap}.booking-plan-price b small{font-size:.65rem}.booking-subscription-grid p,.booking-subscription-grid details{color:var(--muted);font-size:.75rem}.booking-subscription-grid ul{display:grid;gap:6px;margin:12px 0;padding:0;list-style:none;font-size:.76rem}.booking-subscription-grid li i{color:#16834c}.booking-subscribe-form{display:grid;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.booking-subscribe-form label{display:grid;gap:5px;font-size:.72rem;font-weight:800}.booking-subscribe-form input,.booking-subscribe-form select{width:100%;padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--foreground)}.booking-subscribe-form button,.booking-login-plan,.booking-subscription-actions a{display:block;padding:10px;border:0;border-radius:9px;background:#0d6efd;color:#fff;text-align:center;text-decoration:none;font-weight:900}.booking-subscribe-form>small{color:var(--muted);font-size:.66rem}.booking-subscription-grid article>div:first-child span{display:block;color:#1767c5;font-size:.7rem;font-weight:800}.booking-subscription-grid article>small{color:var(--muted)}.booking-subscription-actions{display:flex;align-items:center;gap:8px;margin-top:12px}.booking-subscription-actions form button{padding:8px;border:1px solid #c84a55;border-radius:8px;background:transparent;color:#a92e3b;font-size:.72rem;font-weight:800}.booking-subscription-actions a{padding:8px;font-size:.72rem}@media(max-width:767px){.booking-subscription-grid{grid-template-columns:1fr}.booking-subscription-actions{align-items:stretch;flex-direction:column}.booking-subscription-actions form,.booking-subscription-actions button{width:100%}}
 .booking-subscribe-form .booking-subscribe-consent{display:flex;align-items:flex-start;gap:8px}.booking-subscribe-form .booking-subscribe-consent input{width:auto;margin-top:2px}.booking-plan-covered{display:flex;align-items:flex-start;gap:9px;margin:0 0 14px;padding:12px;border:1px solid #91d5ad;border-radius:10px;background:#e9f8ef;color:#176b3d}.booking-plan-covered span{display:block;font-size:.7rem}html[data-theme="dark"] .booking-plan-covered{border-color:#246541;background:#173627;color:#9fe0b9}
 .booking-procedure-details{grid-column:1/-1;padding:14px;border:1px solid #b9d5f7;border-radius:12px;background:#f1f7ff}.booking-procedure-details strong,.booking-procedure-details span{display:block}.booking-procedure-details p{margin:5px 0;color:#334f70;font-size:.8rem;white-space:pre-line}.booking-procedure-details span{color:#1767c5;font-size:.72rem;font-weight:800}html[data-theme="dark"] .booking-procedure-details{border-color:#285985;background:#132c46}html[data-theme="dark"] .booking-procedure-details p{color:#c6d8eb}

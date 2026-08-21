@@ -8,19 +8,33 @@ use App\Models\Category;
 use App\Models\ProductVariation;
 use App\Models\Store;
 use App\Models\User;
+use App\Exceptions\CrmLookupException;
+use App\Services\ConsultarCrmClient;
 use App\Services\ImageOptimizer;
 use App\Services\ProductDisplayService;
 use App\Services\ReviewDisplayService;
 use App\Services\StoreFollowerNotifier;
+use App\Support\ServiceBookingAvailability;
+use App\Support\ServiceBookingCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdController extends Controller
 {
+    private const BRAZILIAN_STATES = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+
+    private const COMPANY_PROFILE_KINDS = [
+        'service_company',
+        'store_commerce',
+        'real_estate_agency',
+        'hiring_company',
+    ];
+
     private const MODULE_CATEGORY_SLUGS = [
         'real_estate' => 'imoveis',
         'vehicles' => 'veiculos',
@@ -105,13 +119,17 @@ class AdController extends Controller
         $profileView = $provider->profile_kind === 'liberal_professional'
             ? 'services.show-liberal'
             : 'services.show';
+        $upcomingBookingSlots = $provider->booking_enabled && ServiceBookingCatalog::eligible($provider)
+            ? app(ServiceBookingAvailability::class)->upcoming($provider)
+            : collect();
 
         return view($profileView, compact(
             'provider',
             'relatedProviders',
             'ownerStores',
             'reviewData',
-            'currentUserPendingClaim'
+            'currentUserPendingClaim',
+            'upcomingBookingSlots'
         ));
     }
 
@@ -138,7 +156,7 @@ class AdController extends Controller
 
         $requestedModule = in_array($request->query('module'), array_keys(self::MODULE_CATEGORY_SLUGS), true)
             ? $request->query('module')
-            : 'products';
+            : 'services';
         $requestedProfileKind = in_array($request->query('profile_kind'), array_keys(Ad::PROFILE_KINDS), true)
             ? $request->query('profile_kind')
             : 'professional';
@@ -182,14 +200,28 @@ class AdController extends Controller
                 'nullable',
                 Rule::in(array_keys(Ad::PROFILE_KINDS)),
             ],
-            'category_name' => 'required|string|max:100',
+            'category_name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::when(
+                    $request->input('module') === 'services',
+                    [Rule::in($this->serviceCategoriesForProfileKind($request->input('profile_kind')))]
+                ),
+            ],
             'title' => 'required|string|max:255',
             'price' => 'nullable|numeric|min:0',
             'city' => 'required|string|max:100',
             'description' => 'required|string|max:1000',
             'category_id' => 'nullable|exists:categories,id',
             'advertiser_type' => 'nullable|string',
-            'cnpj' => 'nullable|string|max:30',
+            'cnpj' => [
+                Rule::excludeIf(fn () => $request->input('module') !== 'services'
+                    || ! in_array($request->input('profile_kind'), self::COMPANY_PROFILE_KINDS, true)),
+                'nullable',
+                'string',
+                'max:30',
+            ],
             'region' => 'nullable|string|max:100',
             'public_address' => [
                 Rule::excludeIf(fn () => $request->input('module') !== 'services'),
@@ -212,6 +244,31 @@ class AdController extends Controller
             'telegram' => 'nullable|string|max:50',
             'instagram' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
+            'liberal_credential' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'
+                    && $request->input('profile_kind') === 'liberal_professional'),
+                'nullable', 'string', 'max:150',
+            ],
+            'liberal_credential_issuer' => [
+                Rule::requiredIf(fn () => $request->input('module') === 'services'
+                    && $request->input('profile_kind') === 'liberal_professional'),
+                'nullable', 'string', 'max:255',
+            ],
+            'liberal_credential_url' => ['nullable', 'url:http,https', 'max:500'],
+            'liberal_credential_state' => [
+                Rule::requiredIf(fn () => $request->input('profile_kind') === 'liberal_professional'
+                    && ServiceBookingCatalog::usesCrmCategory($request->input('category_name'))),
+                'nullable', 'string', Rule::in(self::BRAZILIAN_STATES),
+            ],
+            'liberal_credential_name' => [
+                Rule::requiredIf(fn () => $request->input('profile_kind') === 'liberal_professional'
+                    && ServiceBookingCatalog::usesCrmCategory($request->input('category_name'))),
+                'nullable', 'string', 'min:3', 'max:255',
+            ],
+            'liberal_education' => ['nullable', 'string', 'max:255'],
+            'liberal_education_institution' => ['nullable', 'string', 'max:255'],
+            'service_modes' => ['nullable', 'array'],
+            'service_modes.*' => [Rule::in(['presencial', 'online'])],
             'profile_is_claimed' => 'nullable|boolean',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'banner' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
@@ -243,6 +300,8 @@ class AdController extends Controller
                 ->route('module.services')
                 ->with('professional_profile_limit', $this->professionalProfileLimitMessage());
         }
+
+        $crmVerification = $this->resolveCrmVerification($request);
 
         $slug = Str::slug($request->title).'-'.time().'-'.rand(1000, 9999);
 
@@ -291,7 +350,9 @@ class AdController extends Controller
             'slug' => $slug,
             'description' => $request->description,
             'price' => $priceValue,
-            'cnpj' => $request->cnpj,
+            'cnpj' => in_array($request->input('profile_kind'), self::COMPANY_PROFILE_KINDS, true)
+                ? $request->cnpj
+                : null,
             'city' => $request->city,
             'state' => 'Sergipe',
             'region' => $request->module === 'services' ? $request->region : null,
@@ -318,6 +379,10 @@ class AdController extends Controller
                 ? $request->whatsapp
                 : null,
             'contact_telegram' => $request->telegram,
+            'technical_specs' => $request->module === 'services'
+                && $request->input('profile_kind') === 'liberal_professional'
+                    ? $this->liberalProfileData($request, null, $crmVerification)
+                    : null,
         ];
 
         if (Schema::hasColumn('ads', 'price_type')) {
@@ -428,6 +493,31 @@ class AdController extends Controller
             ],
             'instagram' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
+            'liberal_credential' => [
+                Rule::requiredIf(fn () => $ad->module === 'services'
+                    && $request->input('profile_kind', $ad->profile_kind) === 'liberal_professional'),
+                'nullable', 'string', 'max:150',
+            ],
+            'liberal_credential_issuer' => [
+                Rule::requiredIf(fn () => $ad->module === 'services'
+                    && $request->input('profile_kind', $ad->profile_kind) === 'liberal_professional'),
+                'nullable', 'string', 'max:255',
+            ],
+            'liberal_credential_url' => ['nullable', 'url:http,https', 'max:500'],
+            'liberal_credential_state' => [
+                Rule::requiredIf(fn () => $request->input('profile_kind', $ad->profile_kind) === 'liberal_professional'
+                    && ServiceBookingCatalog::usesCrmCategory($request->input('category_name', $ad->advertiser_type))),
+                'nullable', 'string', Rule::in(self::BRAZILIAN_STATES),
+            ],
+            'liberal_credential_name' => [
+                Rule::requiredIf(fn () => $request->input('profile_kind', $ad->profile_kind) === 'liberal_professional'
+                    && ServiceBookingCatalog::usesCrmCategory($request->input('category_name', $ad->advertiser_type))),
+                'nullable', 'string', 'min:3', 'max:255',
+            ],
+            'liberal_education' => ['nullable', 'string', 'max:255'],
+            'liberal_education_institution' => ['nullable', 'string', 'max:255'],
+            'service_modes' => ['nullable', 'array'],
+            'service_modes.*' => [Rule::in(['presencial', 'online'])],
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'banner' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'images' => 'nullable|array|max:20',
@@ -456,6 +546,8 @@ class AdController extends Controller
             ],
             ...$this->productCommerceRules($ad),
         ]);
+
+        $crmVerification = $this->resolveCrmVerification($request, $ad);
 
         $oldLogoPath = $ad->logo;
         $oldBannerPath = $ad->banner;
@@ -535,6 +627,10 @@ class AdController extends Controller
             'logo' => $logoPath,
             'banner' => $bannerPath,
             'business_hours' => $ad->module === 'services' ? $this->resolveBusinessHours($request, $ad) : $ad->business_hours,
+            'technical_specs' => $ad->module === 'services'
+                && $request->input('profile_kind', $ad->profile_kind) === 'liberal_professional'
+                    ? $this->liberalProfileData($request, $ad, $crmVerification)
+                    : $ad->technical_specs,
         ];
 
         if ($hasPriceType) {
@@ -923,6 +1019,137 @@ class AdController extends Controller
             'cover_position_y' => $ad->cover_position_y,
             'message' => 'Posição da capa salva com sucesso!',
         ]);
+    }
+
+    private function serviceCategoriesForProfileKind(?string $profileKind): array
+    {
+        $groups = config('marketplace.service_categories_by_profile_kind', []);
+        $categories = $groups[$profileKind ?: 'professional'] ?? [];
+        $databaseCategories = Category::query()
+            ->where('active', true)
+            ->where('module', 'services')
+            ->where('profile_kind', $profileKind ?: 'professional')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->pluck('name')
+            ->all();
+
+        return collect($categories)
+            ->concat($databaseCategories)
+            ->when(
+                empty($categories),
+                fn ($items) => $items->concat(config('marketplace.service_categories', []))
+            )
+            ->filter()
+            ->unique(fn (string $name): string => mb_strtolower($name))
+            ->values()
+            ->all();
+    }
+
+    private function liberalProfileData(Request $request, ?Ad $ad = null, ?array $crmVerification = null): array
+    {
+        $existing = (array) data_get($ad?->technical_specs, 'liberal_profile', []);
+
+        $fields = [
+            'liberal_credential' => 'credential',
+            'liberal_credential_issuer' => 'credential_issuer',
+            'liberal_credential_url' => 'credential_url',
+            'liberal_credential_state' => 'credential_state',
+            'liberal_education' => 'education',
+            'liberal_education_institution' => 'education_institution',
+        ];
+
+        $updates = [];
+        foreach ($fields as $input => $key) {
+            if ($request->exists($input)) {
+                $value = trim((string) $request->input($input));
+                $updates[$key] = $value !== '' ? $value : null;
+            }
+        }
+
+        if ($request->exists('liberal_credential')
+            || $request->exists('liberal_credential_issuer')
+            || $request->exists('liberal_credential_url')) {
+            $updates['credential_verified'] = false;
+        }
+
+        $profileData = array_merge($existing, $updates, $crmVerification ?? []);
+        if (! ServiceBookingCatalog::usesCrmCategory($request->input('category_name', $ad?->advertiser_type))) {
+            foreach (array_keys($profileData) as $key) {
+                if (str_starts_with($key, 'credential_registry_')) {
+                    unset($profileData[$key]);
+                }
+            }
+        }
+
+        return ['liberal_profile' => $profileData];
+    }
+
+    private function resolveCrmVerification(Request $request, ?Ad $ad = null): ?array
+    {
+        $module = $request->input('module', $ad?->module);
+        $profileKind = $request->input('profile_kind', $ad?->profile_kind);
+        $category = $request->input('category_name', $ad?->advertiser_type);
+        if ($module !== 'services'
+            || $profileKind !== 'liberal_professional'
+            || ! ServiceBookingCatalog::usesCrmCategory($category)) {
+            return null;
+        }
+
+        $number = preg_replace('/\D+/', '', (string) $request->input('liberal_credential'));
+        $state = strtoupper((string) $request->input('liberal_credential_state'));
+        $existing = (array) data_get($ad?->technical_specs, 'liberal_profile', []);
+        if ($ad
+            && (bool) ($existing['credential_registry_found'] ?? false)
+            && preg_replace('/\D+/', '', (string) ($existing['credential'] ?? '')) === $number
+            && strtoupper((string) ($existing['credential_state'] ?? '')) === $state) {
+            return Arr::only($existing, [
+                'credential',
+                'credential_state',
+                'credential_issuer',
+                'credential_registry_found',
+                'credential_registry_check_status',
+                'credential_registry_checked_at',
+                'credential_registry_name',
+                'credential_registry_situation',
+                'credential_registry_specialties',
+                'credential_registry_source_url',
+            ]);
+        }
+
+        try {
+            $result = app(ConsultarCrmClient::class)->lookup(
+                $number,
+                $state,
+                (string) $request->input('liberal_credential_name')
+            );
+        } catch (CrmLookupException $exception) {
+            if (! $exception->isTransient()) {
+                throw ValidationException::withMessages([
+                    'liberal_credential' => $exception->getMessage(),
+                ]);
+            }
+
+            return [
+                'credential_registry_found' => false,
+                'credential_registry_check_status' => 'unavailable',
+                'credential_registry_checked_at' => now()->toIso8601String(),
+            ];
+        }
+
+        return [
+            'credential' => 'CRM/'.$result['state'].' '.$result['number'],
+            'credential_state' => $result['state'],
+            'credential_issuer' => 'Conselho Regional de Medicina',
+            'credential_verified' => false,
+            'credential_registry_found' => true,
+            'credential_registry_check_status' => 'found',
+            'credential_registry_checked_at' => now()->toIso8601String(),
+            'credential_registry_name' => $result['name'],
+            'credential_registry_situation' => $result['situation'],
+            'credential_registry_specialties' => $result['specialties'],
+            'credential_registry_source_url' => $result['source_url'],
+        ];
     }
 
     private function resolveBusinessHours(Request $request, ?Ad $ad = null): ?array

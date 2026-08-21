@@ -84,6 +84,11 @@
                             <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded-pill">
                                 <i class="fa-solid fa-cubes me-1"></i>{{ $modules[$cat->module] ?? 'Geral' }}
                             </span>
+                            @if($cat->module === 'services')
+                                <small class="text-muted d-block mt-1">
+                                    {{ $profileKinds[$cat->profile_kind]['label'] ?? 'Sem tipo vinculado' }}
+                                </small>
+                            @endif
                         </td>
                         <td>
                             <span class="badge bg-light text-dark border px-2 py-1 fw-bold">{{ $cat->sort_order }}</span>
@@ -136,12 +141,23 @@
 
                                                 <div class="mb-3">
                                                     <label for="module_{{ $cat->id }}" class="form-label fw-semibold">Módulo do Site</label>
-                                                    <select class="form-select rounded-3" id="module_{{ $cat->id }}" name="module">
+                                                    <select class="form-select rounded-3" id="module_{{ $cat->id }}" name="module" data-category-module-select>
                                                         <option value="">Geral / Sem módulo fixo</option>
                                                         @foreach($modules as $modKey => $modLabel)
                                                             <option value="{{ $modKey }}" {{ $cat->module === $modKey ? 'selected' : '' }}>{{ $modLabel }}</option>
                                                         @endforeach
                                                     </select>
+                                                </div>
+
+                                                <div class="mb-3" data-category-profile-kind-field>
+                                                    <label for="profile_kind_{{ $cat->id }}" class="form-label fw-semibold">Subcategoria de serviços</label>
+                                                    <select class="form-select rounded-3" id="profile_kind_{{ $cat->id }}" name="profile_kind" data-category-profile-kind-select>
+                                                        <option value="">Selecione o tipo de anunciante</option>
+                                                        @foreach($profileKinds as $kindKey => $kind)
+                                                            <option value="{{ $kindKey }}" @selected($cat->profile_kind === $kindKey)>{{ $kind['label'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <small class="text-muted">Define em qual lista esta categoria aparecerá no cadastro.</small>
                                                 </div>
 
                                                 <div class="row g-3 mb-3">
@@ -229,12 +245,23 @@
 
                     <div class="mb-3">
                         <label for="module" class="form-label fw-semibold">Módulo do Site</label>
-                        <select class="form-select rounded-3" id="module" name="module">
+                        <select class="form-select rounded-3" id="module" name="module" data-category-module-select>
                             <option value="">Geral / Sem módulo fixo</option>
                             @foreach($modules as $modKey => $modLabel)
                                 <option value="{{ $modKey }}">{{ $modLabel }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div class="mb-3" data-category-profile-kind-field>
+                        <label for="profile_kind" class="form-label fw-semibold">Subcategoria de serviços</label>
+                        <select class="form-select rounded-3" id="profile_kind" name="profile_kind" data-category-profile-kind-select>
+                            <option value="">Selecione o tipo de anunciante</option>
+                            @foreach($profileKinds as $kindKey => $kind)
+                                <option value="{{ $kindKey }}">{{ $kind['label'] }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Ex.: Farmacêutico deve ser vinculado a Profissional liberal.</small>
                     </div>
 
                     <div class="row g-3">
@@ -256,4 +283,26 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.querySelectorAll('[data-category-module-select]').forEach((moduleSelect) => {
+        const form = moduleSelect.closest('form');
+        const field = form?.querySelector('[data-category-profile-kind-field]');
+        const profileKindSelect = form?.querySelector('[data-category-profile-kind-select]');
+
+        const syncProfileKindField = () => {
+            const isService = moduleSelect.value === 'services';
+            if (field) field.hidden = !isService;
+            if (profileKindSelect) {
+                profileKindSelect.disabled = !isService;
+                profileKindSelect.required = isService;
+            }
+        };
+
+        moduleSelect.addEventListener('change', syncProfileKindField);
+        syncProfileKindField();
+    });
+</script>
+@endpush
 @endsection

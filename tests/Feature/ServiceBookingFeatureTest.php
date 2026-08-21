@@ -22,10 +22,11 @@ class ServiceBookingFeatureTest extends TestCase
         $manicure = $this->provider($owner, 'Manicure e Pedicure');
         $electrician = $this->provider($owner, 'Eletricista');
 
-        $this->assertFalse(ServiceBookingCatalog::eligible($electrician));
+        $this->assertTrue(ServiceBookingCatalog::eligible($electrician));
+        $this->assertSame('professional_service', ServiceBookingCatalog::type($electrician));
 
         $this->actingAs($owner)->get(route('service-booking.manage', $manicure))->assertOk();
-        $this->actingAs($owner)->get(route('service-booking.manage', $electrician))->assertNotFound();
+        $this->actingAs($owner)->get(route('service-booking.manage', $electrician))->assertOk();
 
         $otherUser = User::factory()->create();
         $this->actingAs($otherUser)->get(route('service-booking.manage', $manicure))->assertForbidden();
@@ -239,8 +240,78 @@ class ServiceBookingFeatureTest extends TestCase
         $owner = User::factory()->create();
         [$ad] = $this->configuredProvider($owner);
 
-        $this->get(route('provider.show', $ad->slug))->assertOk()->assertSee('Agendar horário');
+        $this->get(route('provider.show', $ad->slug))->assertOk()->assertSee('Agendar serviço');
         $this->actingAs($owner)->get(route('user.panel'))->assertOk()->assertSee('Agenda e financeiro');
+    }
+
+    public function test_health_liberal_uses_consultation_flow_and_attendance_mode(): void
+    {
+        $owner = User::factory()->create();
+        $customer = User::factory()->create(['name' => 'Paciente Teste', 'phone' => '79999999999']);
+        $ad = $this->provider($owner, 'Cardiologista');
+        $ad->update([
+            'profile_kind' => 'liberal_professional',
+            'booking_enabled' => true,
+            'service_modes' => ['presencial', 'online'],
+            'technical_specs' => ['liberal_profile' => [
+                'credential' => 'CRM/SE 1234',
+                'credential_issuer' => 'Conselho Regional de Medicina de Sergipe',
+            ]],
+        ]);
+        $procedure = $ad->serviceProcedures()->create([
+            'name' => 'Consulta cardiológica',
+            'description' => 'Consulta inicial para avaliação cardiológica.',
+            'price' => 200,
+            'duration_minutes' => 30,
+            'active' => true,
+        ]);
+        $staff = $ad->serviceStaff()->create(['name' => 'Dr. Carlos Almeida', 'active' => true]);
+        $staff->procedures()->attach($procedure);
+        $date = now('America/Fortaleza')->addDays(2);
+        $staff->availabilities()->create([
+            'day_of_week' => $date->dayOfWeek,
+            'starts_at' => '09:00',
+            'ends_at' => '12:00',
+        ]);
+
+        $this->assertTrue(ServiceBookingCatalog::isConsultation($ad));
+        $this->get(route('provider.show', $ad->slug))
+            ->assertOk()
+            ->assertSee('Atendimento por consulta')
+            ->assertSee('Agenda disponível')
+            ->assertSee('Atendimento presencial')
+            ->assertSee('Teleconsulta')
+            ->assertSee('Agendar consulta')
+            ->assertSee('Próximos horários');
+
+        $this->actingAs($customer)
+            ->get(route('service-booking.book', [
+                'ad' => $ad,
+                'procedure' => $procedure->id,
+                'staff' => $staff->id,
+                'date' => $date->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertSee('Agendar consulta')
+            ->assertSee('1. Escolha o atendimento')
+            ->assertSee('2. Escolha a data')
+            ->assertSee('3. Escolha o horário')
+            ->assertSee('4. Seus dados');
+
+        $this->actingAs($customer)->post(route('service-booking.store', $ad), [
+            'procedure_id' => $procedure->id,
+            'staff_id' => $staff->id,
+            'starts_at' => $date->toDateString().' 09:00',
+            'attendance_mode' => 'online',
+            'phone' => '79999999999',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('service_appointments', [
+            'ad_id' => $ad->id,
+            'customer_name' => 'Paciente Teste',
+            'attendance_mode' => 'online',
+            'status' => 'pending',
+        ]);
     }
 
     private function provider(User $owner, string $category): Ad

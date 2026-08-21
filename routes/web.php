@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminUpdateController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\CrmVerificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationPreferenceController;
 use App\Http\Controllers\LandingPageController;
@@ -154,6 +155,9 @@ Route::middleware(['auth', 'not_suspended'])->group(function () {
         ->name('provider.claim.store');
 
     Route::get('/anunciar', [AdController::class, 'create'])->name('ad.create');
+    Route::post('/profissionais/consultar-crm', CrmVerificationController::class)
+        ->middleware('throttle:10,1')
+        ->name('professionals.crm.verify');
     Route::post('/anunciar', [AdController::class, 'store'])->name('ad.store');
     Route::get('/anuncio/{id}/editar', [AdController::class, 'edit'])->name('ad.edit');
     Route::post('/anuncio/{ad}/posicao-capa', [AdController::class, 'updateCoverPosition'])->name('ad.cover_position');
@@ -331,6 +335,7 @@ Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('a
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('/cadastro', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/cadastro/concluido', [AuthController::class, 'showRegistrationSuccess'])->name('register.success');
 Route::get('/cadastro/sugestoes-usuario', [AuthController::class, 'suggestUsernames'])->name('register.suggest-usernames');
 Route::post('/cadastro', [AuthController::class, 'register']);
 

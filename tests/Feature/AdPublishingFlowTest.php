@@ -68,6 +68,7 @@ class AdPublishingFlowTest extends TestCase
         $this->actingAs($user)
             ->get(route('ad.create'))
             ->assertOk()
+            ->assertViewHas('requestedModule', 'services')
             ->assertSee('id="main-photo-preview-box"', false)
             ->assertSee('id="banner-photo-preview-box"', false)
             ->assertSee('id="prev-card-img"', false)
@@ -83,14 +84,61 @@ class AdPublishingFlowTest extends TestCase
             ->assertSee('const stableFile = await snapshotFileForUpload(file)', false)
             ->assertDontSee("file.size <= 900 * 1024) {\n            return file", false)
             ->assertSee('wizard-submit-button', false)
-            ->assertSee('Como você atua? (Tipo de anunciante)')
+            ->assertSee('Como você atua na área de serviços?')
             ->assertSee('Prestador de serviços')
             ->assertSee('Empresa de serviços')
+            ->assertSee('Assist\u00eancia T\u00e9cnica', false)
+            ->assertSee('const serviceCategoriesByProfileKind', false)
+            ->assertSee('const initialModule = "services"', false)
+            ->assertDontSee('Empresa de serviços — Assistência técnica')
             ->assertSee('Loja ou comércio')
             ->assertSee('Profissional liberal')
             ->assertSee('id="service-profile-kind"', false)
             ->assertDontSee('Seus dados protegidos')
             ->assertDontSee('moduleMotionTrail', false);
+    }
+
+    public function test_selected_service_profile_kind_is_not_offered_again_in_details(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('ad.create', [
+                'module' => 'services',
+                'profile_kind' => 'liberal_professional',
+            ]))
+            ->assertOk()
+            ->assertSee('name="profile_kind" id="service-profile-kind" value="liberal_professional"', false)
+            ->assertDontSee('id="profile_kind_select"', false)
+            ->assertDontSee('Como você atua? (Tipo de anunciante)', false);
+    }
+
+    public function test_cultural_artist_receives_only_cultural_subcategories(): void
+    {
+        $user = User::factory()->create(['whatsapp' => '79999999999']);
+
+        $this->actingAs($user)
+            ->get(route('ad.create', [
+                'module' => 'services',
+                'profile_kind' => 'cultural_artist',
+            ]))
+            ->assertOk()
+            ->assertSee('Cordelista')
+            ->assertSee('Escritor \/ Escritora', false)
+            ->assertDontSee('Personalizados, Artes Sublimadas e Logos');
+
+        $this->actingAs($user)
+            ->post(route('ad.store'), [
+                'module' => 'services',
+                'profile_kind' => 'cultural_artist',
+                'category_name' => 'Plotagem',
+                'title' => 'Perfil cultural inválido',
+                'city' => 'Aracaju',
+                'description' => 'Valida que uma categoria comercial não entra no perfil cultural.',
+                'whatsapp' => '79999999999',
+                'phone' => '79999999999',
+            ])
+            ->assertSessionHasErrors('category_name');
     }
 
     public function test_brazilian_price_category_and_region_rules_are_saved_correctly(): void
@@ -220,23 +268,34 @@ class AdPublishingFlowTest extends TestCase
             'description' => 'Consultoria jurídica trabalhista e previdenciária especializada.',
             'whatsapp' => '79999999999',
             'phone' => '79999999999',
+            'liberal_credential' => 'OAB/SE 12.345',
+            'liberal_credential_issuer' => 'Ordem dos Advogados do Brasil - Seccional Sergipe',
+            'liberal_credential_url' => 'https://www.oab-se.org.br/consulta',
+            'liberal_education' => 'Bacharel em Direito',
+            'liberal_education_institution' => 'Universidade Tiradentes',
         ])->assertSessionHasNoErrors();
 
         $service = Ad::where('title', 'Advogado Trabalhista em Aracaju')->firstOrFail();
         $this->assertSame('liberal_professional', $service->profile_kind);
         $this->assertSame('Profissional liberal', $service->profile_kind_label);
+        $this->assertSame('OAB/SE 12.345', data_get($service->technical_specs, 'liberal_profile.credential'));
+        $this->assertSame('Bacharel em Direito', data_get($service->technical_specs, 'liberal_profile.education'));
+        $this->assertFalse((bool) data_get($service->technical_specs, 'liberal_profile.credential_verified'));
 
         $this->get(route('provider.show', $service->slug))
             ->assertOk()
             ->assertSee('liberal-profile-page', false)
-            ->assertSee('Profissional Liberal em Sergipe');
+            ->assertSee('Profissional Liberal em Sergipe')
+            ->assertSee('OAB/SE 12.345')
+            ->assertSee('Bacharel em Direito')
+            ->assertSee('Universidade Tiradentes');
 
         $this->actingAs($user)->put(route('ad.update', $service->id), [
             'title' => 'Escritório de Advocacia & Consultoria',
             'city' => 'Aracaju',
             'description' => 'Sociedade de advogados prestando assessoria jurídica empresarial.',
             'profile_kind' => 'cultural_artist',
-            'category_name' => 'Advogado',
+            'category_name' => 'Fotógrafo',
         ])->assertSessionHasNoErrors();
 
         $service->refresh();
@@ -246,6 +305,99 @@ class AdPublishingFlowTest extends TestCase
         $this->get(route('provider.show', $service->slug))
             ->assertOk()
             ->assertSee('Artista / Profissional da cultura');
+    }
+
+    public function test_service_registration_orders_description_before_contacts_and_limits_cnpj_to_companies(): void
+    {
+        $liberalUser = User::factory()->create(['whatsapp' => '79999999999']);
+        $liberalResponse = $this->actingAs($liberalUser)->get(route('ad.create', [
+            'module' => 'services',
+            'profile_kind' => 'liberal_professional',
+        ]));
+
+        $liberalResponse
+            ->assertOk()
+            ->assertDontSee('name="facebook"', false)
+            ->assertSee('id="cnpj-field"', false)
+            ->assertSee('id="cnpj" name="cnpj"', false)
+            ->assertSee('class="publish-sidebar"', false)
+            ->assertSee('O que você vai criar hoje?')
+            ->assertSee('name="liberal_credential"', false)
+            ->assertSee('name="liberal_education"', false);
+
+        $content = $liberalResponse->getContent();
+        $serviceCardPosition = strpos($content, 'id="card-choice-services"');
+        $itemsCardPosition = strpos($content, 'id="card-choice-items"');
+        $this->assertNotFalse($serviceCardPosition);
+        $this->assertNotFalse($itemsCardPosition);
+        $this->assertLessThan($itemsCardPosition, $serviceCardPosition);
+        $this->assertStringContainsString('is-active', substr($content, $serviceCardPosition - 100, 100));
+        $this->assertMatchesRegularExpression('/id="mod_services"[^>]*checked/', $content);
+        $descriptionPosition = strpos($content, 'id="description-label"');
+        $contactPosition = strpos($content, 'Informações de contato e atendimento');
+        $this->assertNotFalse($descriptionPosition);
+        $this->assertNotFalse($contactPosition);
+        $this->assertLessThan($contactPosition, $descriptionPosition);
+        preg_match('/<div[^>]*id="cnpj-field"[^>]*>/', $content, $liberalCnpjField);
+        preg_match('/<input[^>]*id="cnpj"[^>]*>/', $content, $liberalCnpjInput);
+        $this->assertStringContainsString('d-none', $liberalCnpjField[0] ?? '');
+        $this->assertStringContainsString('disabled', $liberalCnpjInput[0] ?? '');
+
+        $this->actingAs($liberalUser)->post(route('ad.store'), [
+            'module' => 'services',
+            'profile_kind' => 'liberal_professional',
+            'category_name' => 'Advogado',
+            'title' => 'Profissional liberal sem documentação',
+            'city' => 'Aracaju',
+            'description' => 'Tentativa usada para validar a obrigatoriedade do registro profissional.',
+            'whatsapp' => '79999999999',
+            'phone' => '79999999999',
+        ])->assertSessionHasErrors(['liberal_credential', 'liberal_credential_issuer']);
+
+        $this->actingAs($liberalUser)->post(route('ad.store'), [
+            'module' => 'services',
+            'profile_kind' => 'liberal_professional',
+            'category_name' => 'Advogado',
+            'title' => 'Profissional liberal sem CNPJ',
+            'city' => 'Aracaju',
+            'description' => 'Perfil profissional usado para validar os campos do cadastro.',
+            'whatsapp' => '79999999999',
+            'phone' => '79999999999',
+            'cnpj' => '12.345.678/0001-90',
+            'liberal_credential' => 'OAB/SE 98.765',
+            'liberal_credential_issuer' => 'Ordem dos Advogados do Brasil - Seccional Sergipe',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull(Ad::where('title', 'Profissional liberal sem CNPJ')->value('cnpj'));
+
+        $companyUser = User::factory()->create(['whatsapp' => '79988887777']);
+        $companyResponse = $this->actingAs($companyUser)->get(route('ad.create', [
+            'module' => 'services',
+            'profile_kind' => 'service_company',
+        ]));
+
+        $companyContent = $companyResponse->assertOk()->getContent();
+        preg_match('/<div[^>]*id="cnpj-field"[^>]*>/', $companyContent, $companyCnpjField);
+        preg_match('/<input[^>]*id="cnpj"[^>]*>/', $companyContent, $companyCnpjInput);
+        $this->assertStringNotContainsString('d-none', $companyCnpjField[0] ?? 'missing');
+        $this->assertStringNotContainsString('disabled', $companyCnpjInput[0] ?? 'missing');
+
+        $this->actingAs($companyUser)->post(route('ad.store'), [
+            'module' => 'services',
+            'profile_kind' => 'service_company',
+            'category_name' => 'Assistência Técnica',
+            'title' => 'Empresa de assistência com CNPJ',
+            'city' => 'Aracaju',
+            'description' => 'Empresa utilizada para validar o cadastro empresarial.',
+            'whatsapp' => '79988887777',
+            'phone' => '79988887777',
+            'cnpj' => '12.345.678/0001-90',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            '12.345.678/0001-90',
+            Ad::where('title', 'Empresa de assistência com CNPJ')->value('cnpj')
+        );
     }
 
     private function fakePng(string $name): UploadedFile

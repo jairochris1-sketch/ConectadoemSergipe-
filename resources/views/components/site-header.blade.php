@@ -130,6 +130,8 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end marketplace-account-menu">
                             <li><a class="dropdown-item" href="{{ route('user.panel') }}"><i class="fa-solid fa-gauge-high text-primary"></i>Meu Painel</a></li>
+                            <li><a class="dropdown-item" href="{{ route('user.profile') }}"><i class="fa-regular fa-user text-primary"></i>Editar perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ route('user.settings') }}"><i class="fa-solid fa-gear text-secondary"></i>Configurações</a></li>
                             <li>
                                 <a class="dropdown-item" href="{{ route('user.panel') }}#notificacoes">
                                     <i class="fa-solid fa-bell text-warning"></i>
@@ -143,7 +145,9 @@
                             </li>
                             <li><a class="dropdown-item" href="{{ route('page.plans') }}"><i class="fa-solid fa-gem text-warning"></i>Planos</a></li>
                             <li><a class="dropdown-item" href="{{ route('orders.index') }}"><i class="fa-solid fa-box text-success"></i>Meus pedidos</a></li>
-                            <li><a class="dropdown-item" href="{{ route('culture.my-works') }}"><i class="fa-solid fa-feather-pointed text-warning"></i>Minhas Obras (Cordel)</a></li>
+                            @if(auth()->user()->hasCulturalArtistProfile())
+                                <li><a class="dropdown-item" href="{{ route('culture.my-works') }}"><i class="fa-solid fa-feather-pointed text-warning"></i>Minhas Obras &amp; Rascunhos</a></li>
+                            @endif
                             @if(auth()->user()->role === 'admin')
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-shield-halved"></i>Painel Admin</a></li>

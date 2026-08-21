@@ -292,6 +292,14 @@ class UserCommunicationAndProfileTest extends TestCase
             ->assertSee('notification_messages_enabled', false);
 
         $this->actingAs($user)
+            ->get(route('user.profile'))
+            ->assertOk()
+            ->assertSee(route('user.avatar.update'), false)
+            ->assertSee('enctype="multipart/form-data"', false)
+            ->assertSee('name="avatar"', false)
+            ->assertSee('data-avatar-upload', false);
+
+        $this->actingAs($user)
             ->post(route('user.settings.update'), [
                 'header_layout' => 'vertical',
                 'theme_preference' => 'dark',
@@ -323,7 +331,14 @@ class UserCommunicationAndProfileTest extends TestCase
             ->get(route('home'))
             ->assertOk()
             ->assertSee('site-header-layout-vertical', false)
-            ->assertSee('marketplace-header-layout-vertical', false);
+            ->assertSee('marketplace-header-layout-vertical', false)
+            ->assertSee('data-smart-search="0"', false)
+            ->assertSee(route('user.profile'), false)
+            ->assertSee(route('user.settings'), false);
+
+        $mainJavascript = File::get(public_path('js/main.js'));
+        $this->assertStringContainsString("html.getAttribute('data-theme-preference')", $mainJavascript);
+        $this->assertStringContainsString("document.querySelectorAll('[data-avatar-upload]')", $mainJavascript);
     }
 
     public function test_user_notification_category_preference_is_respected(): void

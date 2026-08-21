@@ -52,6 +52,11 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
+    public function showRegistrationSuccess()
+    {
+        return view('auth.registration-success');
+    }
+
     public function register(Request $request)
     {
         $request->merge([
@@ -117,10 +122,7 @@ class AuthController extends Controller
             ]);
         }
 
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('ad.create')->with('success', 'Conta criada com sucesso! Você já pode publicar o seu anúncio.');
+        return redirect()->route('register.success');
     }
 
     public function suggestUsernames(Request $request)

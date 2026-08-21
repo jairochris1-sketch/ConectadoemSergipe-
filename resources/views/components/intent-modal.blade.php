@@ -46,6 +46,7 @@
 
     .intent-modal-close-btn {
         position: absolute;
+        z-index: 3;
         top: 1.25rem;
         right: 1.25rem;
         width: 36px;
@@ -58,6 +59,8 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        pointer-events: auto;
+        touch-action: manipulation;
         transition: all 0.2s ease;
     }
 

@@ -35,7 +35,7 @@
                 @endif
 
                 <!-- Formulário de Cadastro -->
-                <form action="{{ route('register') }}" method="POST">
+                <form action="{{ route('register') }}" method="POST" id="registration-form">
                     @csrf
                     
                     <div class="mb-2.5">
@@ -128,6 +128,9 @@
                         @error('terms_accepted')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
+                        <div class="text-danger small mt-1 d-none" id="terms-client-error" role="alert">
+                            Marque a opção acima para aceitar os Termos de Uso antes de criar sua conta.
+                        </div>
                     </div>
 
                     <div class="d-grid mb-3">
@@ -432,7 +435,8 @@ html[data-theme="dark"] .username-suggestions-hint {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const termsCheckbox = document.getElementById('terms_accepted');
-    const submitButton = document.querySelector('[data-register-submit]');
+    const registrationForm = document.getElementById('registration-form');
+    const termsClientError = document.getElementById('terms-client-error');
     const passwordInput = document.getElementById('password');
     const confirmInput = document.getElementById('password_confirmation');
     const secureNotice = document.getElementById('password-secure-notice');
@@ -440,14 +444,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionsWrapper = document.getElementById('username-suggestions-wrapper');
     const suggestionsList = document.getElementById('username-suggestions-list');
 
-    if (termsCheckbox && submitButton) {
-        const updateSubmitState = () => {
-            submitButton.disabled = !termsCheckbox.checked;
-            submitButton.setAttribute('aria-disabled', submitButton.disabled ? 'true' : 'false');
-        };
+    if (termsCheckbox && registrationForm) {
+        termsCheckbox.addEventListener('change', () => {
+            if (!termsCheckbox.checked) return;
 
-        termsCheckbox.addEventListener('change', updateSubmitState);
-        updateSubmitState();
+            termsCheckbox.setCustomValidity('');
+            termsClientError?.classList.add('d-none');
+        });
+
+        registrationForm.addEventListener('submit', (event) => {
+            if (termsCheckbox.checked) return;
+
+            event.preventDefault();
+            termsCheckbox.setCustomValidity('Aceite os Termos de Uso para criar sua conta.');
+            termsClientError?.classList.remove('d-none');
+            termsCheckbox.focus();
+            termsCheckbox.reportValidity();
+        });
     }
 
     // 1. Alerta de memorizar/guardar senha (some após 7 segundos)

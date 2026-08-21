@@ -8,54 +8,46 @@
     $publishDesign = in_array($publishDesign, ['design4', 'design5'], true) ? $publishDesign : 'design4';
 @endphp
 <div class="container py-4 py-md-5 publish-page publish-design-{{ $publishDesign }}">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
-            
-            <!-- Top Navbar / Header com Voltar ao Início e Salvar Rascunho -->
-            <div class="d-flex align-items-center justify-content-between mb-4 publish-toolbar">
-                <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                        <i class="fa-solid fa-arrow-left me-1"></i> Voltar ao Início
-                    </a>
+    <div class="publish-workspace">
+        <aside class="publish-sidebar" aria-label="Etapas da publicação">
+            <a href="{{ route('home') }}" class="publish-sidebar-brand">
+                <img src="{{ asset('images/logo-hero.png') }}?v=4.3" alt="">
+                <span>Conectado</span>
+            </a>
+
+            <div class="publish-step-track">
+                <div class="step-item active" id="step-nav-1">
+                    <div class="step-icon">1</div>
+                    <div><small>Início</small><strong>Escolha a categoria</strong></div>
                 </div>
-                <div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-2" onclick="saveDraft()">
-                        <i class="fa-regular fa-bookmark me-1"></i> Salvar rascunho
-                    </button>
-                    <a href="{{ route('home') }}" class="btn-close" aria-label="Close"></a>
+                <div class="step-item" id="step-nav-2">
+                    <div class="step-icon">2</div>
+                    <div><small>Detalhes</small><strong>Dados do anúncio</strong></div>
+                </div>
+                <div class="step-item" id="step-nav-3">
+                    <div class="step-icon">3</div>
+                    <div><small>Mídia</small><strong>Galeria de fotos</strong></div>
+                </div>
+                <div class="step-item" id="step-nav-4">
+                    <div class="step-icon">4</div>
+                    <div><small>Fim</small><strong>Revisar e publicar</strong></div>
                 </div>
             </div>
 
-            <!-- CARD UNIFICADO (STEPPER + FORMULÁRIO) -->
+            <div class="publish-sidebar-promo">
+                <h2>Anuncie para todo o Sergipe!</h2>
+                <p>Milhares de pessoas buscam produtos e serviços todos os dias no Conectado.</p>
+                <span><i class="fa-solid fa-users"></i> Conectando Sergipe</span>
+            </div>
+        </aside>
+
+        <div class="publish-main-column">
+            <div class="d-flex align-items-center justify-content-between mb-3 publish-toolbar">
+                <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="fa-solid fa-arrow-left me-1"></i> Voltar ao início</a>
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="saveDraft()"><i class="fa-regular fa-bookmark me-1"></i> Salvar rascunho</button>
+            </div>
+
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 publish-form-card">
-
-                <!-- CABEÇALHO DE ETAPAS -->
-                <div class="publish-stepper-header border-bottom p-3 p-md-4">
-                    <div class="d-flex justify-content-between align-items-center position-relative px-2 px-md-5 publish-step-track">
-                        
-                        <!-- Etapa 1 -->
-                        <div class="text-center z-index-2 step-item active" id="step-nav-1">
-                            <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">1</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Categoria</small>
-                        </div>
-                        <!-- Etapa 2 -->
-                        <div class="text-center z-index-2 step-item" id="step-nav-2">
-                            <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">2</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Informações & Contato</small>
-                        </div>
-                        <!-- Etapa 3 -->
-                        <div class="text-center z-index-2 step-item" id="step-nav-3">
-                            <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">3</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Fotos</small>
-                        </div>
-                        <!-- Etapa 4 -->
-                        <div class="text-center z-index-2 step-item" id="step-nav-4">
-                            <div class="step-icon rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto mb-1">4</div>
-                            <small class="step-label d-none d-md-block fw-semibold">Publicar</small>
-                        </div>
-
-                    </div>
-                </div>
 
                 <div class="card-body p-4 p-md-5">
 
@@ -80,11 +72,12 @@
                         <!-- ================= ETAPA 1: CATEGORIA ================= -->
                         <div class="wizard-step" id="wizard-step-1">
                             <div class="mb-4">
-                                <h2 class="fw-bold text-dark mb-1" style="font-size: 1.85rem; letter-spacing: -0.5px;">O que você deseja anunciar?</h2>
-                                <p class="text-muted fs-6 mb-0">Escolha a opção que melhor representa o que você quer criar no Conectado em Sergipe.</p>
+                                <h2 class="fw-bold text-dark mb-1" style="font-size: 1.85rem; letter-spacing: -0.5px;">O que você vai criar hoje?</h2>
+                                <p class="text-muted fs-6 mb-0">Escolha o tipo de publicação para começar sua jornada.</p>
                             </div>
 
                             {{-- OS 2 GRANDES CARDS MESTRES (SERVIÇOS vs PRODUTOS, IMÓVEIS E MAIS) --}}
+                            <span class="publish-section-label">Tipo principal</span>
                             <div class="row g-3 mb-4">
                                 <div class="col-12 col-md-6">
                                     <div class="master-choice-card is-active shadow-sm" id="card-choice-services" onclick="selectPublishMode('services')">
@@ -110,8 +103,8 @@
                                                 <i class="fa-solid fa-bag-shopping"></i>
                                             </div>
                                             <div class="master-choice-copy flex-grow-1">
-                                                <strong class="master-choice-title text-dark d-block">Vendas e Anúncios</strong>
-                                                <span class="master-choice-text text-muted">Anuncie produtos, imóveis, veículos, empregos, lojas e agro.</span>
+                                                <strong class="master-choice-title text-dark d-block">Anúncios</strong>
+                                                <span class="master-choice-text text-muted">Vendas em geral: produtos, imóveis, veículos e mais.</span>
                                             </div>
                                             <div class="master-choice-check">
                                                 <i class="fa-solid fa-check"></i>
@@ -125,6 +118,7 @@
 
                             {{-- SEÇÃO 1: COMO VOCÊ ATUA NA ÁREA DE SERVIÇOS? --}}
                             <div id="section-services-flow" class="publish-flow-section mb-4">
+                                <span class="publish-section-label">Categoria de serviço</span>
                                 <h5 class="fw-bold text-dark mb-3" style="font-size: 1.15rem;">Como você atua na área de serviços?</h5>
                                 
                                 <div class="row g-3 mb-4">
@@ -371,22 +365,9 @@
                                 </button>
                             </div>
 
-                            <div class="mb-3 d-none" id="profile-kind-field">
-                                <label for="profile_kind_select" class="form-label fw-semibold">
-                                    <i class="fa-solid fa-id-card-clip text-primary me-1"></i> Como você atua? (Tipo de anunciante) *
-                                </label>
-                                <select class="form-select form-select-lg rounded-3" id="profile_kind_select" name="profile_kind" onchange="updateProfileKindContext(this.value)">
-                                    @foreach($profileKinds ?? \App\Models\Ad::PROFILE_KINDS as $kindKey => $kindData)
-                                        <option value="{{ $kindKey }}" @selected(old('profile_kind', 'professional') === $kindKey)>
-                                            {{ $kindData['label'] }} — {{ $kindData['subtitle'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
                             <div class="mb-3">
                                 <label for="category_select" class="form-label fw-semibold">Especifique a Subcategoria *</label>
-                                <select class="form-select form-select-lg rounded-3" id="category_select" name="category_name" onchange="updateSuggestedTitle()" required>
+                                <select class="form-select form-select-lg rounded-3" id="category_select" name="category_name" onchange="updateSuggestedTitle(); updateCrmVerificationContext();" required>
                                 </select>
                             </div>
 
@@ -499,6 +480,97 @@
                                 <small class="text-muted">Preencha somente se clientes puderem ir ao local. O endereço aparecerá no perfil com o botão “Como chegar”.</small>
                             </div>
 
+                            <div class="mb-4">
+                                <label for="description" class="form-label fw-semibold" id="description-label">Sobre o profissional e seus serviços *</label>
+                                <textarea class="form-control rounded-3" id="description" name="description" rows="5" maxlength="1000" placeholder="Descreva os detalhes do seu anúncio ou serviço..." oninput="updateCharCount(this); updatePreview();" required>{{ old('description') }}</textarea>
+                                <div class="text-end text-muted small mt-1"><span id="char-count">0</span>/1000 caracteres</div>
+                            </div>
+
+                            @php
+                                $showLiberalFieldsInitially = $requestedModule === 'services'
+                                    && old('profile_kind', $requestedProfileKind) === 'liberal_professional';
+                            @endphp
+                            <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light {{ $showLiberalFieldsInitially ? '' : 'd-none' }}" id="liberal-professional-fields">
+                                <div class="mb-3">
+                                    <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-user-shield text-primary me-2"></i>Documentação e registros</h6>
+                                    <small class="text-muted">Informe os dados que o visitante poderá conferir no conselho profissional.</small>
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_credential" class="form-label fw-semibold">Registro profissional *</label>
+                                        <input type="text" class="form-control rounded-3" id="liberal_credential" name="liberal_credential" value="{{ old('liberal_credential') }}" maxlength="150" placeholder="Ex.: OAB/SE 12.345, CRM/SE 1234" @required($showLiberalFieldsInitially) @disabled(!$showLiberalFieldsInitially)>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_credential_issuer" class="form-label fw-semibold">Conselho ou órgão emissor *</label>
+                                        <input type="text" class="form-control rounded-3" id="liberal_credential_issuer" name="liberal_credential_issuer" value="{{ old('liberal_credential_issuer') }}" maxlength="255" placeholder="Ex.: Conselho Regional de Medicina de Sergipe" @required($showLiberalFieldsInitially) @disabled(!$showLiberalFieldsInitially)>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="liberal_credential_url" class="form-label fw-semibold">Link oficial para consulta (opcional)</label>
+                                        <input type="url" class="form-control rounded-3" id="liberal_credential_url" name="liberal_credential_url" value="{{ old('liberal_credential_url') }}" maxlength="500" placeholder="https://..." @disabled(!$showLiberalFieldsInitially)>
+                                    </div>
+                                </div>
+
+                                @php
+                                    $showCrmVerificationInitially = $showLiberalFieldsInitially
+                                        && \App\Support\ServiceBookingCatalog::usesCrmCategory(old('category_name'));
+                                @endphp
+                                <div class="border rounded-3 p-3 mb-4 bg-white {{ $showCrmVerificationInitially ? '' : 'd-none' }}" id="crm-verification-panel">
+                                    <div class="d-flex align-items-start gap-2 mb-3">
+                                        <i class="fa-solid fa-stethoscope text-primary mt-1"></i>
+                                        <div><strong class="d-block">Consulta do registro médico</strong><small class="text-muted">Informe o CRM e a UF. O resultado confirma que o registro foi localizado e está ativo, mas não comprova a identidade do titular da conta.</small></div>
+                                    </div>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12">
+                                            <label for="liberal_credential_name" class="form-label fw-semibold">Nome completo como consta no CRM *</label>
+                                            <input type="text" class="form-control" id="liberal_credential_name" name="liberal_credential_name" value="{{ old('liberal_credential_name') }}" maxlength="255" @required($showCrmVerificationInitially) @disabled(!$showCrmVerificationInitially)>
+                                        </div>
+                                        <div class="col-12 col-sm-4">
+                                            <label for="liberal_credential_state" class="form-label fw-semibold">UF do CRM *</label>
+                                            <select class="form-select" id="liberal_credential_state" name="liberal_credential_state" @required($showCrmVerificationInitially) @disabled(!$showCrmVerificationInitially)>
+                                                @foreach(['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] as $state)
+                                                    <option value="{{ $state }}" @selected(old('liberal_credential_state', 'SE') === $state)>{{ $state }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-sm-8">
+                                            <button type="button" class="btn btn-outline-primary w-100" id="verify-crm-button"><i class="fa-solid fa-magnifying-glass me-1"></i> Consultar CRM</button>
+                                        </div>
+                                    </div>
+                                    <div class="small mt-3 d-none" id="crm-verification-result" role="status" aria-live="polite"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-graduation-cap text-primary me-2"></i>Formação</h6>
+                                    <small class="text-muted">Apresente sua formação acadêmica ou técnica.</small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_education" class="form-label fw-semibold">Curso ou formação</label>
+                                        <input type="text" class="form-control rounded-3" id="liberal_education" name="liberal_education" value="{{ old('liberal_education') }}" maxlength="255" placeholder="Ex.: Bacharelado em Farmácia" @disabled(!$showLiberalFieldsInitially)>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_education_institution" class="form-label fw-semibold">Instituição de ensino (opcional)</label>
+                                        <input type="text" class="form-control rounded-3" id="liberal_education_institution" name="liberal_education_institution" value="{{ old('liberal_education_institution') }}" maxlength="255" placeholder="Ex.: Universidade Federal de Sergipe" @disabled(!$showLiberalFieldsInitially)>
+                                    </div>
+                                </div>
+                                <fieldset class="mt-4">
+                                    <legend class="h6 fw-bold text-dark mb-2"><i class="fa-solid fa-laptop-medical text-primary me-2"></i>Formas de atendimento</legend>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <label class="form-check border rounded-3 px-3 py-2 mb-0">
+                                            <input class="form-check-input" type="checkbox" name="service_modes[]" value="presencial" @checked(in_array('presencial', old('service_modes', ['presencial']), true)) @disabled(!$showLiberalFieldsInitially)>
+                                            <span class="form-check-label ms-1">Atendimento presencial</span>
+                                        </label>
+                                        <label class="form-check border rounded-3 px-3 py-2 mb-0">
+                                            <input class="form-check-input" type="checkbox" name="service_modes[]" value="online" @checked(in_array('online', old('service_modes', []), true)) @disabled(!$showLiberalFieldsInitially)>
+                                            <span class="form-check-label ms-1">Atendimento online / teleconsulta</span>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                                <div class="alert alert-info border-0 rounded-3 small mt-3 mb-0">
+                                    <i class="fa-solid fa-circle-info me-1"></i>Os dados serão exibidos como informados até que a equipe conclua uma verificação documental.
+                                </div>
+                            </div>
+
                             <!-- CANAIS DE CONTATO E ATENDIMENTO -->
                             <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light">
                                 <h6 class="fw-bold text-dark mb-3">
@@ -517,23 +589,24 @@
                                         </label>
                                         <input type="text" class="form-control form-control-lg rounded-3" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" placeholder="(79) 3333-3333" required>
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-6">
                                         <label for="telegram" class="form-label fw-semibold"><i class="fa-brands fa-telegram text-info me-1"></i> Telegram (opcional)</label>
                                         <input type="text" class="form-control rounded-3" id="telegram" name="telegram" value="{{ old('telegram') }}" placeholder="@seutelegram ou (79) 99999-9999">
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-6">
                                         <label for="instagram" class="form-label fw-semibold"><i class="fa-brands fa-instagram text-danger me-1"></i> Instagram (opcional)</label>
                                         <input type="text" class="form-control rounded-3" id="instagram" name="instagram" value="{{ old('instagram') }}" placeholder="@seudoinstagram">
                                     </div>
-                                    <div class="col-12 col-md-4">
-                                        <label for="facebook" class="form-label fw-semibold"><i class="fa-brands fa-facebook text-primary me-1"></i> Facebook (opcional)</label>
-                                        <input type="text" class="form-control rounded-3" id="facebook" name="facebook" value="{{ old('facebook') }}" placeholder="/seudofacebook">
-                                    </div>
                                 </div>
-                                <div class="mt-3 pt-3 border-top">
+                                @php
+                                    $cnpjProfileKinds = ['service_company', 'store_commerce', 'real_estate_agency', 'hiring_company'];
+                                    $showCnpjInitially = $requestedModule === 'services'
+                                        && in_array(old('profile_kind', $requestedProfileKind), $cnpjProfileKinds, true);
+                                @endphp
+                                <div class="mt-3 pt-3 border-top {{ $showCnpjInitially ? '' : 'd-none' }}" id="cnpj-field">
                                     <label for="cnpj" class="form-label fw-semibold"><i class="fa-solid fa-id-card text-secondary me-1"></i> CNPJ (opcional)</label>
-                                    <input type="text" class="form-control rounded-3" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" placeholder="00.000.000/0001-00" style="max-width: 320px;">
-                                    <small class="text-muted">Preencha apenas se você tem empresa registrada</small>
+                                    <input type="text" class="form-control rounded-3" id="cnpj" name="cnpj" value="{{ old('cnpj') }}" placeholder="00.000.000/0001-00" style="max-width: 320px;" @disabled(!$showCnpjInitially)>
+                                    <small class="text-muted">Preencha somente se a empresa ou loja possuir CNPJ.</small>
                                 </div>
                             </div>
 
@@ -583,12 +656,6 @@
                                         </div>
                                     @endforeach
                                 </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="description" class="form-label fw-semibold" id="description-label">Sobre o profissional e seus serviços *</label>
-                                <textarea class="form-control rounded-3" id="description" name="description" rows="5" maxlength="1000" placeholder="Descreva os detalhes do seu anúncio ou serviço..." oninput="updateCharCount(this); updatePreview();" required>{{ old('description') }}</textarea>
-                                <div class="text-end text-muted small mt-1"><span id="char-count">0</span>/1000 caracteres</div>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center pt-3 border-top wizard-actions">
@@ -763,6 +830,96 @@
 .publish-page {
     --publish-blue: #1265f5;
     --publish-violet: #7138ef;
+    max-width: 1220px;
+}
+.publish-workspace {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 68px);
+    align-items: stretch;
+}
+.publish-sidebar {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 28px 0 34px;
+}
+.publish-sidebar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 48px;
+    color: #153b8f;
+    font-size: 1.35rem;
+    font-weight: 900;
+    text-decoration: none;
+}
+.publish-sidebar-brand img { width: 36px; height: 36px; object-fit: contain; }
+.publish-sidebar .publish-step-track {
+    position: relative;
+    display: grid;
+    gap: 28px;
+}
+.publish-sidebar .publish-step-track::before {
+    top: 24px;
+    bottom: 24px;
+    left: 17px;
+    right: auto;
+    width: 1px;
+    height: auto;
+}
+.publish-sidebar .step-item {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    min-width: 0;
+    text-align: left;
+}
+.publish-sidebar .step-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    border-radius: 11px;
+    background: #edf2f9;
+    color: #91a2b8;
+    font-size: .78rem;
+    font-weight: 900;
+}
+.publish-sidebar .step-item.active .step-icon { color: #fff; background: #2563eb; box-shadow: 0 7px 16px rgba(37, 99, 235, .24); }
+.publish-sidebar .step-item.completed .step-icon { color: #fff; background: #2563eb; }
+.publish-sidebar .step-item small {
+    display: block;
+    margin-bottom: 2px;
+    color: #9aabc1;
+    font-size: .58rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.publish-sidebar .step-item.active small { color: #2563eb; }
+.publish-sidebar .step-item strong { display: block; color: #64748b; font-size: .76rem; line-height: 1.25; }
+.publish-sidebar .step-item.active strong { color: #0f172a; }
+.publish-sidebar-promo {
+    margin-top: auto;
+    padding: 25px;
+    color: #fff;
+    background: linear-gradient(145deg, #3274ef, #1858dc);
+    border-radius: 24px;
+    box-shadow: 0 18px 36px rgba(37, 99, 235, .2);
+}
+.publish-sidebar-promo h2 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 900; }
+.publish-sidebar-promo p { margin: 0 0 18px; color: rgba(255,255,255,.88); font-size: .7rem; line-height: 1.55; }
+.publish-sidebar-promo span { display: inline-flex; align-items: center; gap: 7px; font-size: .68rem; font-weight: 800; }
+.publish-main-column { min-width: 0; }
+.publish-main-column .publish-form-card {
+    min-height: 710px;
+    border-radius: 34px !important;
+    box-shadow: 0 24px 65px rgba(15, 23, 42, .09) !important;
 }
 
 /* CARDS MESTRES (LAYOUT IDÊNTICO AO MOCKUP) */
@@ -774,6 +931,19 @@
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+}
+
+@media (max-width: 991.98px) {
+    .publish-workspace { grid-template-columns: 1fr; gap: 16px; }
+    .publish-sidebar { padding: 0; }
+    .publish-sidebar-brand, .publish-sidebar-promo { display: none; }
+    .publish-sidebar .publish-step-track { display: flex; justify-content: space-between; gap: 6px; padding: 10px 4px; }
+    .publish-sidebar .publish-step-track::before { top: 27px; right: 10%; bottom: auto; left: 10%; width: auto; height: 1px; }
+    .publish-sidebar .step-item { display: grid; flex: 1 1 25%; grid-template-columns: 1fr; justify-items: center; gap: 5px; text-align: center; }
+    .publish-sidebar .step-item > div:last-child { min-width: 0; }
+    .publish-sidebar .step-item small { display: none; }
+    .publish-sidebar .step-item strong { font-size: .62rem; }
+    .publish-main-column .publish-form-card { min-height: 0; border-radius: 22px !important; }
 }
 .master-choice-card:hover {
     border-color: #93c5fd;
@@ -1144,6 +1314,15 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         radial-gradient(circle at 50% 0, color-mix(in srgb, var(--publish-blue) 8%, transparent), transparent 38%),
         var(--card);
     border: 1px solid var(--border) !important;
+}
+.publish-section-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #94a3b8;
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
 }
 .publish-stepper-header {
     border-bottom: 1px solid var(--border);
@@ -1761,6 +1940,8 @@ html[data-theme="dark"] #business-hours-field .bg-white,
     let imageProcessingCount = 0;
     const previousCategory = @json(old('category_name'));
     const initialModule = @json(old('module', $requestedModule));
+    const crmCategoryTerms = @json(\App\Support\ServiceBookingCatalog::CRM_CATEGORY_TERMS);
+    const crmVerificationUrl = @json(route('professionals.crm.verify'));
 
     const moduleNames = {
         services: '🛠️ Serviço',
@@ -1773,6 +1954,18 @@ html[data-theme="dark"] #business-hours-field .bg-white,
 
     const databaseCategoryLists = @json(
         $categories->groupBy('module')->map(fn ($cats) => $cats->pluck('name')->values()->all())
+    );
+
+    const serviceCategoriesByProfileKind = @json(
+        config('marketplace.service_categories_by_profile_kind', [])
+    );
+
+    const databaseServiceCategoriesByProfileKind = @json(
+        $categories
+            ->where('module', 'services')
+            ->whereNotNull('profile_kind')
+            ->groupBy('profile_kind')
+            ->map(fn ($cats) => $cats->pluck('name')->values()->all())
     );
 
     const fallbackCategoryLists = {
@@ -1843,13 +2036,11 @@ html[data-theme="dark"] #business-hours-field .bg-white,
 
     function chooseProfessionalProfile(profileKind = 'professional') {
         const profileKindInput = document.getElementById('service-profile-kind');
-        const profileKindSelect = document.getElementById('profile_kind_select');
         const serviceOption = document.getElementById('mod_services');
         if (profileKindInput) profileKindInput.value = profileKind;
-        if (profileKindSelect) profileKindSelect.value = profileKind;
         if (serviceOption) serviceOption.checked = true;
         selectModule('services');
-        updateProfileKindContext(profileKind);
+        updateProfileKindContext(profileKind, false);
         goToStep(2);
     }
 
@@ -1895,11 +2086,40 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         }
     }
 
-    function updateProfileKindContext(profileKind) {
+    function updateCnpjField(profileKind, modKey = 'services') {
+        const cnpjField = document.getElementById('cnpj-field');
+        const cnpjInput = document.getElementById('cnpj');
+        const companyProfileKinds = [
+            'service_company',
+            'store_commerce',
+            'real_estate_agency',
+            'hiring_company',
+        ];
+        const shouldShow = modKey === 'services' && companyProfileKinds.includes(profileKind);
+
+        cnpjField?.classList.toggle('d-none', !shouldShow);
+        if (cnpjInput) cnpjInput.disabled = !shouldShow;
+    }
+
+    function updateLiberalProfessionalFields(profileKind, modKey = 'services') {
+        const fields = document.getElementById('liberal-professional-fields');
+        const shouldShow = modKey === 'services' && profileKind === 'liberal_professional';
+
+        fields?.classList.toggle('d-none', !shouldShow);
+        fields?.querySelectorAll('input').forEach((input) => {
+            input.disabled = !shouldShow;
+            input.required = shouldShow && ['liberal_credential', 'liberal_credential_issuer'].includes(input.name);
+        });
+    }
+
+    function updateProfileKindContext(profileKind, refreshCategories = true) {
         const titleLabel = document.getElementById('title-label');
         const descLabel = document.getElementById('description-label');
         const detailsHeading = document.getElementById('details-heading');
         const detailsSubtitle = document.getElementById('details-subtitle');
+        const profileKindInput = document.getElementById('service-profile-kind');
+
+        if (profileKindInput) profileKindInput.value = profileKind;
 
         if (profileKind === 'hiring_company') {
             if (detailsHeading) detailsHeading.textContent = 'Informações da empresa e da vaga';
@@ -1924,16 +2144,43 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         }
 
         const modKey = document.querySelector('input[name="module"]:checked')?.value || 'services';
+        if (refreshCategories && modKey === 'services') {
+            populateCategoryOptions('services');
+            updateSuggestedTitle();
+        }
         updatePriceFieldConfig(modKey, profileKind);
+        updateCnpjField(profileKind, modKey);
+        updateLiberalProfessionalFields(profileKind, modKey);
+        updateCrmVerificationContext();
     }
 
-    function selectModule(modKey, preserveTitle = false) {
+    function categoryListForModule(modKey) {
+        if (modKey === 'services') {
+            const profileKind = document.getElementById('service-profile-kind')?.value
+                || 'professional';
+            const profileCategories = serviceCategoriesByProfileKind[profileKind] || [];
+            const databaseProfileCategories = databaseServiceCategoriesByProfileKind[profileKind] || [];
+            const combinedCategories = [...new Set([...profileCategories, ...databaseProfileCategories])];
+
+            if (combinedCategories.length > 0) {
+                return combinedCategories;
+            }
+        }
+
+        if (databaseCategoryLists[modKey] && databaseCategoryLists[modKey].length > 0) {
+            return databaseCategoryLists[modKey];
+        }
+
+        return fallbackCategoryLists[modKey] || fallbackCategoryLists.products;
+    }
+
+    function populateCategoryOptions(modKey, preferredCategory = null) {
         const catSelect = document.getElementById('category_select');
+        if (!catSelect) return;
+
+        const list = categoryListForModule(modKey);
         catSelect.innerHTML = '';
-        const list = (databaseCategoryLists[modKey] && databaseCategoryLists[modKey].length > 0)
-            ? databaseCategoryLists[modKey]
-            : (fallbackCategoryLists[modKey] || fallbackCategoryLists.products);
-        
+
         list.forEach(item => {
             const opt = document.createElement('option');
             opt.value = item;
@@ -1941,9 +2188,83 @@ html[data-theme="dark"] #business-hours-field .bg-white,
             catSelect.appendChild(opt);
         });
 
-        if (previousCategory && list.includes(previousCategory)) {
-            catSelect.value = previousCategory;
+        if (preferredCategory && list.includes(preferredCategory)) {
+            catSelect.value = preferredCategory;
         }
+
+        updateCrmVerificationContext();
+    }
+
+    function normalizedCategory(value) {
+        return (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function updateCrmVerificationContext() {
+        const panel = document.getElementById('crm-verification-panel');
+        const state = document.getElementById('liberal_credential_state');
+        const professionalName = document.getElementById('liberal_credential_name');
+        const category = document.getElementById('category_select')?.value || '';
+        const profileKind = document.getElementById('service-profile-kind')?.value;
+        const normalized = normalizedCategory(category);
+        const isCrmCategory = crmCategoryTerms.some(term => normalized.includes(normalizedCategory(term)));
+        const shouldShow = document.getElementById('mod_services')?.checked === true;
+        const visible = shouldShow && profileKind === 'liberal_professional' && isCrmCategory;
+
+        panel?.classList.toggle('d-none', !visible);
+        if (state) {
+            state.disabled = !visible;
+            state.required = visible;
+        }
+        if (professionalName) {
+            professionalName.disabled = !visible;
+            professionalName.required = visible;
+        }
+    }
+
+    async function verifyCrm() {
+        const button = document.getElementById('verify-crm-button');
+        const result = document.getElementById('crm-verification-result');
+        const credential = document.getElementById('liberal_credential')?.value || '';
+        const state = document.getElementById('liberal_credential_state')?.value || '';
+        const category = document.getElementById('category_select')?.value || '';
+        const professionalName = document.getElementById('liberal_credential_name')?.value || '';
+        if (!button || !result) return;
+
+        result.className = 'small mt-3 alert alert-info';
+        result.textContent = 'Consultando o registro...';
+        button.disabled = true;
+        try {
+            const response = await fetch(crmVerificationUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                body: JSON.stringify({ credential, state, category, professional_name: professionalName }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Não foi possível consultar o CRM.');
+
+            const professional = data.professional || {};
+            const specialties = Array.isArray(professional.specialties) && professional.specialties.length
+                ? ` · ${professional.specialties.join(', ')}`
+                : '';
+            result.className = 'small mt-3 alert alert-success';
+            result.textContent = `${professional.name} · CRM/${professional.state} ${professional.number} · ${professional.situation}${specialties}`;
+            const issuer = document.getElementById('liberal_credential_issuer');
+            if (issuer && !issuer.value.trim()) issuer.value = 'Conselho Regional de Medicina';
+        } catch (error) {
+            result.className = 'small mt-3 alert alert-warning';
+            result.textContent = error.message;
+        } finally {
+            result.classList.remove('d-none');
+            button.disabled = false;
+        }
+    }
+
+    function selectModule(modKey, preserveTitle = false) {
+        populateCategoryOptions(modKey, previousCategory);
 
         const badgeCat = document.getElementById('badge-cat-name');
         if (badgeCat) {
@@ -1998,8 +2319,7 @@ html[data-theme="dark"] #business-hours-field .bg-white,
     function updateModuleLanguage(modKey) {
         const isService = modKey === 'services';
         const isProduct = modKey === 'products';
-        const profileKindSelect = document.getElementById('profile_kind_select');
-        const profileKind = profileKindSelect ? profileKindSelect.value : null;
+        const profileKind = document.getElementById('service-profile-kind')?.value || null;
 
         const titleInput = document.getElementById('title');
         if (titleInput) {
@@ -2012,7 +2332,7 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         }
 
         if (isService && profileKind) {
-            updateProfileKindContext(profileKind);
+            updateProfileKindContext(profileKind, false);
         } else {
             document.getElementById('details-heading').textContent = isService
                 ? 'Informações do seu perfil profissional'
@@ -2032,7 +2352,9 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         }
 
         updatePriceFieldConfig(modKey, profileKind);
-        document.getElementById('profile-kind-field').classList.toggle('d-none', !isService);
+        updateCnpjField(profileKind, modKey);
+        updateLiberalProfessionalFields(profileKind, modKey);
+        updateCrmVerificationContext();
         document.getElementById('region-field').classList.toggle('d-none', !isService);
         document.getElementById('public-address-field').classList.toggle('d-none', !isService);
         const businessHoursField = document.getElementById('business-hours-field');
@@ -2478,6 +2800,7 @@ html[data-theme="dark"] #business-hours-field .bg-white,
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('verify-crm-button')?.addEventListener('click', verifyCrm);
         if (initialModule && initialModule !== 'services') {
             selectPublishMode('items');
         } else {
@@ -2485,9 +2808,6 @@ html[data-theme="dark"] #business-hours-field .bg-white,
         }
 
         selectModule(initialModule, true);
-        if (initialModule === 'services') {
-            requestAnimationFrame(() => goToStep(2));
-        }
         updateCharCount(document.getElementById('description'));
         document.getElementById('price').addEventListener('blur', function() {
             formatBrazilianPrice(this);

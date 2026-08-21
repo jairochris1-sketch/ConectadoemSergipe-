@@ -172,7 +172,7 @@
                     @if($provider->booking_enabled && \App\Support\ServiceBookingCatalog::eligible($provider))
                         <a href="{{ auth()->check() ? route('service-booking.book', $provider) : route('login', ['redirect' => route('service-booking.book', $provider)]) }}" class="provider-action provider-action-primary">
                             <i class="fa-regular fa-calendar-check"></i>
-                            <span>Agendar horário</span>
+                            <span>{{ \App\Support\ServiceBookingCatalog::actionLabel($provider) }}</span>
                         </a>
                     @endif
                     @if($provider->is_claimed)

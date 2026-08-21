@@ -111,6 +111,16 @@ class User extends Authenticatable
         return $this->hasMany(Ad::class)->where('module', 'services');
     }
 
+    public function culturalArtistProfiles()
+    {
+        return $this->professionalProfiles()->where('profile_kind', 'cultural_artist');
+    }
+
+    public function hasCulturalArtistProfile(): bool
+    {
+        return $this->culturalArtistProfiles()->exists();
+    }
+
     public function servicePaymentSetting()
     {
         return $this->hasOne(ServicePaymentSetting::class);

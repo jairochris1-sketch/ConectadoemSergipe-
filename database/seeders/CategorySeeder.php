@@ -14,30 +14,26 @@ class CategorySeeder extends Seeder
         Category::truncate();
 
         // 1. SERVIÇOS & PRESTADORES
-        $serviceCategories = [
-            'Açougue', 'Advogado', 'Aluga Cadeiras e Mesas', 'Artes Personalizadas', 'Ateliê',
-            'Cabeleireira', 'Cantores e Bandas', 'Carro de Mudança', 'Carroceiro', 'Cartomante',
-            'Cartório', 'Chaveiro', 'Confeitaria', 'Conserto de Portão', 'Consertos de Eletrodomésticos',
-            'Consertos de TV e Som', 'Costureira', 'Dentista', 'Designer de Sobrancelhas', 'Diarista',
-            'Editor de Fotos', 'Eletricista', 'Empréstimos e Serviços', 'Encanador', 'Enfermeira(o)',
-            'Entregador', 'Entregador de Gás', 'Faxineira', 'Faz Tudo - Serviços Residenciais', 'Fisioterapeuta',
-            'Forro de PVC', 'Fotógrafo', 'Frete e Mudanças', 'Gesseiro', 'Gráficas', 'Guincho',
-            'Instalação de Portas e Janelas', 'Instalador de Antenas', 'Instalador de Ar-condicionado',
-            'Instrutor Autônomo de Carro e Moto', 'Jardineiro', 'Lava Jato', 'Locação de Kits para Festas',
-            'Lojas', 'Manicure e Pedicure', 'Marceneiro', 'Maquiadora', 'Material de Construção',
-            'Mecânico', 'Montador de Móveis', 'Moto Táxi', 'Móveis Planejados', 'Pedreiro',
-            'Pedreiro de Acabamento', 'Pintor', 'Pizzaria', 'Plotagem', 'Portões e Manutenção',
-            'Pousada e Hotel', 'Programador', 'Prótese Dentária', 'Provedor de Internet',
-            'Reformas e Fabricação de Estofados', 'Restaurante', 'Soldador', 'Tatuador', 'Taxista',
-            'Técnica de Enfermagem', 'Técnico de Informática', 'Técnico em Eletrônica', 'Uber'
-        ];
+        $serviceCategories = collect(config('marketplace.service_categories_by_profile_kind', []))
+            ->flatMap(fn (array $names, string $profileKind) => collect($names)->map(fn (string $name) => [
+                'name' => $name,
+                'profile_kind' => $profileKind,
+            ]))
+            ->concat(collect(config('marketplace.service_categories', []))->map(fn (string $name) => [
+                'name' => $name,
+                'profile_kind' => null,
+            ]))
+            ->unique(fn (array $category): string => mb_strtolower($category['name']))
+            ->values();
 
         $sortIndex = 1;
-        foreach ($serviceCategories as $name) {
+        foreach ($serviceCategories as $serviceCategory) {
+            $name = $serviceCategory['name'];
             Category::create([
                 'name' => $name,
                 'slug' => Str::slug($name),
                 'module' => 'services',
+                'profile_kind' => $serviceCategory['profile_kind'],
                 'icon' => $this->getServiceIcon($name),
                 'color' => '#0d6efd',
                 'sort_order' => $sortIndex++,

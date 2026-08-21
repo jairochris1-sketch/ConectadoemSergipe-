@@ -30,6 +30,47 @@
                         </div>
                     @endif
 
+                    <form action="{{ route('user.avatar.update') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+                        @csrf
+                        <div class="d-flex flex-column align-items-center text-center gap-3">
+                            <div class="profile-photo-preview">
+                                @if($user->avatar)
+                                    <img id="profile-photo-preview" src="{{ asset($user->avatar) }}" alt="Foto de {{ $user->name }}">
+                                    <div id="profile-photo-placeholder" class="d-none">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                @else
+                                    <img id="profile-photo-preview" class="d-none" src="" alt="Prévia da nova foto">
+                                    <div id="profile-photo-placeholder">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                @endif
+                            </div>
+                            <div>
+                                <label for="avatar" class="form-label fw-semibold mb-1">Foto do perfil</label>
+                                <input
+                                    type="file"
+                                    class="form-control"
+                                    id="avatar"
+                                    name="avatar"
+                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                    data-avatar-upload
+                                    data-preview-target="profile-photo-preview"
+                                    data-placeholder-target="profile-photo-placeholder"
+                                    @disabled(!$avatarPolicy['allowed'])
+                                >
+                                <small class="text-muted d-block mt-1">
+                                    @if(!$avatarPolicy['allowed'])
+                                        Nova troca disponível em {{ $avatarPolicy['locked_until']?->format('d/m/Y') }}.
+                                    @elseif($avatarPolicy['remaining'] !== null)
+                                        Você ainda pode trocar a foto {{ $avatarPolicy['remaining'] }} {{ $avatarPolicy['remaining'] === 1 ? 'vez' : 'vezes' }} neste período.
+                                    @else
+                                        JPG, PNG ou WebP, até 5 MB.
+                                    @endif
+                                </small>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" @disabled(!$avatarPolicy['allowed'])>
+                                <i class="fa-solid fa-camera me-2"></i>Atualizar foto
+                            </button>
+                        </div>
+                    </form>
+
                     <form action="{{ route('user.profile.update') }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -123,18 +164,4 @@
     }
 </style>
 
-@push('scripts')
-<script>
-    document.getElementById('avatar')?.addEventListener('change', (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const preview = document.getElementById('profile-photo-preview');
-        const placeholder = document.getElementById('profile-photo-placeholder');
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove('d-none');
-        placeholder?.classList.add('d-none');
-    });
-</script>
-@endpush
 @endsection

@@ -1547,6 +1547,7 @@
                     action="{{ route('home') }}"
                     method="GET"
                     data-suggestions-url="{{ route('search.suggestions') }}"
+                    data-smart-search="{{ auth()->check() ? (auth()->user()->smart_search_enabled ? '1' : '0') : 'guest' }}"
                     class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-1.5 gap-lg-2.5 w-100 mb-1 mb-md-2"
                 >
                     <input type="hidden" id="home-search-module-value" name="module" value="{{ $module }}">
@@ -2675,7 +2676,7 @@
         syncFilterValues();
 
         let automaticSearchTimer = null;
-        const automaticSearchDelay = 20000;
+        const automaticSearchDelay = 2000;
         const scheduleAutomaticSearch = () => {
             if (!smartSearchEnabled) {
                 return;
@@ -2892,7 +2893,9 @@
             }
         });
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognition = smartSearchEnabled
+            ? (window.SpeechRecognition || window.webkitSpeechRecognition)
+            : null;
         const normalizeVoiceTerm = (value) => value
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -3028,10 +3031,17 @@
                 setVoiceStatus('Não consegui entender a fala. Tente novamente mais perto do microfone.', 'error');
             });
         } else {
-            microphoneButton.title = 'Busca por voz não disponível neste navegador.';
+            microphoneButton.title = smartSearchEnabled
+                ? 'Busca por voz não disponível neste navegador.'
+                : 'Busca inteligente desativada nas configurações.';
             microphoneButton.setAttribute('aria-label', microphoneButton.title);
             microphoneButton.addEventListener('click', () => {
-                setVoiceStatus('Este navegador não oferece busca por voz. No celular, tente usar o Chrome atualizado.', 'error');
+                setVoiceStatus(
+                    smartSearchEnabled
+                        ? 'Este navegador não oferece busca por voz. No celular, tente usar o Chrome atualizado.'
+                        : 'Ative a busca inteligente nas configurações para usar a busca por voz.',
+                    'error'
+                );
             });
         }
 

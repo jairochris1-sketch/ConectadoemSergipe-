@@ -9,6 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,6 +27,21 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
+            if ($exception->getStatusCode() !== 419
+                || ! $request->isMethod('post')
+                || ! $request->is('cadastro')) {
+                return null;
+            }
+
+            return redirect()
+                ->route('register')
+                ->withInput($request->except(['_token', 'password', 'password_confirmation']))
+                ->withErrors([
+                    'session' => 'Sua sessão de cadastro expirou. Confira os dados, digite a senha novamente e tente criar a conta.',
+                ]);
+        });
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );

@@ -40,7 +40,7 @@
                             <label for="user-avatar-file-input" class="user-avatar-edit-btn" title="Alterar foto de perfil">
                                 <i class="fa-solid fa-camera"></i>
                             </label>
-                            <input type="file" id="user-avatar-file-input" name="avatar" class="visually-hidden" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onchange="document.getElementById('user-panel-avatar-form').submit()">
+                            <input type="file" id="user-avatar-file-input" name="avatar" class="visually-hidden" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-avatar-upload data-auto-submit="true">
                         </div>
                     </form>
 

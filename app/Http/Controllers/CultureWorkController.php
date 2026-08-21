@@ -6,6 +6,7 @@ use App\Models\Ad;
 use App\Models\CultureWork;
 use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class CultureWorkController extends Controller
@@ -64,7 +65,9 @@ class CultureWorkController extends Controller
             ->values()
             ->all();
 
-        return view('culture.index', compact('works', 'themes', 'cultureBanners'));
+        $canManageCultureWorks = auth()->user()?->hasCulturalArtistProfile() ?? false;
+
+        return view('culture.index', compact('works', 'themes', 'cultureBanners', 'canManageCultureWorks'));
     }
 
     /**
@@ -140,6 +143,8 @@ class CultureWorkController extends Controller
      */
     public function myWorks()
     {
+        $this->ensureCulturalArtist();
+
         $works = CultureWork::where('user_id', auth()->id())
             ->latest()
             ->paginate(15);
@@ -152,8 +157,9 @@ class CultureWorkController extends Controller
      */
     public function create()
     {
-        // Anúncios do tipo 'products' ou 'services' do usuário para vincular à obra (venda de livros/folhetos)
-        $userAds = Ad::where('user_id', auth()->id())->get();
+        $this->ensureCulturalArtist();
+
+        $userAds = $this->culturalArtistAds();
 
         return view('culture.create', compact('userAds'));
     }
@@ -163,6 +169,8 @@ class CultureWorkController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureCulturalArtist();
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:cordel,literatura,musica,arte_visual',
@@ -173,7 +181,13 @@ class CultureWorkController extends Controller
             'external_url' => 'nullable|url|max:255',
             'embed_media_url' => 'nullable|string',
             'status' => 'required|in:draft,published',
-            'ad_id' => 'nullable|exists:ads,id',
+            'ad_id' => [
+                'nullable',
+                Rule::exists('ads', 'id')->where(fn ($query) => $query
+                    ->where('user_id', auth()->id())
+                    ->where('module', 'services')
+                    ->where('profile_kind', 'cultural_artist')),
+            ],
         ]);
 
         $coverPath = null;
@@ -209,8 +223,10 @@ class CultureWorkController extends Controller
      */
     public function edit($id)
     {
+        $this->ensureCulturalArtist();
+
         $work = CultureWork::where('user_id', auth()->id())->findOrFail($id);
-        $userAds = Ad::where('user_id', auth()->id())->get();
+        $userAds = $this->culturalArtistAds();
 
         return view('culture.edit', compact('work', 'userAds'));
     }
@@ -220,6 +236,8 @@ class CultureWorkController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->ensureCulturalArtist();
+
         $work = CultureWork::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
@@ -232,7 +250,13 @@ class CultureWorkController extends Controller
             'external_url' => 'nullable|url|max:255',
             'embed_media_url' => 'nullable|string',
             'status' => 'required|in:draft,published',
-            'ad_id' => 'nullable|exists:ads,id',
+            'ad_id' => [
+                'nullable',
+                Rule::exists('ads', 'id')->where(fn ($query) => $query
+                    ->where('user_id', auth()->id())
+                    ->where('module', 'services')
+                    ->where('profile_kind', 'cultural_artist')),
+            ],
             'bump_version' => 'nullable|boolean',
         ]);
 
@@ -268,9 +292,30 @@ class CultureWorkController extends Controller
      */
     public function destroy($id)
     {
+        $this->ensureCulturalArtist();
+
         $work = CultureWork::where('user_id', auth()->id())->findOrFail($id);
         $work->delete();
 
         return redirect()->route('culture.my-works')->with('success', 'Obra removida com sucesso.');
+    }
+
+    private function ensureCulturalArtist(): void
+    {
+        abort_unless(
+            auth()->user()?->hasCulturalArtistProfile(),
+            403,
+            'Cadastre um perfil de Artista / Profissional da cultura para gerenciar obras e rascunhos.'
+        );
+    }
+
+    private function culturalArtistAds()
+    {
+        return Ad::query()
+            ->where('user_id', auth()->id())
+            ->where('module', 'services')
+            ->where('profile_kind', 'cultural_artist')
+            ->orderBy('title')
+            ->get();
     }
 }

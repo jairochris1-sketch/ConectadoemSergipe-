@@ -15,6 +15,10 @@
     ];
     $availableCategories = $categoryLists[$ad->module] ?? [];
     $galleryImages = $ad->images->reject(fn ($image) => $image->image_path === $ad->logo);
+    $liberalDetails = (array) data_get($ad->technical_specs, 'liberal_profile', []);
+    $isCrmProfile = $isService
+        && $ad->profile_kind === 'liberal_professional'
+        && \App\Support\ServiceBookingCatalog::usesCrmCategory($ad->display_category);
 @endphp
 
 <div class="container py-5">
@@ -263,6 +267,69 @@
                             <textarea class="form-control rounded-3" id="description" name="description" rows="5" required>{{ old('description', $ad->description) }}</textarea>
                         </div>
 
+                        @if($isService && $ad->profile_kind === 'liberal_professional')
+                            <div class="border rounded-4 p-3 p-md-4 mb-4 bg-light">
+                                <h3 class="h6 fw-bold text-dark mb-3"><i class="fa-solid fa-user-shield text-primary me-2"></i>Documentação e registros</h3>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_credential" class="form-label fw-semibold">Registro profissional *</label>
+                                        <input type="text" class="form-control" id="liberal_credential" name="liberal_credential" value="{{ old('liberal_credential', $liberalDetails['credential'] ?? '') }}" maxlength="150" required>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_credential_issuer" class="form-label fw-semibold">Conselho ou órgão emissor *</label>
+                                        <input type="text" class="form-control" id="liberal_credential_issuer" name="liberal_credential_issuer" value="{{ old('liberal_credential_issuer', $liberalDetails['credential_issuer'] ?? '') }}" maxlength="255" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="liberal_credential_url" class="form-label fw-semibold">Link oficial para consulta (opcional)</label>
+                                        <input type="url" class="form-control" id="liberal_credential_url" name="liberal_credential_url" value="{{ old('liberal_credential_url', $liberalDetails['credential_url'] ?? '') }}" maxlength="500">
+                                    </div>
+                                </div>
+
+                                @if($isCrmProfile)
+                                    <div class="border rounded-3 p-3 mb-4 bg-white" id="crm-verification-panel">
+                                        <strong class="d-block mb-1"><i class="fa-solid fa-stethoscope text-primary me-2"></i>Consulta do registro médico</strong>
+                                        <small class="text-muted d-block mb-3">A consulta confirma que o CRM está ativo, mas não comprova a identidade do titular da conta.</small>
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-12">
+                                                <label for="liberal_credential_name" class="form-label fw-semibold">Nome completo como consta no CRM *</label>
+                                                <input type="text" class="form-control" id="liberal_credential_name" name="liberal_credential_name" value="{{ old('liberal_credential_name', $liberalDetails['credential_registry_name'] ?? '') }}" maxlength="255" required>
+                                            </div>
+                                            <div class="col-12 col-sm-4">
+                                                <label for="liberal_credential_state" class="form-label fw-semibold">UF do CRM *</label>
+                                                <select class="form-select" id="liberal_credential_state" name="liberal_credential_state" required>
+                                                    @foreach(['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'] as $state)
+                                                        <option value="{{ $state }}" @selected(old('liberal_credential_state', $liberalDetails['credential_state'] ?? 'SE') === $state)>{{ $state }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-sm-8"><button type="button" class="btn btn-outline-primary w-100" id="verify-crm-button"><i class="fa-solid fa-magnifying-glass me-1"></i> Consultar CRM</button></div>
+                                        </div>
+                                        <div class="small mt-3 d-none" id="crm-verification-result" role="status" aria-live="polite"></div>
+                                    </div>
+                                @endif
+
+                                <h3 class="h6 fw-bold text-dark mb-3"><i class="fa-solid fa-graduation-cap text-primary me-2"></i>Formação</h3>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_education" class="form-label fw-semibold">Curso ou formação</label>
+                                        <input type="text" class="form-control" id="liberal_education" name="liberal_education" value="{{ old('liberal_education', $liberalDetails['education'] ?? '') }}" maxlength="255">
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="liberal_education_institution" class="form-label fw-semibold">Instituição de ensino (opcional)</label>
+                                        <input type="text" class="form-control" id="liberal_education_institution" name="liberal_education_institution" value="{{ old('liberal_education_institution', $liberalDetails['education_institution'] ?? '') }}" maxlength="255">
+                                    </div>
+                                </div>
+                                <fieldset class="mt-4">
+                                    <legend class="h6 fw-bold text-dark mb-2"><i class="fa-solid fa-laptop-medical text-primary me-2"></i>Formas de atendimento</legend>
+                                    @php $savedServiceModes = old('service_modes', $ad->service_modes ?: ['presencial']); @endphp
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <label class="form-check border rounded-3 px-3 py-2 mb-0"><input class="form-check-input" type="checkbox" name="service_modes[]" value="presencial" @checked(in_array('presencial', $savedServiceModes, true))><span class="form-check-label ms-1">Atendimento presencial</span></label>
+                                        <label class="form-check border rounded-3 px-3 py-2 mb-0"><input class="form-check-input" type="checkbox" name="service_modes[]" value="online" @checked(in_array('online', $savedServiceModes, true))><span class="form-check-label ms-1">Atendimento online / teleconsulta</span></label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        @endif
+
                         <div class="border rounded-4 p-3 p-md-4 mb-4">
                             <h3 class="h5 fw-bold mb-3">Fotos do {{ $isService ? 'perfil' : 'anúncio' }}</h3>
 
@@ -402,6 +469,42 @@
     }
 </script>
 @endpush
+
+@if($isCrmProfile)
+    @push('scripts')
+    <script>
+        document.getElementById('verify-crm-button')?.addEventListener('click', async function () {
+            const result = document.getElementById('crm-verification-result');
+            this.disabled = true;
+            result.className = 'small mt-3 alert alert-info';
+            result.textContent = 'Consultando o registro...';
+            try {
+                const response = await fetch(@json(route('professionals.crm.verify')), {
+                    method: 'POST',
+                    headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content || ''},
+                    body: JSON.stringify({
+                        credential: document.getElementById('liberal_credential')?.value || '',
+                        state: document.getElementById('liberal_credential_state')?.value || '',
+                        category: @json($ad->display_category),
+                        professional_name: document.getElementById('liberal_credential_name')?.value || '',
+                    }),
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.message || 'Não foi possível consultar o CRM.');
+                const professional = data.professional || {};
+                result.className = 'small mt-3 alert alert-success';
+                result.textContent = `${professional.name} · CRM/${professional.state} ${professional.number} · ${professional.situation}`;
+            } catch (error) {
+                result.className = 'small mt-3 alert alert-warning';
+                result.textContent = error.message;
+            } finally {
+                result.classList.remove('d-none');
+                this.disabled = false;
+            }
+        });
+    </script>
+    @endpush
+@endif
 
 @if($ad->module === 'products' && $availableStores->isNotEmpty())
     @push('scripts')

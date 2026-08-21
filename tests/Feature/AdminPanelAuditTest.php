@@ -107,6 +107,8 @@ class AdminPanelAuditTest extends TestCase
     public function test_duplicate_category_slug_is_reported_as_a_validation_error(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $existingCategoryCount = Category::count();
+
         Category::create([
             'name' => 'Veículos',
             'slug' => 'veiculos',
@@ -123,7 +125,7 @@ class AdminPanelAuditTest extends TestCase
             ])
             ->assertSessionHasErrors('name');
 
-        $this->assertSame(1, Category::count());
+        $this->assertSame($existingCategoryCount + 1, Category::count());
     }
 
     public function test_public_desktop_header_displays_the_site_name_next_to_the_logo(): void

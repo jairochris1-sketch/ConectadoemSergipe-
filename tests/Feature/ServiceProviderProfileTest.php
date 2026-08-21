@@ -191,6 +191,16 @@ class ServiceProviderProfileTest extends TestCase
         $liberalOwner = User::factory()->create(['subscription_plan' => 'start']);
         $liberalProfessional = $this->createAdForUser($liberalOwner, 'Advogada em destaque');
         $liberalProfessional->update(['profile_kind' => 'liberal_professional']);
+        AdImage::create([
+            'ad_id' => $liberalProfessional->id,
+            'image_path' => 'uploads/liberal-office.webp',
+            'is_main' => true,
+        ]);
+        AdImage::create([
+            'ad_id' => $liberalProfessional->id,
+            'image_path' => 'uploads/liberal-meeting.webp',
+            'is_main' => false,
+        ]);
 
         $response = $this->get(route('home'))->assertOk();
         $serviceProviders = $response->viewData('serviceProviders');
@@ -227,6 +237,11 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('liberal-profile-page', false)
             ->assertSee('Documentação e registros')
             ->assertSee('Profissional Liberal em Sergipe')
+            ->assertSee('data-liberal-gallery-index="0"', false)
+            ->assertSee('id="liberal-gallery-dialog"', false)
+            ->assertSee('dialog.showModal()', false)
+            ->assertSee('data-liberal-gallery-previous', false)
+            ->assertSee('data-liberal-gallery-next', false)
             ->assertSee('id="marketplaceHeader"', false);
     }
 

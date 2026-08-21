@@ -2,12 +2,16 @@
 
 @section('title', 'Agenda e financeiro - '.$ad->title)
 
-@php $weekdays = [0 => 'Domingo', 1 => 'Segunda', 2 => 'Terça', 3 => 'Quarta', 4 => 'Quinta', 5 => 'Sexta', 6 => 'Sábado']; @endphp
+@php
+    $weekdays = [0 => 'Domingo', 1 => 'Segunda', 2 => 'Terça', 3 => 'Quarta', 4 => 'Quinta', 5 => 'Sexta', 6 => 'Sábado'];
+    $isConsultation = \App\Support\ServiceBookingCatalog::isConsultation($ad);
+    $attendanceModes = \App\Support\ServiceBookingCatalog::allowedAttendanceModes($ad);
+@endphp
 
 @section('content')
 <div class="container py-4 booking-manage">
     <header class="booking-manage-head">
-        <div><span>Gestão do atendimento</span><h1>Agenda e financeiro</h1><p>{{ $ad->title }} · {{ $ad->display_category }}</p></div>
+        <div><span>{{ $isConsultation ? 'Gestão de consultas' : 'Gestão do atendimento' }}</span><h1>{{ $isConsultation ? 'Agenda de consultas' : 'Agenda e financeiro' }}</h1><p>{{ $ad->title }} · {{ $ad->display_category }}</p></div>
         <div class="booking-head-actions">
             <a href="{{ route('provider.show', $ad->slug) }}" class="btn btn-outline-light">Ver perfil</a>
             @if($ad->store)<a href="{{ route('store.manage', $ad->store) }}" class="btn btn-light"><i class="fa-solid fa-store me-1"></i> Produtos da vitrine</a>@else<a href="{{ route('store.create') }}" class="btn btn-light"><i class="fa-solid fa-store me-1"></i> Criar vitrine de produtos</a>@endif
@@ -40,9 +44,9 @@
 
     <section id="agendamentos" class="booking-section">
         <div class="booking-section-title"><div><h2>Agendamentos</h2><p>Cliente, procedimento, profissional, valor e data ficam registrados.</p></div></div>
-        <div class="booking-table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>Procedimento</th><th>Profissional</th><th>Valor</th><th>Status</th></tr></thead><tbody>
-            @forelse($appointments as $appointment)<tr><td>{{ $appointment->starts_at->format('d/m/Y H:i') }}</td><td><strong>{{ $appointment->customer_name }}</strong><small>{{ $appointment->customer_phone }}</small></td><td>{{ $appointment->procedure->name }}</td><td>{{ $appointment->staff->name }}</td><td>@if($appointment->clientSubscription)<strong>Incluído no plano</strong><small>{{ $appointment->clientSubscription->plan->name }}</small>@else R$ {{ number_format($appointment->service_price,2,',','.') }} @endif</td><td><form method="POST" action="{{ route('service-booking.appointments.update', [$ad,$appointment]) }}">@csrf @method('PATCH')<select name="status" onchange="this.form.submit()">@foreach(\App\Models\ServiceAppointment::STATUSES as $key=>$label)<option value="{{ $key }}" @selected($appointment->status===$key)>{{ $label }}</option>@endforeach</select></form></td></tr>
-            @empty<tr><td colspan="6">Nenhum agendamento registrado.</td></tr>@endforelse
+        <div class="booking-table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>{{ $isConsultation ? 'Consulta' : 'Procedimento' }}</th><th>Modalidade</th><th>Profissional</th><th>Valor</th><th>Status</th></tr></thead><tbody>
+            @forelse($appointments as $appointment)<tr><td>{{ $appointment->starts_at->format('d/m/Y H:i') }}</td><td><strong>{{ $appointment->customer_name }}</strong><small>{{ $appointment->customer_phone }}</small></td><td>{{ $appointment->procedure->name }}</td><td>{{ $appointment->attendance_mode_label ?? 'Não informada' }}</td><td>{{ $appointment->staff->name }}</td><td>@if($appointment->clientSubscription)<strong>Incluído no plano</strong><small>{{ $appointment->clientSubscription->plan->name }}</small>@else R$ {{ number_format($appointment->service_price,2,',','.') }} @endif</td><td><form method="POST" action="{{ route('service-booking.appointments.update', [$ad,$appointment]) }}">@csrf @method('PATCH')<select name="status" onchange="this.form.submit()">@foreach(\App\Models\ServiceAppointment::STATUSES as $key=>$label)<option value="{{ $key }}" @selected($appointment->status===$key)>{{ $label }}</option>@endforeach</select></form></td></tr>
+            @empty<tr><td colspan="7">Nenhum agendamento registrado.</td></tr>@endforelse
         </tbody></table></div>
     </section>
 
@@ -71,6 +75,7 @@
                 <div class="booking-form-grid"><label>Cliente<input name="customer_name" required maxlength="255"></label><label>Telefone<input name="customer_phone" maxlength="20" inputmode="tel"></label></div>
                 <label>E-mail cadastrado (opcional)<input type="email" name="customer_email" maxlength="255" placeholder="Vincula ao usuário quando já existe no site"></label>
                 <div class="booking-form-grid"><label>Procedimento<select name="procedure_id" required>@foreach($ad->serviceProcedures->where('active', true) as $procedure)<option value="{{ $procedure->id }}">{{ $procedure->name }}</option>@endforeach</select></label><label>Profissional<select name="staff_id" required>@foreach($ad->serviceStaff->where('active', true) as $person)<option value="{{ $person->id }}">{{ $person->name }}</option>@endforeach</select></label></div>
+                @if($isConsultation)<label>Modalidade<select name="attendance_mode" required>@foreach($attendanceModes as $mode)<option value="{{ $mode }}">{{ $mode === 'online' ? 'Online / teleconsulta' : 'Presencial' }}</option>@endforeach</select></label>@endif
                 <label>Data e horário<input type="datetime-local" name="starts_at" required></label>
                 <label>Observação<textarea name="notes" maxlength="1000" rows="3"></textarea></label>
                 <button>Registrar agendamento</button>

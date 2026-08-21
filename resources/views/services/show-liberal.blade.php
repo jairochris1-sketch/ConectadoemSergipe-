@@ -29,7 +29,9 @@
         ->filter(fn ($item) => filled(is_array($item) ? ($item['title'] ?? null) : $item))
         ->values();
     $credentialVerified = (bool) ($details['credential_verified'] ?? false);
+    $credentialRegistryFound = (bool) ($details['credential_registry_found'] ?? false);
     $credentialLabel = $details['credential'] ?? null;
+    $credentialSourceUrl = $details['credential_url'] ?? $details['credential_registry_source_url'] ?? null;
     $education = $details['education'] ?? null;
     $educationInstitution = $details['education_institution'] ?? null;
     $headline = $details['headline'] ?? 'Atendimento profissional com experiência, ética e compromisso.';
@@ -55,6 +57,9 @@
         : null;
     $currentUser = auth()->user();
     $isOwnerOrAdmin = $currentUser && ($currentUser->id === $provider->user_id || $currentUser->role === 'admin');
+    $isConsultation = \App\Support\ServiceBookingCatalog::isConsultation($provider);
+    $attendanceModes = \App\Support\ServiceBookingCatalog::allowedAttendanceModes($provider);
+    $bookingActionLabel = \App\Support\ServiceBookingCatalog::actionLabel($provider);
 @endphp
 
 <main class="liberal-profile-page">
@@ -84,14 +89,16 @@
                 <div class="liberal-profile-copy">
                     <div class="liberal-profile-badges">
                         <span class="is-category">{{ $provider->display_category ?? 'Profissional liberal' }}</span>
-                        <span class="{{ $credentialVerified ? 'is-verified' : 'is-informed' }}">
-                            <i class="fa-solid {{ $credentialVerified ? 'fa-circle-check' : 'fa-id-card' }}"></i>
-                            {{ $credentialVerified ? 'Credencial verificada' : 'Credencial informada' }}
+                        <span class="{{ $credentialVerified ? 'is-verified' : ($credentialRegistryFound ? 'is-found' : 'is-informed') }}">
+                            <i class="fa-solid {{ $credentialVerified ? 'fa-circle-check' : ($credentialRegistryFound ? 'fa-database' : 'fa-id-card') }}"></i>
+                            {{ $credentialVerified ? 'Credencial verificada' : ($credentialRegistryFound ? 'Registro localizado' : 'Credencial informada') }}
                         </span>
                     </div>
                     <h1 id="liberal-profile-title">{{ $provider->title }}</h1>
                     <div class="liberal-profile-facts">
                         <span><i class="fa-solid fa-location-dot"></i>{{ $provider->city }}, Sergipe</span>
+                        @if($isConsultation)<span><i class="fa-solid fa-hospital-user"></i>Atendimento por consulta</span>@endif
+                        @if($provider->booking_enabled)<span><i class="fa-regular fa-calendar-check"></i>Agenda disponível</span>@endif
                         <a href="#avaliacoes">
                             <span class="liberal-profile-stars">★★★★★</span>
                             <strong>{{ $reviewData['count'] ? number_format($reviewData['average'], 1, ',', '.') : 'Novo' }}</strong>
@@ -149,11 +156,14 @@
                             <div>
                                 <h3>{{ $credentialLabel ?: 'Registro profissional não informado' }}</h3>
                                 <p>{{ $details['credential_issuer'] ?? 'A informação do conselho profissional deve ser confirmada diretamente com o profissional.' }}</p>
-                                @if(!empty($details['credential_url']))
-                                    <a href="{{ $details['credential_url'] }}" target="_blank" rel="noopener noreferrer">Consultar registro oficial <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                @if($credentialRegistryFound && !empty($details['credential_registry_name']))
+                                    <p><strong>Nome localizado:</strong> {{ $details['credential_registry_name'] }} · Situação: {{ $details['credential_registry_situation'] ?? 'Ativo' }}</p>
+                                @endif
+                                @if($credentialSourceUrl)
+                                    <a href="{{ $credentialSourceUrl }}" target="_blank" rel="noopener noreferrer">Consultar registro na fonte <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                                 @endif
                             </div>
-                            <span class="{{ $credentialVerified ? 'is-valid' : '' }}">{{ $credentialVerified ? 'Verificado' : 'Informado' }}</span>
+                            <span class="{{ $credentialVerified || $credentialRegistryFound ? 'is-valid' : '' }}">{{ $credentialVerified ? 'Verificado' : ($credentialRegistryFound ? 'Localizado' : 'Informado') }}</span>
                         </article>
                         <article>
                             <i class="fa-solid fa-graduation-cap"></i>
@@ -170,19 +180,47 @@
                         <span class="liberal-profile-eyebrow">Galeria</span>
                         <h2>Escritório e estrutura</h2>
                         <div class="liberal-profile-gallery">
-                            @foreach($portfolioImages as $image)
-                                <img src="{{ asset($image) }}" alt="Galeria de {{ $provider->title }}" loading="lazy">
+                            @foreach($portfolioImages as $index => $image)
+                                <button type="button" data-liberal-gallery-index="{{ $index }}" aria-label="Ampliar foto {{ $index + 1 }} da galeria">
+                                    <img src="{{ asset($image) }}" alt="Galeria de {{ $provider->title }}" loading="lazy">
+                                </button>
                             @endforeach
                         </div>
                     </section>
+
+                    <dialog class="liberal-gallery-dialog" id="liberal-gallery-dialog" aria-label="Galeria ampliada de {{ $provider->title }}">
+                        <button type="button" class="liberal-gallery-close" data-liberal-gallery-close aria-label="Fechar galeria"><i class="fa-solid fa-xmark"></i></button>
+                        <button type="button" class="liberal-gallery-nav is-previous" data-liberal-gallery-previous aria-label="Foto anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                        <img id="liberal-gallery-dialog-image" src="" alt="">
+                        <button type="button" class="liberal-gallery-nav is-next" data-liberal-gallery-next aria-label="Próxima foto"><i class="fa-solid fa-chevron-right"></i></button>
+                        <span id="liberal-gallery-counter"></span>
+                    </dialog>
                 @endif
             </div>
 
             <aside class="liberal-profile-sidebar">
                 <section class="liberal-profile-panel liberal-profile-availability">
                     <i class="fa-regular fa-calendar-check"></i>
-                    <h2>Disponibilidade</h2>
+                    <h2>{{ $isConsultation ? 'Próximos horários' : 'Disponibilidade' }}</h2>
                     <p>{{ $serviceArea }}</p>
+                    @if($isConsultation)
+                        <div class="liberal-attendance-modes">
+                            @foreach($attendanceModes as $mode)
+                                <span><i class="fa-solid {{ $mode === 'online' ? 'fa-laptop-medical' : 'fa-hospital' }}"></i>{{ $mode === 'online' ? 'Teleconsulta' : 'Atendimento presencial' }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if($upcomingBookingSlots->isNotEmpty())
+                        <div class="liberal-upcoming-slots">
+                            @foreach($upcomingBookingSlots as $slot)
+                                @php
+                                    $slotRoute = route('service-booking.book', ['ad' => $provider, 'procedure' => $slot['procedure_id'], 'staff' => $slot['staff_id'], 'date' => $slot['date']]);
+                                    $slotUrl = auth()->check() ? $slotRoute : route('login', ['redirect' => $slotRoute]);
+                                @endphp
+                                <a href="{{ $slotUrl }}"><b>{{ $slot['day_label'] }}</b>{{ $slot['time'] }}</a>
+                            @endforeach
+                        </div>
+                    @endif
                     @if($businessHours->isNotEmpty())
                         <div>
                             @foreach($businessHours as $day => $times)
@@ -193,7 +231,7 @@
                         <div><span><b>Horários</b><strong>Sob consulta</strong></span></div>
                     @endif
                     @if($provider->booking_enabled && \App\Support\ServiceBookingCatalog::eligible($provider))
-                        <a href="{{ auth()->check() ? route('service-booking.book', $provider) : route('login', ['redirect' => route('service-booking.book', $provider)]) }}">Agendar atendimento</a>
+                        <a href="{{ auth()->check() ? route('service-booking.book', $provider) : route('login', ['redirect' => route('service-booking.book', $provider)]) }}"><i class="fa-regular fa-calendar-check"></i>{{ $bookingActionLabel }}</a>
                     @elseif($whatsappNumber)
                         <a href="https://wa.me/{{ $whatsappNumber }}?text={{ $whatsappMessage }}" target="_blank" rel="noopener">Consultar disponibilidade</a>
                     @endif
@@ -212,10 +250,10 @@
                     @endif
                 </section>
 
-                <section class="liberal-profile-trust {{ $credentialVerified ? 'is-verified' : '' }}">
+                <section class="liberal-profile-trust {{ $credentialVerified || $credentialRegistryFound ? 'is-verified' : '' }}">
                     <i class="fa-solid fa-user-shield"></i>
-                    <h2>{{ $credentialVerified ? 'Perfil verificado pelo Conectado' : 'Dados profissionais informados' }}</h2>
-                    <p>{{ $credentialVerified ? 'A documentação profissional apresentada foi analisada pela plataforma.' : 'Confirme o registro no conselho profissional antes da contratação.' }}</p>
+                    <h2>{{ $credentialVerified ? 'Perfil verificado pelo Conectado' : ($credentialRegistryFound ? 'Registro profissional localizado' : 'Dados profissionais informados') }}</h2>
+                    <p>{{ $credentialVerified ? 'A documentação profissional apresentada foi analisada pela plataforma.' : ($credentialRegistryFound ? 'O registro foi localizado como ativo na fonte consultada. Isso não comprova a identidade do titular da conta.' : 'Confirme o registro no conselho profissional antes da contratação.') }}</p>
                 </section>
 
                 <div class="liberal-profile-report">@include('reports._button-and-modal', ['reportable' => $provider])</div>
@@ -249,6 +287,7 @@
     .liberal-profile-badges span { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; font-size: .61rem; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
     .liberal-profile-badges .is-category { color: #fff; background: #2463eb; }
     .liberal-profile-badges .is-verified { color: #07814a; background: #dcfce7; }
+    .liberal-profile-badges .is-found { color: #1767c5; background: #e5f0ff; }
     .liberal-profile-badges .is-informed { color: #975a00; background: #fff4cc; }
     .liberal-profile-copy h1 { margin: 0 0 10px; font-size: clamp(1.7rem, 3.2vw, 2.55rem); font-weight: 900; letter-spacing: -.04em; }
     .liberal-profile-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; color: var(--muted-foreground); font-size: .72rem; font-weight: 700; }
@@ -279,8 +318,21 @@
     .liberal-profile-documents article > span { padding: 5px 8px; border-radius: 999px; color: #975a00; background: #fff4cc; font-size: .55rem; font-weight: 900; text-transform: uppercase; }
     .liberal-profile-documents article > span.is-valid { color: #07814a; background: #dcfce7; }
     .liberal-profile-gallery { display: grid; grid-template-columns: 1.5fr repeat(2, 1fr); gap: 14px; }
-    .liberal-profile-gallery img { width: 100%; height: 145px; object-fit: cover; border-radius: 18px; }
-    .liberal-profile-gallery img:first-child { height: 205px; grid-row: span 2; }
+    .liberal-profile-gallery button { padding: 0; overflow: hidden; background: transparent; border: 0; border-radius: 18px; cursor: zoom-in; }
+    .liberal-profile-gallery img { width: 100%; height: 145px; display: block; object-fit: cover; border-radius: 18px; transition: transform .2s ease; }
+    .liberal-profile-gallery button:hover img, .liberal-profile-gallery button:focus-visible img { transform: scale(1.035); }
+    .liberal-profile-gallery button:first-child { grid-row: span 2; }
+    .liberal-profile-gallery button:first-child img { height: 304px; }
+    .liberal-gallery-dialog { width: min(96vw, 1180px); height: min(92vh, 820px); padding: 0; overflow: hidden; background: #050b18; border: 0; border-radius: 22px; }
+    .liberal-gallery-dialog[open] { display: grid; place-items: center; }
+    .liberal-gallery-dialog::backdrop { background: rgba(2, 6, 23, .92); backdrop-filter: blur(8px); }
+    .liberal-gallery-dialog > img { width: 100%; height: 100%; max-height: 82vh; object-fit: contain; }
+    .liberal-gallery-close, .liberal-gallery-nav { position: absolute; z-index: 2; width: 44px; height: 44px; display: grid; place-items: center; color: #fff; background: rgba(15, 23, 42, .76); border: 1px solid rgba(255, 255, 255, .28); border-radius: 50%; }
+    .liberal-gallery-close { top: 16px; right: 16px; }
+    .liberal-gallery-nav { top: 50%; transform: translateY(-50%); }
+    .liberal-gallery-nav.is-previous { left: 16px; }
+    .liberal-gallery-nav.is-next { right: 16px; }
+    .liberal-gallery-dialog > span { position: absolute; bottom: 15px; left: 50%; padding: 6px 12px; color: #fff; background: rgba(15, 23, 42, .78); border-radius: 999px; font-size: .75rem; font-weight: 800; transform: translateX(-50%); }
     .liberal-profile-availability { text-align: center; }
     .liberal-profile-availability > i { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 18px; border-radius: 17px; color: #2563eb; background: #eff6ff; font-size: 1.4rem; }
     .liberal-profile-availability > p { color: var(--muted-foreground); font-size: .73rem; line-height: 1.5; }
@@ -288,6 +340,12 @@
     .liberal-profile-availability > div span { display: flex; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 11px; background: var(--muted); font-size: .68rem; }
     .liberal-profile-availability > div strong { color: #2563eb; }
     .liberal-profile-availability > a { display: flex; align-items: center; justify-content: center; min-height: 45px; border: 2px solid #2563eb; border-radius: 14px; color: #2563eb; font-size: .74rem; font-weight: 900; text-decoration: none; }
+    .liberal-profile-availability > a i { margin-right: 7px; }
+    .liberal-profile-availability .liberal-attendance-modes { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin: 13px 0; }
+    .liberal-profile-availability .liberal-attendance-modes span { display: inline-flex; width: auto; align-items: center; justify-content: flex-start; gap: 6px; padding: 7px 9px; border: 0; border-radius: 9px; background: #edf5ff; color: #195cad; font-size: .68rem; }
+    .liberal-profile-availability .liberal-upcoming-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin: 15px 0; }
+    .liberal-profile-availability .liberal-upcoming-slots a { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 7px; border: 1px solid #b7d3f8; border-radius: 9px; background: var(--background); color: #1767c5; font-size: .72rem; text-decoration: none; }
+    .liberal-profile-availability .liberal-upcoming-slots b { color: var(--foreground); }
     .liberal-profile-location { color: #fff; background: #0d1a33; }
     .liberal-profile-location h2 { color: #fff; }
     .liberal-profile-location p { display: flex; gap: 12px; margin-bottom: 16px; color: #c7d2e5; font-size: .69rem; line-height: 1.5; }
@@ -333,8 +391,51 @@
         .liberal-profile-documents article { grid-template-columns: 38px minmax(0, 1fr); padding: 16px; }
         .liberal-profile-documents article > span { grid-column: 2; justify-self: start; }
         .liberal-profile-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .liberal-profile-gallery img, .liberal-profile-gallery img:first-child { height: 125px; grid-row: auto; }
-        .liberal-profile-gallery img:first-child { grid-column: 1 / -1; height: 180px; }
+        .liberal-profile-gallery button, .liberal-profile-gallery button:first-child { grid-row: auto; }
+        .liberal-profile-gallery button:first-child { grid-column: 1 / -1; }
+        .liberal-profile-gallery img, .liberal-profile-gallery button:first-child img { height: 125px; }
+        .liberal-profile-gallery button:first-child img { height: 180px; }
+        .liberal-gallery-nav { width: 38px; height: 38px; }
+        .liberal-gallery-nav.is-previous { left: 8px; }
+        .liberal-gallery-nav.is-next { right: 8px; }
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    (() => {
+        const galleryImages = @json($portfolioImages->map(fn ($image) => asset($image))->values());
+        const dialog = document.getElementById('liberal-gallery-dialog');
+        const dialogImage = document.getElementById('liberal-gallery-dialog-image');
+        const counter = document.getElementById('liberal-gallery-counter');
+        let activeIndex = 0;
+
+        if (!dialog || !dialogImage || galleryImages.length === 0) return;
+
+        const showImage = (index) => {
+            activeIndex = (index + galleryImages.length) % galleryImages.length;
+            dialogImage.src = galleryImages[activeIndex];
+            dialogImage.alt = `Foto ${activeIndex + 1} de ${galleryImages.length} da galeria`;
+            if (counter) counter.textContent = `${activeIndex + 1} de ${galleryImages.length}`;
+        };
+
+        document.querySelectorAll('[data-liberal-gallery-index]').forEach((button) => {
+            button.addEventListener('click', () => {
+                showImage(Number(button.dataset.liberalGalleryIndex) || 0);
+                dialog.showModal();
+            });
+        });
+        document.querySelector('[data-liberal-gallery-close]')?.addEventListener('click', () => dialog.close());
+        document.querySelector('[data-liberal-gallery-previous]')?.addEventListener('click', () => showImage(activeIndex - 1));
+        document.querySelector('[data-liberal-gallery-next]')?.addEventListener('click', () => showImage(activeIndex + 1));
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) dialog.close();
+        });
+        dialog.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') showImage(activeIndex - 1);
+            if (event.key === 'ArrowRight') showImage(activeIndex + 1);
+        });
+    })();
+</script>
 @endpush
