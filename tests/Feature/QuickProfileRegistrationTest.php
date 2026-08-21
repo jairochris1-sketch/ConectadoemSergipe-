@@ -24,6 +24,10 @@ class QuickProfileRegistrationTest extends TestCase
             ->assertSee('Empresa Contratante')
             ->assertSee('Imobiliária')
             ->assertSee('Produtor Rural')
+            ->assertSee('data-liberal-fields hidden', false)
+            ->assertSee('Seu perfil profissional é gratuito.')
+            ->assertSee(route('page.plans'))
+            ->assertSee(asset('images/logo.png'))
             ->assertSee(route('quick-profile.store'));
 
         $this->get(route('register'))

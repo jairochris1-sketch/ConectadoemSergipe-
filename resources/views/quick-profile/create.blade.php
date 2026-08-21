@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Cadastro rápido de perfil | Conectado em Sergipe</title>
+    <x-theme-head />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/quick-profile.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('css/quick-profile.css') }}?v=1.1">
 </head>
 <body>
 @php
@@ -25,13 +26,18 @@
     <section class="quick-profile-layout">
         <aside class="quick-profile-story">
             <a class="quick-profile-brand" href="{{ route('home') }}" aria-label="Voltar ao Conectado em Sergipe">
-                <span class="quick-profile-brand-mark"><i class="fa-solid fa-location-dot"></i></span>
+                <img class="quick-profile-brand-logo" src="{{ asset('images/logo.png') }}" alt="">
                 <span>Conectado <b>em Sergipe</b></span>
             </a>
             <div class="quick-profile-story-content">
                 <div class="quick-profile-route"><span></span> Cadastro rápido <b id="quick-side-step">01</b></div>
                 <h2>Seu trabalho mais perto de quem precisa.</h2>
                 <p>Crie sua conta e publique um perfil profissional em poucos passos. Depois você poderá completar ou editar tudo pelo seu painel.</p>
+                <div class="quick-profile-plan-note">
+                    <i class="fa-solid fa-gift"></i>
+                    <span><strong>Seu perfil profissional é gratuito.</strong><small>Se quiser crescer mais, assine o Conectado em Sergipe para aparecer em destaque, criar mais perfis e ampliar os limites de imagens e anúncios.</small></span>
+                    <a href="{{ route('page.plans') }}">Conhecer os planos <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
                 <div id="quick-desktop-preview"></div>
             </div>
             <footer>Feito para quem movimenta Sergipe <span></span></footer>
@@ -40,11 +46,19 @@
         <section class="quick-profile-form-panel" aria-labelledby="quick-step-title">
             <header class="quick-profile-mobile-brand">
                 <a class="quick-profile-brand" href="{{ route('home') }}">
-                    <span class="quick-profile-brand-mark"><i class="fa-solid fa-location-dot"></i></span>
+                    <img class="quick-profile-brand-logo" src="{{ asset('images/logo.png') }}" alt="">
                     <span>Conectado <b>em Sergipe</b></span>
                 </a>
-                <a href="{{ route('home') }}" class="quick-profile-close" aria-label="Fechar cadastro"><i class="fa-solid fa-xmark"></i></a>
+                <div class="quick-profile-header-actions">
+                    <button type="button" class="quick-profile-theme-toggle" data-quick-theme-toggle aria-label="Alternar modo claro e escuro" aria-pressed="false"><i class="fa-solid fa-circle-half-stroke"></i></button>
+                    <a href="{{ route('home') }}" class="quick-profile-close" aria-label="Fechar cadastro"><i class="fa-solid fa-xmark"></i></a>
+                </div>
             </header>
+
+            <div class="quick-profile-desktop-actions">
+                <button type="button" class="quick-profile-theme-toggle" data-quick-theme-toggle aria-label="Alternar modo claro e escuro" aria-pressed="false"><i class="fa-solid fa-circle-half-stroke"></i><span>Modo escuro</span></button>
+                <a href="{{ route('home') }}" class="quick-profile-close" aria-label="Fechar cadastro"><i class="fa-solid fa-xmark"></i></a>
+            </div>
 
             <div class="quick-profile-mobile-preview">
                 <span>Prévia do perfil <small>Atualização ao vivo</small></span>
@@ -111,7 +125,7 @@
                         <div class="quick-profile-field"><label for="liberal_credential_issuer">Conselho ou órgão <b>*</b></label><input id="liberal_credential_issuer" name="liberal_credential_issuer" value="{{ old('liberal_credential_issuer') }}" placeholder="Ex.: OAB, CRM, CRO"></div>
                     </div>
 
-                    <div class="quick-profile-reassurance"><i class="fa-solid fa-bolt"></i><span><strong>Cadastro rápido e gratuito</strong><small>Você poderá completar o perfil depois.</small></span></div>
+                    <div class="quick-profile-reassurance"><i class="fa-solid fa-bolt"></i><span><strong>Cadastro do perfil gratuito</strong><small>Complete seu perfil depois ou conheça os <a href="{{ route('page.plans') }}">planos para ganhar destaque e mais recursos</a>.</small></span></div>
                 </section>
 
                 <section class="quick-profile-section" data-step="1" hidden>
@@ -143,6 +157,6 @@
 window.quickProfileOldServices = @json(old('services', []));
 window.quickProfileOldCategory = @json(old('category'));
 </script>
-<script src="{{ asset('js/quick-profile.js') }}?v=1.0"></script>
+<script src="{{ asset('js/quick-profile.js') }}?v=1.1"></script>
 </body>
 </html>

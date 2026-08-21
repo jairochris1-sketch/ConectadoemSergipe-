@@ -18,6 +18,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const oldServices = Array.isArray(window.quickProfileOldServices) ? window.quickProfileOldServices : [];
     const oldCategory = window.quickProfileOldCategory || '';
     const state = { step: 0, photoUrl: '' };
+    const themeButtons = [...document.querySelectorAll('[data-quick-theme-toggle]')];
+
+    function updateThemeButtons() {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        themeButtons.forEach((button) => {
+            button.setAttribute('aria-pressed', String(dark));
+            const label = button.querySelector('span');
+            if (label) label.textContent = dark ? 'Modo claro' : 'Modo escuro';
+        });
+    }
+
+    themeButtons.forEach((button) => button.addEventListener('click', () => {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const theme = dark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        document.documentElement.setAttribute('data-theme-preference', theme);
+        try { localStorage.setItem('theme', theme); } catch (error) { /* O tema ainda funciona nesta página. */ }
+        updateThemeButtons();
+    }));
+    updateThemeButtons();
 
     const stepCopy = [
         ['Comece por aqui', 'Que perfil você quer criar?', 'Escolha como deseja aparecer no Conectado em Sergipe.', 'Continuar para minha cobertura'],
