@@ -45,6 +45,7 @@ class GlobalThemeTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('id="themeToggleBtn"', false)
+            ->assertSee('id="liveSupportLauncher"', false)
             ->assertSee(asset('js/main.js'), false);
 
         $this->get(route('admin.login'))

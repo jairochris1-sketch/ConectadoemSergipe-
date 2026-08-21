@@ -170,6 +170,10 @@ class ServiceProviderProfileTest extends TestCase
             ->assertSee('Em destaque')
             ->assertDontSee('Mais procurado')
             ->assertSee(route('provider.show', $paidProvider->slug));
+
+        $this->get(route('module.services'))
+            ->assertOk()
+            ->assertSee('position: absolute; top: 8px; left: 8px; right: auto;', false);
         $this->assertDatabaseHas('plan_feature_values', [
             'plan_id' => Plan::where('slug', 'free')->value('id'),
             'plan_feature_id' => PlanFeature::where('key', 'provider_featured')->value('id'),

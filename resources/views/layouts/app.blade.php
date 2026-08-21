@@ -210,7 +210,7 @@
     @include('components.theme-toggle')
     @include('components.vlibras-widget')
     @include('components.cookie-consent')
-    @if(request()->routeIs('home') && auth()->check())
+    @if(request()->routeIs('login'))
         @include('components.live-support-widget')
     @endif
     @if($showPublicHeader)

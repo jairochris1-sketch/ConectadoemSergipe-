@@ -21,7 +21,11 @@
 <article class="sdc-card services-directory-card">
     {{-- Banner Cover Superior --}}
     <div class="sdc-banner" style="background-image: url('{{ asset($coverImage) }}');">
-        <x-featured-badge :provider="$provider" class="sdc-banner-badge" />
+        <x-featured-badge
+            :provider="$provider"
+            class="sdc-banner-badge"
+            style="position: absolute; top: 8px; left: 8px; right: auto; max-width: calc(100% - 16px);"
+        />
     </div>
 
     {{-- Corpo do Card --}}

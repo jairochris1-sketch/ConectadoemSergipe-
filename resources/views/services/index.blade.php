@@ -3,7 +3,7 @@
 @section('title', ($isLiberalDirectory ? 'Profissionais Liberais' : 'Prestadores de Serviços') . ' em Sergipe - Conectado em Sergipe')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/services-directory.css') }}?v=2.0">
+<link rel="stylesheet" href="{{ asset('css/services-directory.css') }}?v=2.1">
 <style>
     /* ── PÁGINA ── */
     .services-directory-page {
@@ -56,10 +56,10 @@
     }
     .services-directory-division-link.is-active small { background: rgba(255, 255, 255, .18); }
     @media (max-width: 575.98px) {
-        .services-directory-division { gap: 6px; padding: 5px; border-radius: 14px; }
-        .services-directory-division-link { min-height: 54px; gap: 6px; padding: 8px 6px; font-size: .69rem; }
+        .services-directory-division { gap: 5px; margin-bottom: 16px; padding: 4px; border-radius: 13px; }
+        .services-directory-division-link { min-height: 44px; gap: 5px; padding: 6px 5px; font-size: .66rem; }
         .services-directory-division-link i { font-size: .85rem; }
-        .services-directory-division-link small { min-width: 21px; height: 21px; font-size: .58rem; }
+        .services-directory-division-link small { min-width: 19px; height: 19px; font-size: .56rem; }
     }
 
     /* ── BANNER SWIPER & HERO ── */
@@ -300,13 +300,18 @@
     }
 
     @media (max-width: 575.98px) {
-        .services-banner-swiper { height: 260px; }
+        .services-banner-swiper { height: 230px; }
         .services-banner-content { transform: translateY(-8px); }
         .services-banner-content h1 { font-size: 1.2rem; }
         .services-hero { padding-top: 1.5rem; }
-        .services-search-panel { padding-top: 1rem; }
+        .services-search-panel { padding-top: .65rem; }
         .services-hero-title { font-size: 1.35rem; }
         .services-hero-chips { gap: 5px; }
+        .services-pill-search { gap: 6px; margin-block: 6px !important; }
+        .services-pill-field { min-height: 44px; padding: 0 13px; }
+        .services-pill-field input { font-size: .78rem; }
+        .services-pill-mic { width: 32px; height: 32px; }
+        .services-pill-submit { height: 40px; font-size: .78rem; }
     }
 </style>
 @endpush

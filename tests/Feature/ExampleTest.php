@@ -52,17 +52,12 @@ class ExampleTest extends TestCase
             ->assertDontSee('+ 50 mil usuários');
     }
 
-    public function test_live_support_widget_only_appears_for_authenticated_users_on_home(): void
+    public function test_live_support_widget_does_not_appear_on_home_even_when_authenticated(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->get(route('home'))
-            ->assertOk()
-            ->assertSee('id="liveSupportLauncher"', false);
-
-        $this->actingAs($user)
-            ->get(route('page.plans'))
             ->assertOk()
             ->assertDontSee('id="liveSupportLauncher"', false);
     }
