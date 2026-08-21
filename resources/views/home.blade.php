@@ -111,6 +111,78 @@
         min-width: 0;
         max-width: 780px;
     }
+    .home-hero-plans-card {
+        position: relative;
+        flex: 0 0 min(370px, 39vw);
+        width: min(370px, 39vw);
+        padding: 18px 48px 18px 18px;
+        overflow: hidden;
+        color: #fff;
+        background: linear-gradient(135deg, rgba(7, 91, 232, .96), rgba(30, 64, 175, .92));
+        border: 1px solid rgba(255, 255, 255, .34);
+        border-radius: 22px;
+        box-shadow: 0 18px 44px rgba(3, 25, 74, .32);
+        backdrop-filter: blur(12px);
+    }
+    .home-hero-plans-icon {
+        flex: 0 0 46px;
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        color: #facc15;
+        background: rgba(255, 255, 255, .14);
+        border: 1px solid rgba(255, 255, 255, .24);
+        border-radius: 15px;
+        font-size: 1.1rem;
+    }
+    .home-hero-plans-copy strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: .98rem;
+        line-height: 1.2;
+    }
+    .home-hero-plans-copy p {
+        margin: 0 0 10px;
+        color: rgba(255, 255, 255, .84);
+        font-size: .76rem;
+        line-height: 1.4;
+        text-shadow: none;
+    }
+    .home-hero-plans-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        color: #0b3b91;
+        background: #fff;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .home-hero-plans-link:hover,
+    .home-hero-plans-link:focus-visible {
+        color: #0b3b91;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 18px rgba(2, 20, 56, .22);
+    }
+    .home-hero-plans-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        color: #fff;
+        background: rgba(4, 25, 68, .34);
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 50%;
+        font-size: .7rem;
+    }
     .home-hero-cta {
         display: inline-flex;
         align-items: center;
@@ -1497,15 +1569,19 @@
                                 @endif
                             </div>
                             @if($loop->first)
-                                <div id="home-hero-plans-card" class="home-hero-plans-card d-none d-md-flex align-items-center rounded-pill px-3 py-1.5 ms-auto shadow-sm" style="position: relative; padding-right: 28px; background: rgba(37, 99, 235, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); font-size: 0.82rem;">
-                                    <a href="{{ route('page.plans') }}" class="d-flex align-items-center text-decoration-none text-white gap-2">
-                                        <i class="fa-solid fa-gem text-warning" style="font-size: 0.95rem;"></i>
-                                        <span class="fw-bold text-nowrap">Planos Premium</span>
-                                    </a>
-                                    <button type="button" data-close-home-plans aria-label="Fechar card de planos" title="Fechar" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; padding: 0; border: none; border-radius: 50%; color: #fff; background: rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; font-size: 0.65rem;">
+                                <aside id="home-hero-plans-card" class="home-hero-plans-card d-none d-lg-flex align-items-center gap-3 ms-auto" aria-label="Conheça os planos do Conectado em Sergipe">
+                                    <span class="home-hero-plans-icon" aria-hidden="true"><i class="fa-solid fa-gem"></i></span>
+                                    <div class="home-hero-plans-copy">
+                                        <strong>Assine agora o Conectado em Sergipe</strong>
+                                        <p>Apareça em destaque, personalize seu perfil profissional e muito mais.</p>
+                                        <a href="{{ route('page.plans') }}" class="home-hero-plans-link">
+                                            Conheça nossos planos <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                    <button type="button" class="home-hero-plans-close" data-close-home-plans aria-label="Fechar card de planos" title="Fechar">
                                         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                                     </button>
-                                </div>
+                                </aside>
                             @endif
                         </div>
                     </div>

@@ -44,9 +44,27 @@ class ExampleTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('id="home-hero-plans-card"', false)
-            ->assertSee('Planos Premium')
+            ->assertSee('Assine agora o Conectado em Sergipe')
+            ->assertSee('Apareça em destaque, personalize seu perfil profissional e muito mais.')
+            ->assertSee('Conheça nossos planos')
             ->assertSee('data-close-home-plans', false)
+            ->assertDontSee('id="liveSupportLauncher"', false)
             ->assertDontSee('+ 50 mil usuários');
+    }
+
+    public function test_live_support_widget_only_appears_for_authenticated_users_on_home(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('id="liveSupportLauncher"', false);
+
+        $this->actingAs($user)
+            ->get(route('page.plans'))
+            ->assertOk()
+            ->assertDontSee('id="liveSupportLauncher"', false);
     }
 
     public function test_authenticated_home_includes_the_mobile_experience(): void

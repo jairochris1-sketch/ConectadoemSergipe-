@@ -1,6 +1,7 @@
 @php
     $showPublicHeader = !request()->is('login')
         && !request()->is('cadastro')
+        && !request()->routeIs('register.success')
         && !request()->is('esqueci-senha*')
         && !request()->is('admin*');
     $userHeaderLayout = auth()->user()?->header_layout ?? 'horizontal';
@@ -209,7 +210,9 @@
     @include('components.theme-toggle')
     @include('components.vlibras-widget')
     @include('components.cookie-consent')
-    @include('components.live-support-widget')
+    @if(request()->routeIs('home') && auth()->check())
+        @include('components.live-support-widget')
+    @endif
     @if($showPublicHeader)
         @include('components.pwa-install')
     @endif

@@ -60,6 +60,7 @@ class RegistrationTermsAcceptanceTest extends TestCase
             ->assertSee('data-animation-src="'.asset('animations/account-created.json').'"', false)
             ->assertSee('data-login-url="'.route('login').'"', false)
             ->assertSee('Sua conta foi criada!')
+            ->assertDontSee('id="marketplaceHeader"', false)
             ->assertSee('assets/registration-success-', false);
     }
 
